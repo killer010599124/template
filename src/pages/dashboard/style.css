@@ -57,30 +57,31 @@ textarea {
 form {
   width: 400px;
   margin: 50px auto;
-  
+  background: "#233044";
 }
 
 input[type="text"] {
   display: block;
   width: 160px;
-  margin: 0 0 20px;
-  padding: 8px 12px 10px 12px;
+  margin: 0 0 10px;
+  padding: 4px 12px 4px 12px;
   border: 1px solid rgba(0,0,0,.5);
   background: rgba(0,0,0,.5);
 }
 input[type="date"] {
     display: block;
     width: 160px;
-    margin: 0 0 20px;
-    padding: 8px 12px 10px 12px;
+    margin: 0 0 10px;
+    padding: 4px 12px 4px 12px;
     border: 1px solid rgba(0,0,0,.5);
     background: rgba(0,0,0,.5);
   }
 textarea {
   display: block;
-  width: 400px;
-  height: 150px;
-  margin: 0 0 20px;
+  width: 345px;
+  height: 100px;
+  
+  margin: auto;
   padding: 8px 12px 10px 12px;
   border: 1px solid rgba(0,0,0,.5);
   background: rgba(0,0,0,.5);
@@ -109,7 +110,7 @@ textarea {
   height: 20px;
   margin: -3px 5px 0 -15px;
   vertical-align: middle;
-  font-size: 14px;
+  font-size: 12px;
   font-family: fontawesome;
   line-height: 19px;
   text-align: center;

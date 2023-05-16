@@ -38,18 +38,24 @@ const SatelitteMap = (props: Props) => {
       }}>
         <form>
           <div style={{
-            display : 'flex',
+            display: 'flex',
             flexDirection: 'row',
-            justifyContent : "space-evenly"}}>
+            justifyContent: "space-evenly",
+            paddingTop : "25px"
+          }}>
             <input type="text" placeholder="Name" />
             <input type="date" placeholder="Date" />
           </div>
-          
-          <input type="text" placeholder="Longtitude" />
-          <input type="text" placeholder="Latitude" />
-          
+          <div style={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: "space-evenly"
+          }}>
+            <input type="text" placeholder="Longtitude" />
+            <input type="text" placeholder="Latitude" />
+          </div>
           <textarea placeholder="Your Message"></textarea>
-          <input type="submit" value="Send" />
+          {/* <button className='addBtn' >Add</button> */}
         </form>
       </div>
 
