@@ -34,6 +34,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, mapStyle: str
                     });
                     handleLongtitude(lngLat.lng);
                     handleLatitude(lngLat.lat);
+                  
                 }
 
             )

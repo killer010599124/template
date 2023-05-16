@@ -8,32 +8,79 @@ import "./style.css"
 
 type Props = {};
 
-
+// function Table({ tableData : any }) {
+//   return (
+//     <table className="table">
+//       <thead>
+//         <tr>
+//           <th>Id</th>
+//           <th>Name</th>
+//           <th>Email</th>
+//           <th>Profile</th>
+//         </tr>
+//       </thead>
+//       <tbody>
+//         {tableData.map((data, index) => {
+//           return (
+//             <tr key={index}>
+//               <td>{index + 1}</td>
+//               <td>{data.name}</td>
+//               <td>{data.email}</td>
+//               <td>{data.profile}</td>
+//             </tr>
+//           );
+//         })}
+//       </tbody>
+//     </table>
+//   );
+// }
 const SatelitteMap = (props: Props) => {
 
   const mapRef = useRef<HTMLDivElement>(null);
   const [dataVisible, setDataVisible] = useState(1);
 
-  const [lng, setLng] = useState(0);
-  const [lat, setLat] = useState(0);
-
+  const [lng, setLng] = useState("");
+  const [lat, setLat] = useState("");
+  const [name, setName] = useState("");
+  interface Geo {
+    name: string;
+    lat: string;
+    lng: string;
+  }
+  const [flag, setFlag] = useState(0);
+  const [data, setData] = useState<Geo>();
+  const [allData, setAllData] = useState<Geo[]>([]);
 
   const handleLongtitude = (num: number) => {
     // 👇️ take the parameter passed from the Child component
-    setLng(num);
+    setLng(num.toString());
 
     // console.log('argument from Child: ', lng);
   };
   const handleLatitude = (num: number) => {
     // 👇️ take the parameter passed from the Child component
-    setLat(num);
-
+    setLat(num.toString());
+    setFlag(1);
     // console.log('argument from Child: ', lng);
   };
+  const manageData = (data: Geo) => {
+    setData(data);
+  }
+  const manageAllData = (data: Geo) => {
+    setAllData(prevNames => [...prevNames, data])
 
+  }
 
   useMap(mapRef, "mapbox://styles/mapbox/satellite-streets-v12", handleLongtitude, handleLatitude)
+  useEffect(() => {
+    if (flag == 1) {
 
+      manageData({ name, lat, lng });
+      manageAllData({ name, lat, lng })
+      setFlag(0);
+    }
+
+  }, [lat, lng])
   return (
     <>
       <div style={{
@@ -69,7 +116,7 @@ const SatelitteMap = (props: Props) => {
             justifyContent: "space-evenly",
             paddingTop: "25px"
           }}>
-            <input type="text" placeholder="Name" />
+            <input type="text" placeholder="Name" value={name} onChange={(e) => { setName(e.target.value) }} />
             <input type="date" placeholder="Date" />
           </div>
           <div style={{
@@ -77,8 +124,8 @@ const SatelitteMap = (props: Props) => {
             flexDirection: 'row',
             justifyContent: "space-evenly"
           }}>
-            <input type="text" placeholder="Longtitude" value={lng} />
-            <input type="text" placeholder="Latitude" value={lat} />
+            <input type="text" placeholder="Longtitude" value={lng.toString()} onChange={(e) => { setLng(e.target.value) }} />
+            <input type="text" placeholder="Latitude" value={lat.toString()} onChange={(e) => { setLat(e.target.value) }} />
           </div>
           <textarea placeholder="Description"></textarea>
           <div style={{
@@ -87,60 +134,63 @@ const SatelitteMap = (props: Props) => {
             justifyContent: "space-evenly",
             paddingTop: "5px"
           }}>
-            <input type="button" value={"Add"} />
+            <input type="button" value={"Add"} onClick={() => {
+              manageData({ name, lat, lng });
+              manageAllData({ name, lat, lng });
+              console.log(data);
+            }} />
             <input type="button" value={"Edit"} />
             <input type="button" value={"Delete"} />
           </div>
 
         </form>
       </div>
-      <div style={dataVisible ? { display: "none" } : { 
+      <div style={dataVisible ? { display: "none" } : {
         display: "block",
         position: "absolute",
         right: "0px",
         marginTop: "280px",
         marginRight: "70px", zIndex: "1",
-        background : "black",
-        opacity : "0.75",
-        color : "white",
-        width : "345px",
-        height : "60%",
-        padding : "5px",
-        borderRadius:"10px" }
-        
+        background: "black",
+        opacity: "0.75",
+        color: "white",
+        width: "345px",
+        height: "60%",
+        padding: "5px",
+        borderRadius: "10px",
+        // overflowY: 'scroll'
+      }
+
       }>
         <table style={{
-          textAlign : "center",
-          width : "100%",
-          height : "100%"
+          textAlign: "center",
+          width: "100%",
+          // height: "100%"
         }}>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Age</th>
-            <th>Country</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>John</td>
-            <td>25</td>
-            <td>USA</td>
-          </tr>
-          <tr>
-            <td>Jane</td>
-            <td>30</td>
-            <td>Canada</td>
-          </tr>
-          <tr>
-            <td>Bob</td>
-            <td>35</td>
-            <td>Australia</td>
-          </tr>
-        </tbody>
-      </table>
+          <thead>
+            <tr>
+              <th>Mark</th>
+              {/* <th>Name</th> */}
+              <th>Lng</th>
+              <th>Lat</th>
+            </tr>
+          </thead>
+          <tbody>
+            {allData.map((data, index) => {
+              return (
+                <tr>
+                  <td><img src={assets.images.geoMark} style={{ width: "20px", height: "20px" }} /></td>
+                  {/* <td>{data?.name}</td> */}
+                  <td>{(Number(data?.lng).toFixed(3)).toString()}</td>
+                  <td>{(Number(data?.lat).toFixed(3)).toString()}</td>
+                </tr>
+              );
+            })}
+
+          </tbody>
+        </table>
       </div>
-      
+
       <div ref={mapRef} className='map' style={{ padding: "0px !important", height: "94%", width: "100%" }} />
 
     </>
