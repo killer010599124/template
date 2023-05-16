@@ -1,5 +1,5 @@
 import React from 'react';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useEffect } from 'react';
 import { initMap } from './initMap';
 import { useMap } from './useMap';
@@ -11,7 +11,25 @@ type Props = {};
 const SatelitteMap = (props: Props) => {
 
   const mapRef = useRef<HTMLDivElement>(null);
-  useMap(mapRef, "mapbox://styles/mapbox/satellite-streets-v12")
+  const [dataVisible, setDataVisible] = useState(1);
+ 
+  const [lng, setLng] = useState(0);
+  const [lat, setLat] = useState(0);
+
+  const handleLongtitude = (num: number) => {
+    // 👇️ take the parameter passed from the Child component
+    setLng(num);
+
+    // console.log('argument from Child: ', lng);
+  };
+  const handleLatitude = (num: number) => {
+    // 👇️ take the parameter passed from the Child component
+    setLat(num);
+
+    // console.log('argument from Child: ', lng);
+  };
+
+  useMap(mapRef, "mapbox://styles/mapbox/satellite-streets-v12", handleLongtitude,handleLatitude)
 
   return (
     <>
@@ -26,17 +44,22 @@ const SatelitteMap = (props: Props) => {
           background: "transparent",
           borderColor: "white",
           borderWidth: "5px"
-        }}>
+        }}
+        onClick={() => {
+          if(dataVisible) setDataVisible(0);
+          else setDataVisible(1);
+        }}
+        >
           <img src={assets.images.data} style={{ width: "100%", height: "100%" }} />
         </button>
       </div>
       <div style={{
         position: "absolute",
         right: "0px",
-        marginTop: "2%",
+        marginTop: "-1%",
         marginRight: "2%", zIndex: "1"
       }}>
-        <form>
+        <form style={dataVisible ? {display : "none"} : {display : "block"}}>
           <div style={{
             display: 'flex',
             flexDirection: 'row',
@@ -51,11 +74,21 @@ const SatelitteMap = (props: Props) => {
             flexDirection: 'row',
             justifyContent: "space-evenly"
           }}>
-            <input type="text" placeholder="Longtitude" />
-            <input type="text" placeholder="Latitude" />
+            <input type="text" placeholder="Longtitude" value={lng}/>
+            <input type="text" placeholder="Latitude" value={lat}/>
           </div>
-          <textarea placeholder="Your Message"></textarea>
-          {/* <button className='addBtn' >Add</button> */}
+          <textarea placeholder="Description"></textarea>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: "space-evenly",
+            paddingTop : "5px"
+          }}>
+            <input type = "button"  value={"Add"} />
+            <input type = "button"  value={"Edit"} />
+            <input type = "button"  value={"Delete"} />
+          </div>
+          
         </form>
       </div>
 

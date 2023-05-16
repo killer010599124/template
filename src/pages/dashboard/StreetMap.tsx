@@ -8,7 +8,7 @@ type Props = {};
 
 const StreetMap = (props: Props) => {
   const mapRef = useRef<HTMLDivElement>(null);
-  useMap(mapRef,"mapbox://styles/mapbox/streets-v12")
+  // useMap(mapRef,"mapbox://styles/mapbox/streets-v12")
     // useEffect(() => {
     //     if (mapRef.current) {
     //         initMap(

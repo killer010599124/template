@@ -7,7 +7,7 @@ type Props = {};
 
 const LightMap = (props: Props) => {
   const mapRef = useRef<HTMLDivElement>(null);
-  useMap(mapRef,"mapbox://styles/mapbox/light-v11")
+  // useMap(mapRef,"mapbox://styles/mapbox/light-v11")
   
   return (
     <div ref={mapRef} className='map' style = {{padding : "0px", height : "100%", width: "100%"}}/>

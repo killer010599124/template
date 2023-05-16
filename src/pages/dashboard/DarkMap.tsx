@@ -8,7 +8,7 @@ type Props = {};
 
 const DarkMap = (props: Props) => {
   const mapRef = useRef<HTMLDivElement>(null);
-  useMap(mapRef,"mapbox://styles/mapbox/dark-v11")
+  // useMap(mapRef,"mapbox://styles/mapbox/dark-v11")
   
   return (
     <div ref={mapRef} className='map' style = {{padding : "0px !important", height : "100%", width: "100%"}}/>
