@@ -16,11 +16,11 @@ const Topbar = () => {
         minHeight : "0px"
       }}
     >
-      {/* <Toolbar>
+      <Toolbar>
         <Typography variant="h6">
         Geospatial Mapping Software
         </Typography>
-      </Toolbar> */}
+      </Toolbar>
     </AppBar>
   );
 };

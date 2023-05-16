@@ -5,7 +5,7 @@ import LightMap from "../pages/dashboard/LightMap";
 import DashboardIndex from "../pages/dashboard/DashboardIndex";
 import ChangelogPage from "../pages/changelog/ChangelogPage";
 import DarkMap from "../pages/dashboard/DarkMap";
-import StreetMap from "../pages/dashboard/StreetMao";
+import StreetMap from "../pages/dashboard/StreetMap";
 import SatelitteMap from "../pages/dashboard/SatelitteMap";
 import ComponentPageLayout from "../pages/component/ComponentPageLayout";
 import DashboardOutlinedIcon from '@mui/icons-material/DashboardOutlined';
