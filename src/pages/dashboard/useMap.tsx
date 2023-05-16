@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
-import { Map } from 'mapbox-gl';
+import { useEffect,forwardRef,useImperativeHandle , useRef, useState } from 'react';
+import { LngLat, Map } from 'mapbox-gl';
 import { initMap } from './initMap';
 import { generateNewMarker } from './generateNewMarker';
-export const useMap = (container: React.RefObject<HTMLDivElement>, mapStyle: string, handleLongtitude: (num: number) => void,handleLatitude: (num: number) => void) => {
+export const useMap = (container: React.RefObject<HTMLDivElement>,latitude:string,longtitude:string,flag:boolean, mapStyle: string, handleLongtitude: (num: number) => void,handleLatitude: (num: number) => void) => {
 
     const mapInitRef = useRef<Map | null>(null);
 
@@ -36,15 +36,25 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, mapStyle: str
                     handleLatitude(lngLat.lat);
                   
                 }
-
             )
-
-
             return () => {
                 mapInitRef.current?.off('dblclick', generateNewMarker)
             }
         }
 
     }, [])
+    useEffect(() => {
+        if (container.current) {
+            const v = new LngLat(Number(longtitude), Number(latitude))
+            generateNewMarker({
+                map: mapInitRef.current!,
+                ...v
+            });
+            // alert(longtitude + latitude)
+            console.log(new LngLat(Number(longtitude), Number(latitude)));
+            console.log(mapInitRef.current!.getCenter())
+         
+            // alert("hello");
+    }}, [flag])
 
 }

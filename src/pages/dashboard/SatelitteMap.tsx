@@ -37,6 +37,7 @@ type Props = {};
 const SatelitteMap = (props: Props) => {
 
   const mapRef = useRef<HTMLDivElement>(null);
+  const childRef = useRef(null);
   const [dataVisible, setDataVisible] = useState(1);
 
   const [lng, setLng] = useState("");
@@ -48,6 +49,7 @@ const SatelitteMap = (props: Props) => {
     lng: string;
   }
   const [flag, setFlag] = useState(0);
+  const [addFlag, setAddFlag] = useState(true);
   const [data, setData] = useState<Geo>();
   const [allData, setAllData] = useState<Geo[]>([]);
 
@@ -71,7 +73,8 @@ const SatelitteMap = (props: Props) => {
 
   }
 
-  useMap(mapRef, "mapbox://styles/mapbox/satellite-streets-v12", handleLongtitude, handleLatitude)
+  useMap(mapRef,lat, lng,addFlag, "mapbox://styles/mapbox/satellite-streets-v12", handleLongtitude, handleLatitude)
+  
   useEffect(() => {
     if (flag == 1) {
 
@@ -83,6 +86,10 @@ const SatelitteMap = (props: Props) => {
   }, [lat, lng])
   return (
     <>
+      <div>
+
+        
+      </div>
       <div style={{
         position: "absolute",
         marginTop: "2%",
@@ -135,6 +142,7 @@ const SatelitteMap = (props: Props) => {
             paddingTop: "5px"
           }}>
             <input type="button" value={"Add"} onClick={() => {
+              setAddFlag(!addFlag);
               manageData({ name, lat, lng });
               manageAllData({ name, lat, lng });
               console.log(data);
@@ -155,7 +163,7 @@ const SatelitteMap = (props: Props) => {
         opacity: "0.75",
         color: "white",
         width: "345px",
-        height: "60%",
+        height: "55%",
         padding: "5px",
         borderRadius: "10px",
         // overflowY: 'scroll'
@@ -191,6 +199,25 @@ const SatelitteMap = (props: Props) => {
         </table>
       </div>
 
+      <div
+        style={dataVisible ? { display: "none" } : {
+          // display: "block",
+          position: "absolute",
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: "space-evenly",
+          paddingTop: "5px",
+          zIndex: '1',
+          width: "250px",
+          right: "5.5%",
+          marginBottom: "4%",
+          bottom: "0"
+          // overflowY: 'scroll'
+        }}>
+
+        <input type="button" value={"Import CSV"} />
+        <input type="button" value={"Export CSV"} />
+      </div>
       <div ref={mapRef} className='map' style={{ padding: "0px !important", height: "94%", width: "100%" }} />
 
     </>
