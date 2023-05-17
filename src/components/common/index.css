@@ -1,0 +1,10 @@
+.geoStyleBtn{
+    background: black;
+    border-color: white;
+    width: 65px;
+    height: 25px;
+    border-radius: 20px;
+    border-width: 3px;
+    margin-right: 10px;
+    color: white;
+  }

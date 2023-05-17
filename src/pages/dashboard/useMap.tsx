@@ -2,7 +2,9 @@ import { useEffect,forwardRef,useImperativeHandle , useRef, useState } from 'rea
 import { LngLat, Map } from 'mapbox-gl';
 import { initMap } from './initMap';
 import { generateNewMarker } from './generateNewMarker';
-export const useMap = (container: React.RefObject<HTMLDivElement>,latitude:string,longtitude:string,flag:boolean, mapStyle: string, handleLongtitude: (num: number) => void,handleLatitude: (num: number) => void) => {
+
+
+export const useMap = (container: React.RefObject<HTMLDivElement>,latitude:string,longtitude:string,flag:boolean, mapStyle: string, handleLongtitude: (num: number) => void,handleLatitude: (num: number) => void, geoStyleName : string) => {
 
     const mapInitRef = useRef<Map | null>(null);
 
@@ -32,6 +34,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>,latitude:strin
                         map: mapInitRef.current!,
                         ...lngLat
                     });
+                    // mapInitRef.current?.setStyle("mapbox://styles/mapbox/streets-v12")
                     handleLongtitude(lngLat.lng);
                     handleLatitude(lngLat.lat);
                   
@@ -54,7 +57,12 @@ export const useMap = (container: React.RefObject<HTMLDivElement>,latitude:strin
             // console.log(new LngLat(Number(longtitude), Number(latitude)));
             // console.log(mapInitRef.current!.getCenter())
          
-            // alert("hello");
+            
     }}, [flag])
+    useEffect(() => {
+        if (container.current) {
+             mapInitRef.current?.setStyle(geoStyleName);
+            
+    }}, [geoStyleName])
 
 }

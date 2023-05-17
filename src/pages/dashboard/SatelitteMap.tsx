@@ -6,35 +6,11 @@ import { useMap } from './useMap';
 import assets from '../../assets';
 import "./style.css"
 
+
+
 type Props = {};
 
-// function Table({ tableData : any }) {
-//   return (
-//     <table className="table">
-//       <thead>
-//         <tr>
-//           <th>Id</th>
-//           <th>Name</th>
-//           <th>Email</th>
-//           <th>Profile</th>
-//         </tr>
-//       </thead>
-//       <tbody>
-//         {tableData.map((data, index) => {
-//           return (
-//             <tr key={index}>
-//               <td>{index + 1}</td>
-//               <td>{data.name}</td>
-//               <td>{data.email}</td>
-//               <td>{data.profile}</td>
-//             </tr>
-//           );
-//         })}
-//       </tbody>
-//     </table>
-//   );
-// }
-const SatelitteMap = (props: Props) => {
+const SatelitteMap = () => {
 
   const mapRef = useRef<HTMLDivElement>(null);
   const childRef = useRef(null);
@@ -43,6 +19,7 @@ const SatelitteMap = (props: Props) => {
   const [lng, setLng] = useState("");
   const [lat, setLat] = useState("");
   const [name, setName] = useState("");
+  const [geoStyleName, setGeoStyleName] = useState("mapbox://styles/mapbox/satellite-streets-v12")
   interface Geo {
     name: string;
     lat: string;
@@ -73,8 +50,8 @@ const SatelitteMap = (props: Props) => {
 
   }
 
-  useMap(mapRef,lat, lng,addFlag, "mapbox://styles/mapbox/satellite-streets-v12", handleLongtitude, handleLatitude)
-  
+  useMap(mapRef, lat, lng, addFlag, "mapbox://styles/mapbox/satellite-streets-v12", handleLongtitude, handleLatitude, geoStyleName)
+
   useEffect(() => {
     if (flag == 1) {
 
@@ -88,11 +65,11 @@ const SatelitteMap = (props: Props) => {
     <>
       <div>
 
-        
+
       </div>
       <div style={{
         position: "absolute",
-        marginTop: "2%",
+        marginTop: "4%",
         marginLeft: "2%", zIndex: "1"
       }}>
         <button style={{
@@ -109,6 +86,20 @@ const SatelitteMap = (props: Props) => {
         >
           <img src={assets.images.data} style={{ width: "100%", height: "100%" }} />
         </button>
+      </div>
+      <div style={{
+        position: "absolute",
+        marginTop: "1%",
+        marginLeft: "1%", zIndex: "1",
+        opacity: "0.75",
+        background: "black",
+        padding: "8px",
+        borderRadius: "20px"
+      }}>
+        <button className="geoStyleBtn" onClick={() => setGeoStyleName("mapbox://styles/mapbox/light-v11")}>Light</button>
+        <button className="geoStyleBtn" onClick={() => setGeoStyleName("mapbox://styles/mapbox/dark-v11")}>Dark</button>
+        <button className="geoStyleBtn" onClick={() => setGeoStyleName("mapbox://styles/mapbox/streets-v12")}>Street</button>
+        <button className="geoStyleBtn" onClick={() => setGeoStyleName("mapbox://styles/mapbox/satellite-streets-v12")}>Satelitte</button>
       </div>
       <div style={{
         position: "absolute",
@@ -214,8 +205,10 @@ const SatelitteMap = (props: Props) => {
           bottom: "0"
           // overflowY: 'scroll'
         }}>
-
-        <input type="button" value={"Import CSV"} />
+        <label className='csv'>
+          <input id="Image" type="file" />
+            Import CSV
+        </label>
         <input type="button" value={"Export CSV"} />
       </div>
       <div ref={mapRef} className='map' style={{ padding: "0px !important", height: "94%", width: "100%" }} />

@@ -19,6 +19,16 @@ body {
   
 }
 
+.geoStyleBtn{
+  background: black;
+  border-color: white;
+  width: 60px;
+  height: 30px;
+  border-radius: 20px;
+  border-width: 2px;
+  /* padding-right: 10px; */
+  color: white;
+}
 
 input,
 
@@ -60,7 +70,18 @@ form {
   margin: 50px auto;
   background: "#233044";
 }
-
+.csv{
+  border-radius: 10px;
+  /* display: block; */
+  width: 100px;
+  margin: 0 0 10px;
+  padding: 4px 0 4px 0;
+  text-align: center;
+  border: 1px solid rgba(0,0,0,.5);
+  background: rgba(0,0,0,.75);
+  color: white;
+ 
+}
 input[type="text"] {
   display: block;
   width: 160px;
@@ -69,6 +90,12 @@ input[type="text"] {
   border: 1px solid rgba(0,0,0,.5);
   background: rgba(0,0,0,.75);
   border-radius: 10px;
+}
+input[type='file'] {
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  opacity: 0;
 }
 input[type="number"] {
   display: block;

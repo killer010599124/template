@@ -1,7 +1,7 @@
 import { AppBar, Toolbar, Typography } from "@mui/material";
 import colorConfigs from "../../configs/colorConfigs";
 import sizeConfigs from "../../configs/sizeConfigs";
-
+import "./index.css"
 const Topbar = () => {
   return (
     <AppBar
@@ -17,10 +17,11 @@ const Topbar = () => {
         minHeight : "0px"
       }}
     >
-      <Toolbar>
+      <Toolbar >
         <Typography variant="h6">
         Geospatial Mapping Software
         </Typography>
+        
       </Toolbar>
     </AppBar>
   );
