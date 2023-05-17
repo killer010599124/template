@@ -51,8 +51,8 @@ export const useMap = (container: React.RefObject<HTMLDivElement>,latitude:strin
                 ...v
             });
             // alert(longtitude + latitude)
-            console.log(new LngLat(Number(longtitude), Number(latitude)));
-            console.log(mapInitRef.current!.getCenter())
+            // console.log(new LngLat(Number(longtitude), Number(latitude)));
+            // console.log(mapInitRef.current!.getCenter())
          
             // alert("hello");
     }}, [flag])
