@@ -1,2 +1,5 @@
-Name	Email	Age	City
-qw	w@fg	23	hsdfg
+name,lat,lng
+Moscow,25.17,-100.24
+HongKong,25.13,-100.12
+Otawa,25.21,-100.21
+Japan,25.19,-100.19

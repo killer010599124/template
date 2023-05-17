@@ -9,7 +9,7 @@ const MainLayout = () => {
   return (
     <Box sx={{ display: "flex" }} >
       <Topbar  />
-      <Box
+      {/* <Box
         component="nav"
         sx={{
           width: sizeConfigs.sidebar.width,
@@ -17,7 +17,7 @@ const MainLayout = () => {
         }}
       >
         <Sidebar />
-      </Box>
+      </Box> */}
       <Box
         component="main"
         style = {{padding : "0px"}}
@@ -29,7 +29,7 @@ const MainLayout = () => {
           backgroundColor: colorConfigs.mainBg
         }}
       >
-        <Toolbar />
+        <Toolbar style={{background : "black"}} />
         <Outlet />
       </Box>
     </Box>

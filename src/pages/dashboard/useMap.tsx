@@ -4,7 +4,7 @@ import { initMap } from './initMap';
 import { generateNewMarker } from './generateNewMarker';
 
 
-export const useMap = (container: React.RefObject<HTMLDivElement>,latitude:string,longtitude:string,flag:boolean, mapStyle: string, handleLongtitude: (num: number) => void,handleLatitude: (num: number) => void, geoStyleName : string) => {
+export const useMap = (container: React.RefObject<HTMLDivElement>,latitude:string,longtitude:string,flag:boolean, mapStyle: string, handleLongtitude: (num: number) => void,handleLatitude: (num: number) => void, geoStyleName : string, csvData : any) => {
 
     const mapInitRef = useRef<Map | null>(null);
 
@@ -14,16 +14,16 @@ export const useMap = (container: React.RefObject<HTMLDivElement>,latitude:strin
 
             mapInitRef.current = initMap(
                 container.current,
-                [-100.31019063199852, 25.66901932031443],
+                [-100.1219063199852, 25.16901932031443],
                 mapStyle
             );
-            mapInitRef.current && mapInitRef.current.on(
-                'load',
-                () => generateNewMarker({
-                    map: mapInitRef.current!,
-                    ...mapInitRef.current!.getCenter()
-                })
-            )
+            // mapInitRef.current && mapInitRef.current.on(
+            //     'load',
+            //     () => generateNewMarker({
+            //         map: mapInitRef.current!,
+            //         ...mapInitRef.current!.getCenter()
+            //     })
+            // )
             // return () => {
             //     mapInitRef.current?.off('load', generateNewMarker)
             // }
@@ -48,6 +48,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>,latitude:strin
     }, [])
     useEffect(() => {
         if (container.current) {
+
             const v = new LngLat(Number(longtitude), Number(latitude))
             generateNewMarker({
                 map: mapInitRef.current!,
@@ -59,6 +60,23 @@ export const useMap = (container: React.RefObject<HTMLDivElement>,latitude:strin
          
             
     }}, [flag])
+    useEffect(() => {
+        if (container.current) {
+            for(let i = 0 ; i< csvData.length; i ++){
+                console.log('cnt');
+                const v = new LngLat(Number(csvData[i]?.lng), Number(csvData[i]?.lat))
+                generateNewMarker({
+                    map: mapInitRef.current!,
+                    ...v
+                });
+            }
+            
+            // alert(longtitude + latitude)
+            // console.log(new LngLat(Number(longtitude), Number(latitude)));
+            // console.log(mapInitRef.current!.getCenter())
+         
+            
+    }}, [csvData])
     useEffect(() => {
         if (container.current) {
              mapInitRef.current?.setStyle(geoStyleName);

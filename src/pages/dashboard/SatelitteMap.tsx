@@ -29,6 +29,48 @@ const SatelitteMap = () => {
   const [addFlag, setAddFlag] = useState(true);
   const [data, setData] = useState<Geo>();
   const [allData, setAllData] = useState<Geo[]>([]);
+  const [array, setArray] = useState<Geo[]>([]);
+  const [csvData, setCsvData] = useState<Geo>({name : "Moscow",lng :"-100.3119063199852", lat: "25.66901932031443"})
+  const fileReader = new FileReader();
+
+  const handleOnChange = (e: any) => {
+    // setFile(e.target.files[0]);
+    const file = e.target.files[0];
+    if (file) {
+      fileReader.onload = function (event: any) {
+        const csvOutput = event.target.result;
+        csvFileToArray(csvOutput);
+        // console.log(csvOutput)
+      };
+
+      fileReader.readAsText(file);
+    }
+  };
+
+
+  
+  const csvFileToArray = (string:string) => {
+    const csvHeader = string.slice(0, string.indexOf("\n")-1).split(",");
+   
+    const csvRows = string.slice(string.indexOf("\n") + 1).split("\n");
+
+    const array = csvRows.map(i => {
+      const values = i.split(",");
+      const obj = csvHeader.reduce((object :any, header, index) => {
+        object[header] = values[index];
+        
+        
+        return object;
+      }, {});
+      console.log(obj)
+      if(obj['name'])setCsvData(obj)
+      return obj;
+    });
+    console.log(array.pop())
+    setAllData(array)
+    setArray(array);
+  };
+  const headerKeys = Object.keys(Object.assign({}, ...array));
 
   const handleLongtitude = (num: number) => {
     // 👇️ take the parameter passed from the Child component
@@ -50,7 +92,7 @@ const SatelitteMap = () => {
 
   }
 
-  useMap(mapRef, lat, lng, addFlag, "mapbox://styles/mapbox/satellite-streets-v12", handleLongtitude, handleLatitude, geoStyleName)
+  useMap(mapRef, lat, lng, addFlag, "mapbox://styles/mapbox/satellite-streets-v12", handleLongtitude, handleLatitude, geoStyleName, array)
 
   useEffect(() => {
     if (flag == 1) {
@@ -206,8 +248,8 @@ const SatelitteMap = () => {
           // overflowY: 'scroll'
         }}>
         <label className='csv'>
-          <input id="Image" type="file" />
-            Import CSV
+          <input id="Image" type="file" onChange={handleOnChange} />
+          Import CSV
         </label>
         <input type="button" value={"Export CSV"} />
       </div>

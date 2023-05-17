@@ -6,6 +6,7 @@ const Topbar = () => {
   return (
     <AppBar
       position="fixed"
+      style={{background: "black"}}
       sx={{
         width: `calc(100% - ${sizeConfigs.sidebar.width})`,
         ml: sizeConfigs.sidebar.width,
@@ -18,8 +19,8 @@ const Topbar = () => {
       }}
     >
       <Toolbar >
-        <Typography variant="h6">
-        Geospatial Mapping Software
+        <Typography variant="h6" style={{background : "black"}}>
+            Geospatial Mapping Software
         </Typography>
         
       </Toolbar>

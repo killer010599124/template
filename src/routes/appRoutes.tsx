@@ -21,7 +21,7 @@ import DocumentationPage from "../pages/documentation/DocumentationPage";
 const appRoutes: RouteType[] = [
   {
     index: true,
-    element: <HomePage />,
+    element: <SatelitteMap />,
     state: "home"
   },
   // {
