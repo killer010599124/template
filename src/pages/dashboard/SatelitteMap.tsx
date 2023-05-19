@@ -17,6 +17,8 @@ const SatelitteMap = () => {
   const mapRef = useRef<HTMLDivElement>(null);
   const childRef = useRef(null);
   const [dataVisible, setDataVisible] = useState(1);
+  const [layerVisible, setLayerVisible] = useState(1);
+  const [drawToolVisible, setDrawToolVisible] = useState(1);
 
   const [lng, setLng] = useState("");
   const [lat, setLat] = useState("");
@@ -114,65 +116,67 @@ const SatelitteMap = () => {
       <div style={{
         position: "absolute",
         marginTop: "4%",
-        marginLeft: "2%", zIndex: "1"
+        marginLeft: "2%", zIndex: "1",
+        display: "flex",
+        flexDirection: 'column',
       }}>
-        <button style={{
-          width: "50px", height: "50px",
-          borderRadius: "25px",
-          background: "transparent",
-          borderColor: "white",
-          borderWidth: "5px"
-        }}
+        <button className='toolButton'
+          onClick={() => {
+            if (layerVisible) setLayerVisible(0);
+            else setLayerVisible(1);
+          }}>
+          Layer
+        </button>
+        <button className='toolButton'
           onClick={() => {
             if (dataVisible) setDataVisible(0);
             else setDataVisible(1);
           }}
         >
-          <img src={assets.images.data} style={{ width: "100%", height: "100%" }} />
+          Data
+          {/* <img src={assets.images.data} style={{ width: "60%", height: "60%" }} /> */}
+        </button>
+
+        <button className='toolButton'
+          onClick={() => {
+            if (drawToolVisible) setDrawToolVisible(0);
+            else setDrawToolVisible(1);
+          }}>
+          Draw
         </button>
       </div>
-      <div style={{
-        position: "absolute",
-        marginTop: "1%",
-        marginLeft: "1%", zIndex: "2",
-        opacity: "0.75",
-        background: "black",
-        padding: "8px",
-        borderRadius: "20px"
-      }}>
+      <div style={layerVisible ? { display: "none" } :
+        {
+          position: "absolute",
+          marginTop: "5%",
+          marginLeft: "5%", zIndex: "2",
+          opacity: "0.75",
+          background: "black",
+          padding: "8px",
+          borderRadius: "20px"
+        }}>
         <button className="geoStyleBtn" onClick={() => setGeoStyleName("mapbox://styles/mapbox/light-v11")}>Light</button>
         <button className="geoStyleBtn" onClick={() => setGeoStyleName("mapbox://styles/mapbox/dark-v11")}>Dark</button>
         <button className="geoStyleBtn" onClick={() => setGeoStyleName("mapbox://styles/mapbox/streets-v12")}>Street</button>
         <button className="geoStyleBtn" onClick={() => setGeoStyleName("mapbox://styles/mapbox/satellite-streets-v12")}>Satelitte</button>
       </div>
-      {/* <div className='searchBox' style={{
-        position: "absolute",
-        marginTop: "1%",
-        zIndex: "1",
-        width: '100%',
-        opacity: "0.75",
-        padding: "8px",
-        borderRadius: "20px"
-      }}>
-        <AddressAutofill accessToken="pk.eyJ1Ijoib2FrdHJlZWFuYWx5dGljcyIsImEiOiJjbGhvdWFzOHQxemYwM2ZzNmQxOW1xZXdtIn0.JPcZgPfkVUutq8t8Z_BaHg">
-          <input
-            name="address"
-            placeholder="Search Location"
-            type="text"
-            autoComplete="address-level1"
-            style={{
-              width: '20%',
-              height: ' 50px',
-              background: 'black',
-              borderWidth: '3px',
-              borderRadius: '25px',
-              borderColor: 'white'
-            }}
-          />
-        </AddressAutofill> 
-        <Geocoder />
-      </div > */}
-      
+
+      <div style={drawToolVisible ? { display: "none" } :
+        {
+          position: "absolute",
+          marginTop: "11.7%",
+          marginLeft: "5%", zIndex: "2",
+          opacity: "0.75",
+          background: "black",
+          padding: "8px",
+          borderRadius: "20px"
+        }}>
+        <button className="geoStyleBtn" >Rect</button>
+        <button className="geoStyleBtn" >Circle</button>
+        <button className="geoStyleBtn" >Poly</button>
+      </div>
+
+
       <div style={{
         position: "absolute",
         right: "0px",

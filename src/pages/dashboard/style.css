@@ -12,6 +12,17 @@ body {
   height: 100%;
 }
 
+.toolButton {
+  width: 50px;
+  height: 50px;
+  border-radius: 25px;
+  background: black;
+  border-color: white;
+  color: white;
+  /* border-width: 3px; */
+  margin-top: 20px;
+}
+
 body {
   font: 14px/1 'Roboto', sans-serif;
   color: #fff;
@@ -19,6 +30,7 @@ body {
   -webkit-font-smoothing: antialiased;
 
 }
+
 .geoStyleBtn {
   background: black;
   border-color: white;
@@ -111,15 +123,19 @@ form {
   color: white;
 
 }
-.mapboxgl-ctrl-geocoder--icon{
+
+.mapboxgl-ctrl-geocoder--icon {
   display: none;
 }
-.mapboxgl-ctrl-geocoder--pin-right{
+
+.mapboxgl-ctrl-geocoder--pin-right {
   display: none;
 }
-.mapboxgl-ctrl-geocoder--powered-by{
+
+.mapboxgl-ctrl-geocoder--powered-by {
   display: none !important;
 }
+
 input[type="text"] {
   display: block;
   width: 160px;
@@ -129,8 +145,9 @@ input[type="text"] {
   background: rgba(0, 0, 0, .75);
   border-radius: 10px;
 }
-.suggestions{
-  background : black;
+
+.suggestions {
+  background: black;
   color: white;
   font-size: 16px;
   opacity: 0.75;
@@ -139,12 +156,15 @@ input[type="text"] {
   margin-top: -5px;
   border-radius: 5px;
 }
-.mapboxgl-ctrl-geocoder--suggestion{
+
+.mapboxgl-ctrl-geocoder--suggestion {
   padding-top: 5px;
 }
-ul{
+
+ul {
   list-style-type: none;
 }
+
 /* background: black;
     color: white;
     padding: 15px;
