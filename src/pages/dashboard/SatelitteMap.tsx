@@ -5,7 +5,9 @@ import { initMap } from './initMap';
 import { useMap } from './useMap';
 import assets from '../../assets';
 import "./style.css"
-
+// import "react-map-gl-geocoder/dist/mapbox-gl-geocoder.css";
+// import Geocoder from './Geocoder'; 
+import { AddressAutofill } from '@mapbox/search-js-react';
 
 
 type Props = {};
@@ -30,7 +32,7 @@ const SatelitteMap = () => {
   const [data, setData] = useState<Geo>();
   const [allData, setAllData] = useState<Geo[]>([]);
   const [array, setArray] = useState<Geo[]>([]);
-  const [csvData, setCsvData] = useState<Geo>({name : "Moscow",lng :"-100.3119063199852", lat: "25.66901932031443"})
+  const [csvData, setCsvData] = useState<Geo>({ name: "Moscow", lng: "-100.1319063199852", lat: "25.16901932031443" })
   const fileReader = new FileReader();
 
   const handleOnChange = (e: any) => {
@@ -48,22 +50,22 @@ const SatelitteMap = () => {
   };
 
 
-  
-  const csvFileToArray = (string:string) => {
-    const csvHeader = string.slice(0, string.indexOf("\n")-1).split(",");
-   
+
+  const csvFileToArray = (string: string) => {
+    const csvHeader = string.slice(0, string.indexOf("\n") - 1).split(",");
+
     const csvRows = string.slice(string.indexOf("\n") + 1).split("\n");
 
     const array = csvRows.map(i => {
       const values = i.split(",");
-      const obj = csvHeader.reduce((object :any, header, index) => {
+      const obj = csvHeader.reduce((object: any, header, index) => {
         object[header] = values[index];
-        
-        
+
+
         return object;
       }, {});
       console.log(obj)
-      if(obj['name'])setCsvData(obj)
+      if (obj['name']) setCsvData(obj)
       return obj;
     });
     console.log(array.pop())
@@ -132,7 +134,7 @@ const SatelitteMap = () => {
       <div style={{
         position: "absolute",
         marginTop: "1%",
-        marginLeft: "1%", zIndex: "1",
+        marginLeft: "1%", zIndex: "2",
         opacity: "0.75",
         background: "black",
         padding: "8px",
@@ -143,6 +145,34 @@ const SatelitteMap = () => {
         <button className="geoStyleBtn" onClick={() => setGeoStyleName("mapbox://styles/mapbox/streets-v12")}>Street</button>
         <button className="geoStyleBtn" onClick={() => setGeoStyleName("mapbox://styles/mapbox/satellite-streets-v12")}>Satelitte</button>
       </div>
+      {/* <div className='searchBox' style={{
+        position: "absolute",
+        marginTop: "1%",
+        zIndex: "1",
+        width: '100%',
+        opacity: "0.75",
+        padding: "8px",
+        borderRadius: "20px"
+      }}>
+        <AddressAutofill accessToken="pk.eyJ1Ijoib2FrdHJlZWFuYWx5dGljcyIsImEiOiJjbGhvdWFzOHQxemYwM2ZzNmQxOW1xZXdtIn0.JPcZgPfkVUutq8t8Z_BaHg">
+          <input
+            name="address"
+            placeholder="Search Location"
+            type="text"
+            autoComplete="address-level1"
+            style={{
+              width: '20%',
+              height: ' 50px',
+              background: 'black',
+              borderWidth: '3px',
+              borderRadius: '25px',
+              borderColor: 'white'
+            }}
+          />
+        </AddressAutofill> 
+        <Geocoder />
+      </div > */}
+      
       <div style={{
         position: "absolute",
         right: "0px",

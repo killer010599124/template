@@ -1,0 +1,14 @@
+{
+    "rules": {
+        "no-unused-expressions": "off",
+        "@typescript-eslint/no-unused-expressions": 2
+    },
+    "overrides": [
+        {
+            "files": ["*.test.js", "*.spec.js"],
+            "rules": {
+                "no-unused-expressions": "off"
+            }
+        }
+    ]
+}
