@@ -207,7 +207,7 @@ const SatelitteMap = () => {
           background: "black",
           padding: "8px",
           height: "300px",
-          borderRadius: "20px",
+          borderRadius: "10px",
           justifyContent: 'space-between',
           display: 'flex'
         }}>
@@ -225,6 +225,11 @@ const SatelitteMap = () => {
 
             <div className='drawTab'>
               Properties
+              <div style={{ display: "flex" }}>
+
+                <label style={{ paddingTop: '3px', paddingRight: '5px', width: '60px' }} >Point</label>
+                <input type="text" style={{ borderColor: "white" }} />
+              </div>
               <div style={{ display: "flex" }}>
 
                 <label style={{ paddingTop: '3px', paddingRight: '5px', width: '60px' }} >width</label>
