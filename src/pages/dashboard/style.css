@@ -31,10 +31,33 @@ body {
 
 }
 
+.drawTab {
+  padding: 20px;
+  height: 150px;
+  color: white;
+
+}
+
+.mapboxgl-ctrl-group {
+  position: absolute;
+  right: 0;
+  background: black !important;
+  margin-right: 227% !important;
+  margin-top: 230px !important;
+  opacity: 0.75;
+  border-radius: 4px;
+  /* display: none; */
+}
+
+.mapbox-gl-draw_ctrl-draw-btn button {
+  height: 40px;
+  width: 40px;
+}
+
 .geoStyleBtn {
   background: black;
   border-color: white;
-  width: 60px;
+  width: 75px;
   height: 30px;
   border-radius: 20px;
   border-width: 2px;

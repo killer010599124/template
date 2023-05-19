@@ -2,57 +2,39 @@ import { useEffect, forwardRef, useImperativeHandle, useRef, useState } from 're
 import { LngLat, Map } from 'mapbox-gl';
 import { initMap } from './initMap';
 import { generateNewMarker } from './generateNewMarker';
+
 import MapBoxGeocoder from '@mapbox/mapbox-gl-geocoder';
+import DrawControl from 'react-mapbox-gl-draw';
 import { useControl } from 'react-map-gl';
 import mapboxgl from 'mapbox-gl';
 import { SrvRecord } from 'dns';
 import Geocoder from './Geocoder';
-
+import drawGeoFence from './drawGeoFence';
 
 
 export const useMap = (container: React.RefObject<HTMLDivElement>, latitude: string, longtitude: string, flag: boolean, mapStyle: string, handleLongtitude: (num: number) => void, handleLatitude: (num: number) => void, geoStyleName: string, csvData: any) => {
 
     const mapInitRef = useRef<Map | null>(null);
-    // Add the geocoder to the map
-    // const Geocoder = new MapBoxGeocoder({
-    //     // Initialize the geocoder
-    //     accessToken: 'pk.eyJ1Ijoib2FrdHJlZWFuYWx5dGljcyIsImEiOiJjbGhvdWFzOHQxemYwM2ZzNmQxOW1xZXdtIn0.JPcZgPfkVUutq8t8Z_BaHg', // Set the access token
-    //     // localGeocoder: coordinatesGeocoder,
-    //     // localGeocoderOnly: true,
-    //     // localGeocoder : coordinatesGeocoder,
-    //     // externalGeocoder : coordinatesGeocoder,
-    //     mapboxgl: mapboxgl, // Set the mapbox-gl instance
-    //     marker: true, // Do not use the default marker style
-    //     zoom: 19,
-    //     // reverseGeocode: true,
-    //     placeholder: 'Search locations',
-    //     render: function (item : any) {
-    //         // extract the item's maki icon or use a default
-    //         const maki = item.properties.maki || 'marker';
-    //         return `<div class='geocoder-dropdown-item'>
-    //         <img class='geocoder-dropdown-icon' src='https://unpkg.com/@mapbox/maki@6.1.0/icons/${maki}-11.svg'>
-    //         <span class='geocoder-dropdown-text'>
-    //         ${item.text}
-    //         </span>
-    //         </div>`;
-    //     },
-    // });
+
+    
     useEffect(() => {
         if (container.current) {
 
             mapInitRef.current = initMap(
                 container.current,
-                [-100.1319063199852, 25.17901932031443],
+                [-99.1319063199852, 25.17901932031443],
                 mapStyle
             );
             mapInitRef.current.addControl(Geocoder);
+            // mapInitRef.current.addControl(drawGeoFence);
 
             mapInitRef.current && mapInitRef.current.on(
                 'load',
                 () => generateNewMarker({
                     map: mapInitRef.current!,
                     ...mapInitRef.current!.getCenter()
-                })
+                }),
+                // drawGeoFence.delete
             );
             // return () => {
             //     mapInitRef.current?.off('load', generateNewMarker)
@@ -71,6 +53,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, latitude: str
                     handleLatitude(lngLat.lat);
 
                 }
+                
             )
             return () => {
                 mapInitRef.current?.off('dblclick', generateNewMarker)

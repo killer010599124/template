@@ -4,13 +4,47 @@ import { useEffect, } from 'react';
 import { initMap } from './initMap';
 import { useMap } from './useMap';
 import assets from '../../assets';
-import "./style.css"
+import "./style.css";
+import Tab from '@mui/material/Tab/Tab';
+import DrawControl from 'react-mapbox-gl-draw';
 // import "react-map-gl-geocoder/dist/mapbox-gl-geocoder.css";
 // import Geocoder from './Geocoder'; 
 import { AddressAutofill } from '@mapbox/search-js-react';
+import { Box, Tabs } from '@mui/material';
 
 
-type Props = {};
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+
+        <div>{children}</div>
+
+      )}
+    </div>
+  );
+}
+
+function a11yProps(index: number) {
+  return {
+    id: `simple-tab-${index}`,
+    'aria-controls': `simple-tabpanel-${index}`,
+  };
+}
 
 const SatelitteMap = () => {
 
@@ -19,6 +53,11 @@ const SatelitteMap = () => {
   const [dataVisible, setDataVisible] = useState(1);
   const [layerVisible, setLayerVisible] = useState(1);
   const [drawToolVisible, setDrawToolVisible] = useState(1);
+  const [value, setValue] = React.useState(0);
+
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    setValue(newValue);
+  };
 
   const [lng, setLng] = useState("");
   const [lat, setLat] = useState("");
@@ -34,7 +73,7 @@ const SatelitteMap = () => {
   const [data, setData] = useState<Geo>();
   const [allData, setAllData] = useState<Geo[]>([]);
   const [array, setArray] = useState<Geo[]>([]);
-  const [csvData, setCsvData] = useState<Geo>({ name: "Moscow", lng: "-100.1319063199852", lat: "25.16901932031443" })
+  const [csvData, setCsvData] = useState<Geo>({ name: "Moscow", lng: "-99.1319063199852", lat: "25.16901932031443" })
   const fileReader = new FileReader();
 
   const handleOnChange = (e: any) => {
@@ -109,10 +148,7 @@ const SatelitteMap = () => {
   }, [lat, lng])
   return (
     <>
-      <div>
 
-
-      </div>
       <div style={{
         position: "absolute",
         marginTop: "4%",
@@ -167,13 +203,72 @@ const SatelitteMap = () => {
           marginTop: "11.7%",
           marginLeft: "5%", zIndex: "2",
           opacity: "0.75",
+          width: '13.5%',
           background: "black",
           padding: "8px",
-          borderRadius: "20px"
+          height: "300px",
+          borderRadius: "20px",
+          justifyContent: 'space-between',
+          display: 'flex'
         }}>
-        <button className="geoStyleBtn" >Rect</button>
-        <button className="geoStyleBtn" >Circle</button>
-        <button className="geoStyleBtn" >Poly</button>
+
+
+        <Box sx={{ width: '100%' }}>
+          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
+              <Tab label="Rect" {...a11yProps(0)} style={{ color: "white" }} />
+              <Tab label="Circle" {...a11yProps(1)} style={{ color: "white" }} />
+              <Tab label="poly" {...a11yProps(2)} style={{ color: "white" }} />
+            </Tabs>
+          </Box>
+          <TabPanel value={value} index={0} >
+
+            <div className='drawTab'>
+              Properties
+              <div style={{ display: "flex" }}>
+
+                <label style={{ paddingTop: '3px', paddingRight: '5px', width: '60px' }} >width</label>
+                <input type="text" style={{ borderColor: "white" }} />
+              </div>
+              <div style={{ display: "flex" }}>
+
+                <label style={{ paddingTop: '3px', paddingRight: '5px', width: '60px' }} >Height</label>
+                <input type="text" style={{ borderColor: "white" }} />
+              </div>
+            </div>
+          </TabPanel>
+          <TabPanel value={value} index={1}>
+            <div className='drawTab'>
+              Properties
+              <div style={{ display: "flex" }}>
+
+                <label style={{ paddingTop: '3px', paddingRight: '5px', width: '60px' }} >Point</label>
+                <input type="text" style={{ borderColor: "white" }} />
+              </div>
+              <div style={{ display: "flex" }}>
+
+                <label style={{ paddingTop: '3px', paddingRight: '5px', width: '60px' }} >Radius</label>
+                <input type="text" style={{ borderColor: "white" }} />
+              </div>
+            </div>
+          </TabPanel>
+          <TabPanel value={value} index={2}>
+            <div className='drawTab'>
+              Properties
+              <div style={{ display: "flex" }}>
+
+                <label style={{ paddingTop: '3px', paddingRight: '5px', width: '60px' }} >Count</label>
+                <input type="text" style={{ borderColor: "white" }} />
+              </div>
+              <div style={{ display: "flex" }}>
+
+                <label style={{ paddingTop: '3px', paddingRight: '5px', width: '60px' }} >Points</label>
+                <textarea  style={{ borderColor: "white" }} />
+              </div>
+            </div>
+          </TabPanel>
+          <button className='geoStyleBtn' style={{marginLeft:'20px'}}>Search</button>
+        </Box>
       </div>
 
 
