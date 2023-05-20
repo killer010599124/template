@@ -45,6 +45,7 @@ body {
   margin-right: 227% !important;
   margin-top: 230px !important;
   opacity: 0.75;
+  display: none;
   border-radius: 4px;
   /* display: none; */
 }

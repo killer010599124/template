@@ -1,7 +1,6 @@
 import MapboxDraw from "@mapbox/mapbox-gl-draw"
 
 
-
 const drawGeoFence =
     new MapboxDraw({
 

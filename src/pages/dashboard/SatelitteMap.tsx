@@ -54,6 +54,7 @@ const SatelitteMap = () => {
   const [layerVisible, setLayerVisible] = useState(1);
   const [drawToolVisible, setDrawToolVisible] = useState(1);
   const [value, setValue] = React.useState(0);
+  const [drawMode, setDrawMode] = useState('');
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -135,7 +136,7 @@ const SatelitteMap = () => {
 
   }
 
-  useMap(mapRef, lat, lng, addFlag, "mapbox://styles/mapbox/satellite-streets-v12", handleLongtitude, handleLatitude, geoStyleName, array)
+  useMap(mapRef, lat, lng, addFlag, "mapbox://styles/mapbox/satellite-streets-v12", handleLongtitude, handleLatitude, geoStyleName, array, drawMode) 
 
   useEffect(() => {
     if (flag == 1) {
@@ -216,7 +217,10 @@ const SatelitteMap = () => {
         <Box sx={{ width: '100%' }}>
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
             <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
-              <Tab label="Rect" {...a11yProps(0)} style={{ color: "white" }} />
+              <Tab label="Rect" {...a11yProps(0)} style={{ color: "white" }} 
+              onClick={() => {
+                setDrawMode('RECT');
+              }} />
               <Tab label="Circle" {...a11yProps(1)} style={{ color: "white" }} />
               <Tab label="poly" {...a11yProps(2)} style={{ color: "white" }} />
             </Tabs>
@@ -224,7 +228,10 @@ const SatelitteMap = () => {
           <TabPanel value={value} index={0} >
 
             <div className='drawTab'>
-              Properties
+              <div style={{ paddingBottom: "10px" }}>
+                Properties
+              </div>
+
               <div style={{ display: "flex" }}>
 
                 <label style={{ paddingTop: '3px', paddingRight: '5px', width: '60px' }} >Point</label>
@@ -244,7 +251,9 @@ const SatelitteMap = () => {
           </TabPanel>
           <TabPanel value={value} index={1}>
             <div className='drawTab'>
-              Properties
+              <div style={{ paddingBottom: "10px" }}>
+                Properties
+              </div>
               <div style={{ display: "flex" }}>
 
                 <label style={{ paddingTop: '3px', paddingRight: '5px', width: '60px' }} >Point</label>
@@ -259,7 +268,9 @@ const SatelitteMap = () => {
           </TabPanel>
           <TabPanel value={value} index={2}>
             <div className='drawTab'>
-              Properties
+              <div style={{ paddingBottom: "10px" }}>
+                Properties
+              </div>
               <div style={{ display: "flex" }}>
 
                 <label style={{ paddingTop: '3px', paddingRight: '5px', width: '60px' }} >Count</label>
@@ -268,11 +279,11 @@ const SatelitteMap = () => {
               <div style={{ display: "flex" }}>
 
                 <label style={{ paddingTop: '3px', paddingRight: '5px', width: '60px' }} >Points</label>
-                <textarea  style={{ borderColor: "white" }} />
+                <textarea style={{ borderColor: "white" }} />
               </div>
             </div>
           </TabPanel>
-          <button className='geoStyleBtn' style={{marginLeft:'20px'}}>Search</button>
+          <button className='geoStyleBtn' style={{ marginLeft: '20px' }}>Search</button>
         </Box>
       </div>
 
