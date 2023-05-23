@@ -1,11 +1,11 @@
 import { useEffect, forwardRef, useImperativeHandle, useRef, useState } from 'react';
-import { LngLat, Map } from 'mapbox-gl';
+import { LngLat, Map, Marker, } from 'mapbox-gl';
 import { initMap } from './initMap';
 import { generateNewMarker } from './generateNewMarker';
 import MapboxDraw from "@mapbox/mapbox-gl-draw"
 import MapBoxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import DrawControl from 'react-mapbox-gl-draw';
-import { useControl } from 'react-map-gl';
+import { useControl,  } from 'react-map-gl';
 import mapboxgl from 'mapbox-gl';
 import { SrvRecord } from 'dns';
 import Geocoder from './Geocoder';
@@ -21,7 +21,10 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, latitude: str
     handleLatitude: (num: number) => void, geoStyleName: string, csvData: any, drawMode: string, toggle: boolean) => {
 
     const mapInitRef = useRef<Map | null>(null);
-    const [rect, setRect] = useState(true);
+   
+
+    
+    const [rect, setRect] = useState(false);
     const [circle, setCircle] = useState(false);
     const [polygon, setPolygon] = useState(false);
     useEffect(() => {
@@ -38,25 +41,19 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, latitude: str
             // mapInitRef.current.addControl(drawCircle);
             // drawCircle.changeMode('draw_circle', { initialRadiusInKm: 0.5 });
 
-            mapInitRef.current.addControl(drawRect);
+            // mapInitRef.current.addControl(drawRect);
             // drawRect.changeMode('draw_rectangle_drag');
 
-            mapInitRef.current && mapInitRef.current.on(
-                'load', () => {
-                    generateNewMarker({
-                        map: mapInitRef.current!,
-                        ...mapInitRef.current!.getCenter()
-                    });
-                    // mapInitRef.current?.addControl(drawRect);
-                    // drawRect.changeMode('draw_rectangle_drag');
-                }
+            // mapInitRef.current && mapInitRef.current.on(
+            //     'load', () => {
+            //         generateNewMarker({
+            //             map: mapInitRef.current!,
+            //             ...mapInitRef.current!.getCenter()
+            //         });
 
+            //     }
 
-                // drawGeoFence.delete
-            );
-            // return () => {
-            //     mapInitRef.current?.off('load', generateNewMarker)
-            // }
+            // );
 
 
             mapInitRef.current && mapInitRef.current.on(
@@ -66,10 +63,8 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, latitude: str
                         map: mapInitRef.current!,
                         ...lngLat
                     });
-                    // mapInitRef.current?.setStyle("mapbox://styles/mapbox/streets-v12")
                     handleLongtitude(lngLat.lng);
                     handleLatitude(lngLat.lat);
-                    // drawRect.changeMode('draw_rectangle_drag');
                 }
 
             )
@@ -95,12 +90,12 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, latitude: str
                 mapInitRef.current?.removeControl(drawCircle);
                 setCircle(false);
             }
-            if(polygon){
+            if (polygon) {
                 mapInitRef.current?.removeControl(drawGeoFence);
                 setPolygon(false);
             }
 
-           
+
             mapInitRef.current?.addControl(drawCircle);
             drawCircle.changeMode('draw_circle', { initialRadiusInKm: 0.5 });
             setCircle(true);
@@ -116,7 +111,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, latitude: str
                 mapInitRef.current?.removeControl(drawCircle);
                 setCircle(false);
             }
-            if(polygon){
+            if (polygon) {
                 mapInitRef.current?.removeControl(drawGeoFence);
                 setPolygon(false);
             }
@@ -126,7 +121,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, latitude: str
 
             setRect(true);
         }
-        else if (drawMode === "Polygon"){
+        else if (drawMode === "Polygon") {
             if (rect) {
                 mapInitRef.current?.removeControl(drawRect);
                 setRect(false);
@@ -136,7 +131,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, latitude: str
                 mapInitRef.current?.removeControl(drawCircle);
                 setCircle(false);
             }
-            if(polygon){
+            if (polygon) {
                 mapInitRef.current?.removeControl(drawGeoFence);
                 setPolygon(false);
             }
@@ -176,5 +171,5 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, latitude: str
             mapInitRef.current?.setStyle(geoStyleName);
         }
     }, [geoStyleName]);
-
+ 
 }

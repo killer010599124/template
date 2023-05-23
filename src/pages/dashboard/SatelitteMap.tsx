@@ -55,13 +55,13 @@ const SatelitteMap = () => {
   const [drawToolVisible, setDrawToolVisible] = useState(1);
   const [value, setValue] = React.useState(0);
   const [drawMode, setDrawMode] = useState('');
-  
+
   const [toggle, setToggle] = useState(true);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
-  const handleToggle = () =>{
+  const handleToggle = () => {
     setToggle(!toggle);
   }
 
@@ -141,7 +141,7 @@ const SatelitteMap = () => {
 
   }
 
-  const myMap = useMap(mapRef, lat, lng, addFlag, "mapbox://styles/mapbox/satellite-streets-v12", handleLongtitude, handleLatitude, geoStyleName, array, drawMode,toggle)
+  const myMap = useMap(mapRef, lat, lng, addFlag, "mapbox://styles/mapbox/satellite-streets-v12", handleLongtitude, handleLatitude, geoStyleName, array, drawMode, toggle)
 
   useEffect(() => {
     if (flag == 1) {
@@ -293,7 +293,7 @@ const SatelitteMap = () => {
               <div style={{ display: "flex" }}>
 
                 <label style={{ paddingTop: '3px', paddingRight: '5px', width: '60px' }} >Points</label>
-                <textarea style={{ borderColor: "white" }} />
+                <textarea style={{ borderColor: "white", height: "85px" }} />
               </div>
             </div>
           </TabPanel>
@@ -306,7 +306,7 @@ const SatelitteMap = () => {
         position: "absolute",
         right: "0px",
         marginTop: "-1%",
-        marginRight: "2%", zIndex: "1"
+        marginRight: "50px", zIndex: "1"
       }}>
         <form style={dataVisible ? { display: "none" } : { display: "block" }}>
           <div style={{
@@ -350,7 +350,7 @@ const SatelitteMap = () => {
         position: "absolute",
         right: "0px",
         marginTop: "280px",
-        marginRight: "70px", zIndex: "1",
+        marginRight: "75px", zIndex: "1",
         background: "black",
         opacity: "0.75",
         color: "white",
@@ -389,29 +389,34 @@ const SatelitteMap = () => {
 
           </tbody>
         </table>
+        <div
+          style={dataVisible ? { display: "none" } : {
+            // display: "block",
+            position: "absolute",
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: "space-evenly",
+            paddingTop: "5px",
+            zIndex: '1',
+            width: "250px",
+            right: "50px",
+            marginBottom: "4%",
+            bottom: "0"
+            // overflowY: 'scroll'
+          }}>
+          <label className='csv'>
+            <input id="Image" type="file" onChange={handleOnChange} />
+            Import CSV
+          </label>
+          <label className='csv'>
+            <input id="Image" type="file" />
+            Export CSV
+          </label>
+          {/* <input type="button" value={"Export CSV"} /> */}
+        </div>
       </div>
 
-      <div
-        style={dataVisible ? { display: "none" } : {
-          // display: "block",
-          position: "absolute",
-          display: 'flex',
-          flexDirection: 'row',
-          justifyContent: "space-evenly",
-          paddingTop: "5px",
-          zIndex: '1',
-          width: "250px",
-          right: "5.5%",
-          marginBottom: "4%",
-          bottom: "0"
-          // overflowY: 'scroll'
-        }}>
-        <label className='csv'>
-          <input id="Image" type="file" onChange={handleOnChange} />
-          Import CSV
-        </label>
-        <input type="button" value={"Export CSV"} />
-      </div>
+
       <div ref={mapRef} className='map' style={{ padding: "0px !important", height: "94%", width: "100%" }} />
 
     </>

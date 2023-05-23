@@ -9,7 +9,7 @@ import {
 
 const drawCircle = new MapboxDraw({
    
-    userProperties: true,
+    // userProperties: true,
     modes: {
       ...MapboxDraw.modes,
       draw_circle  : CircleMode,

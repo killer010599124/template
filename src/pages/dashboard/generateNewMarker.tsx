@@ -6,7 +6,9 @@ export const generateNewMarker = ({ lat, lng, map }: { lng: number, lat: number,
         .setHTML(`<div class="popup">You click here: <br/>[${lng},  ${lat}]</div>`)
 
     new Marker({ color: '#63df29', scale: 1.5 })
+        .setDraggable(true)
         .setLngLat([lng, lat])
         .setPopup(popUp)
         .addTo(map)
+        
 }
