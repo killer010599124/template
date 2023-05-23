@@ -55,10 +55,15 @@ const SatelitteMap = () => {
   const [drawToolVisible, setDrawToolVisible] = useState(1);
   const [value, setValue] = React.useState(0);
   const [drawMode, setDrawMode] = useState('');
+  
+  const [toggle, setToggle] = useState(true);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
+  const handleToggle = () =>{
+    setToggle(!toggle);
+  }
 
   const [lng, setLng] = useState("");
   const [lat, setLat] = useState("");
@@ -136,7 +141,7 @@ const SatelitteMap = () => {
 
   }
 
-  useMap(mapRef, lat, lng, addFlag, "mapbox://styles/mapbox/satellite-streets-v12", handleLongtitude, handleLatitude, geoStyleName, array, drawMode) 
+  const myMap = useMap(mapRef, lat, lng, addFlag, "mapbox://styles/mapbox/satellite-streets-v12", handleLongtitude, handleLatitude, geoStyleName, array, drawMode,toggle)
 
   useEffect(() => {
     if (flag == 1) {
@@ -217,12 +222,21 @@ const SatelitteMap = () => {
         <Box sx={{ width: '100%' }}>
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
             <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
-              <Tab label="Rect" {...a11yProps(0)} style={{ color: "white" }} 
-              onClick={() => {
-                setDrawMode('RECT');
-              }} />
-              <Tab label="Circle" {...a11yProps(1)} style={{ color: "white" }} />
-              <Tab label="poly" {...a11yProps(2)} style={{ color: "white" }} />
+              <Tab label="Rect" {...a11yProps(0)} style={{ color: "white" }}
+                onClick={() => {
+                  setDrawMode('RECT');
+                  handleToggle();
+                }} />
+              <Tab label="Circle" {...a11yProps(1)} style={{ color: "white" }}
+                onClick={() => {
+                  setDrawMode('Circle');
+                  handleToggle();
+                }} />
+              <Tab label="poly" {...a11yProps(2)} style={{ color: "white" }}
+                onClick={() => {
+                  setDrawMode('Polygon');
+                  handleToggle();
+                }} />
             </Tabs>
           </Box>
           <TabPanel value={value} index={0} >

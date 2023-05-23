@@ -1,6 +1,6 @@
 import createRectangle from './utils/create-rectangle';
 import { enableZoom, disableZoom } from './utils/zoom';
-
+import MapboxDraw from "@mapbox/mapbox-gl-draw";
 const DrawRectangleDrag = {
   onSetup() {
     const rectangle = this.newFeature(createRectangle());
@@ -90,12 +90,12 @@ const DrawRectangleDrag = {
     }
 
     this.deleteFeature([state.rectangle.id], { silent: true });
-    this.changeMode('simple_select', {}, { silent: true });
+   // this.changeMode('simple_select', {}, { silent: true });
   },
 
   onTrash(state) {
     this.deleteFeature([state.rectangle.id], { silent: true });
-    this.changeMode('simple_select');
+   // this.changeMode('simple_select');
   },
 
   toDisplayFeatures(state, geojson, display) {
@@ -115,5 +115,11 @@ const DrawRectangleDrag = {
   },
 };
 
-
-export default DrawRectangleDrag;
+const drawRect = new MapboxDraw({
+  displayControlsDefault: false,
+  modes: {
+      ...MapboxDraw.modes,
+      'draw_rectangle_drag': DrawRectangleDrag
+  }
+});
+export default drawRect;
