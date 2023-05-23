@@ -11,7 +11,7 @@ import DrawControl from 'react-mapbox-gl-draw';
 // import Geocoder from './Geocoder'; 
 import { AddressAutofill } from '@mapbox/search-js-react';
 import { Box, Tabs } from '@mui/material';
-
+import {CSVLink, CSVDownload} from "react-csv";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -100,7 +100,10 @@ const SatelitteMap = () => {
   };
 
 
-
+  let names = [
+    {firstName: 'John',lastName: 'Cena'},
+    {firstName: 'Rey',lastName: 'Mysterio'},
+  ]
   const csvFileToArray = (string: string) => {
     const csvHeader = string.slice(0, string.indexOf("\n") - 1).split(",");
 
@@ -378,7 +381,7 @@ const SatelitteMap = () => {
           <thead>
             <tr>
               <th>Mark</th>
-              {/* <th>Name</th> */}
+              <th>Name</th>
               <th>Lng</th>
               <th>Lat</th>
             </tr>
@@ -388,7 +391,7 @@ const SatelitteMap = () => {
               return (
                 <tr>
                   <td><img src={assets.images.geoMark} style={{ width: "20px", height: "20px" }} /></td>
-                  {/* <td>{data?.name}</td> */}
+                  <td>{data?.name}</td>
                   <td>{(Number(data?.lng).toFixed(3)).toString()}</td>
                   <td>{(Number(data?.lat).toFixed(3)).toString()}</td>
                 </tr>
@@ -416,11 +419,10 @@ const SatelitteMap = () => {
             <input id="Image" type="file" onChange={handleOnChange} />
             Import CSV
           </label>
-          <label className='csv'>
-            <input id="Image" type="file" />
+          {/* <label className='csv'>
             Export CSV
-          </label>
-          {/* <input type="button" value={"Export CSV"} /> */}
+          </label> */}
+          <CSVLink data={allData}><button className='csv' style = {{height:'33px', fontSize:'15px'}}>Export CSV</button></CSVLink>
         </div>
       </div>
 
