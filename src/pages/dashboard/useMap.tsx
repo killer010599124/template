@@ -16,7 +16,7 @@ import drawRect from './drawRect';
 import { setAppState } from '../../redux/features/appStateSlice';
 
 
-export const useMap = (container: React.RefObject<HTMLDivElement>, latitude: string,
+export const useMap = (container: React.RefObject<HTMLDivElement>,name:string, description:string, latitude: string,
     longtitude: string, flag: boolean, mapStyle: string, handleLongtitude: (num: number) => void,
     handleLatitude: (num: number) => void, geoStyleName: string, csvData: any, drawMode: string, toggle: boolean,
     deleteFlag: boolean) => {
@@ -67,6 +67,8 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, latitude: str
                 ({ lngLat }) => {
                     // markersArray[markersArray.length-1].remove();
                     const marker = generateNewMarker({
+                        name:'',
+                        description:'',
                         map: mapInitRef.current!,
                         ...lngLat,
                         color: "#63df29",
@@ -125,7 +127,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, latitude: str
 
 
             mapInitRef.current?.addControl(drawCircle);
-            drawCircle.changeMode('draw_circle', { initialRadiusInKm: 0.5 });
+            drawCircle.changeMode('draw_circle', { initialRadiusInKm: 5 });
             setCircle(true);
         }
         else if (drawMode === "RECT") {
@@ -174,6 +176,8 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, latitude: str
 
             const v = new LngLat(Number(longtitude), Number(latitude))
             generateNewMarker({
+                name : name,
+                description : description,
                 map: mapInitRef.current!,
                 ...v,
                 color: "rgb(70, 104, 242)",
@@ -194,6 +198,8 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, latitude: str
                 console.log('cnt');
                 const v = new LngLat(Number(csvData[i]?.lng), Number(csvData[i]?.lat))
                 const marker = generateNewMarker({
+                    name : csvData[i]?.name,
+                    description : csvData[i]?.description,
                     map: mapInitRef.current!,
                     ...v,
                     color: "rgb(70, 104, 242)",

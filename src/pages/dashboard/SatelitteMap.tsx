@@ -147,7 +147,7 @@ const SatelitteMap = () => {
 
   };
 
-  const myMap = useMap(mapRef, lat, lng, addFlag, "mapbox://styles/mapbox/satellite-streets-v12", handleLongtitude, handleLatitude, geoStyleName, array, drawMode, toggle, deleteFlag)
+  const myMap = useMap(mapRef,name, description, lat, lng, addFlag, "mapbox://styles/mapbox/satellite-streets-v12", handleLongtitude, handleLatitude, geoStyleName, array, drawMode, toggle, deleteFlag)
 
   useEffect(() => {
     if (flag == 1) {

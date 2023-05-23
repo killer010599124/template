@@ -1,9 +1,10 @@
 import { Popup, Marker, Map } from 'mapbox-gl';
 
-export const generateNewMarker = ({ lat, lng, map, color, draggable }: { lng: number, lat: number, map: Map, color : string, draggable:boolean }) => {
+export const generateNewMarker = ({name, description, lat, lng, map, color, draggable }:
+     {name : string, description:string, lng: number, lat: number, map: Map, color : string, draggable:boolean }) => {
 
     const popUp = new Popup({ closeButton: false, anchor: 'left', })
-        .setHTML(`<div class="popup">You click here: <br/>[${lng},  ${lat}]</div>`)
+        .setHTML(`<div class="popup">${name} <br/>${description} </br> [${lng},  ${lat}]</div>`)
         // rgb(70, 104, 242)
     const marker = new Marker({ color: color, scale: 1.5 })
         .setDraggable(draggable)
@@ -13,9 +14,9 @@ export const generateNewMarker = ({ lat, lng, map, color, draggable }: { lng: nu
         
     marker.getElement().addEventListener('click', (e) => {{
         
-        popUp.setHTML(`
-        <div class="popup">You click here: <br/>[${marker.getLngLat().lng},  ${marker.getLngLat().lat}]</div>
-        `)
+        // popUp.setHTML(`
+        // <div class="popup">You click here: <br/>[${marker.getLngLat().lng},  ${marker.getLngLat().lat}]</div>
+        // `)
         
     }}, false);
     return marker;
