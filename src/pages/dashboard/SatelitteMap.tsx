@@ -68,18 +68,21 @@ const SatelitteMap = () => {
   const [lng, setLng] = useState("");
   const [lat, setLat] = useState("");
   const [name, setName] = useState("");
+  const [description, setDescription] = useState("")
   const [geoStyleName, setGeoStyleName] = useState("mapbox://styles/mapbox/satellite-streets-v12")
   interface Geo {
+    description: string;
     name: string;
     lat: string;
     lng: string;
   }
   const [flag, setFlag] = useState(0);
   const [addFlag, setAddFlag] = useState(true);
+  const [deleteFlag, setDeleteFlag] = useState(true);
   const [data, setData] = useState<Geo>();
   const [allData, setAllData] = useState<Geo[]>([]);
   const [array, setArray] = useState<Geo[]>([]);
-  const [csvData, setCsvData] = useState<Geo>({ name: "Moscow", lng: "-99.1319063199852", lat: "25.16901932031443" })
+  const [csvData, setCsvData] = useState<Geo>({description: "The capital of Russia", name: "Moscow", lng: "-99.1319063199852", lat: "25.16901932031443" })
   const fileReader = new FileReader();
 
   const handleOnChange = (e: any) => {
@@ -111,12 +114,14 @@ const SatelitteMap = () => {
 
         return object;
       }, {});
-      console.log(obj)
-      if (obj['name']) setCsvData(obj)
+      console.log(obj);
+      if(!Number.isNaN(Number(obj.lng))) manageAllData(obj);
+      // if (obj['name']) setCsvData(obj)
       return obj;
     });
     console.log(array.pop())
-    setAllData(array)
+    // setAllData(array);
+    // allData.pop()
     setArray(array);
   };
   const headerKeys = Object.keys(Object.assign({}, ...array));
@@ -124,30 +129,31 @@ const SatelitteMap = () => {
   const handleLongtitude = (num: number) => {
     // 👇️ take the parameter passed from the Child component
     setLng(num.toString());
-
     // console.log('argument from Child: ', lng);
   };
+
   const handleLatitude = (num: number) => {
     // 👇️ take the parameter passed from the Child component
     setLat(num.toString());
     setFlag(1);
     // console.log('argument from Child: ', lng);
   };
+
   const manageData = (data: Geo) => {
     setData(data);
-  }
+  };
   const manageAllData = (data: Geo) => {
     setAllData(prevNames => [...prevNames, data])
 
-  }
+  };
 
-  const myMap = useMap(mapRef, lat, lng, addFlag, "mapbox://styles/mapbox/satellite-streets-v12", handleLongtitude, handleLatitude, geoStyleName, array, drawMode, toggle)
+  const myMap = useMap(mapRef, lat, lng, addFlag, "mapbox://styles/mapbox/satellite-streets-v12", handleLongtitude, handleLatitude, geoStyleName, array, drawMode, toggle, deleteFlag)
 
   useEffect(() => {
     if (flag == 1) {
 
-      manageData({ name, lat, lng });
-      manageAllData({ name, lat, lng })
+      // manageData({ name, lat, lng });
+      // manageAllData({ name, lat, lng })
       setFlag(0);
     }
 
@@ -326,7 +332,7 @@ const SatelitteMap = () => {
             <input type="text" placeholder="Longtitude" value={lng.toString()} onChange={(e) => { setLng(e.target.value) }} />
             <input type="text" placeholder="Latitude" value={lat.toString()} onChange={(e) => { setLat(e.target.value) }} />
           </div>
-          <textarea placeholder="Description"></textarea>
+          <textarea placeholder="Description" value={description} onChange={(e) => {setDescription(e.target.value)}}></textarea>
           <div style={{
             display: 'flex',
             flexDirection: 'row',
@@ -335,12 +341,14 @@ const SatelitteMap = () => {
           }}>
             <input type="button" value={"Add"} onClick={() => {
               setAddFlag(!addFlag);
-              manageData({ name, lat, lng });
-              manageAllData({ name, lat, lng });
+              manageData({description, name, lat, lng });
+              manageAllData({description, name, lat, lng });
               console.log(data);
             }} />
             <input type="button" value={"Edit"} />
-            <input type="button" value={"Delete"} />
+            <input type="button" value={"Delete"} onClick={() => {
+              setDeleteFlag(!deleteFlag);
+            }} />
           </div>
 
         </form>

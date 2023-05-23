@@ -5,7 +5,7 @@ import { generateNewMarker } from './generateNewMarker';
 import MapboxDraw from "@mapbox/mapbox-gl-draw"
 import MapBoxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import DrawControl from 'react-mapbox-gl-draw';
-import { useControl,  } from 'react-map-gl';
+import { useControl, } from 'react-map-gl';
 import mapboxgl from 'mapbox-gl';
 import { SrvRecord } from 'dns';
 import Geocoder from './Geocoder';
@@ -18,12 +18,16 @@ import { setAppState } from '../../redux/features/appStateSlice';
 
 export const useMap = (container: React.RefObject<HTMLDivElement>, latitude: string,
     longtitude: string, flag: boolean, mapStyle: string, handleLongtitude: (num: number) => void,
-    handleLatitude: (num: number) => void, geoStyleName: string, csvData: any, drawMode: string, toggle: boolean) => {
+    handleLatitude: (num: number) => void, geoStyleName: string, csvData: any, drawMode: string, toggle: boolean,
+    deleteFlag: boolean) => {
+
 
     const mapInitRef = useRef<Map | null>(null);
-   
 
-    
+    const [markersArray, setMarkersArray] = useState<Marker[]>([]);
+    const [currentMarker, setCurrentMarker] = useState<Marker>();
+    const [lnglat, setLnglat] = useState<LngLat>()
+
     const [rect, setRect] = useState(false);
     const [circle, setCircle] = useState(false);
     const [polygon, setPolygon] = useState(false);
@@ -32,7 +36,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, latitude: str
 
             mapInitRef.current = initMap(
                 container.current,
-                [-99.1319063199852, 25.17901932031443],
+                [-100.2419063199852, 25.17901932031443],
                 mapStyle
             );
             mapInitRef.current.addControl(Geocoder);
@@ -46,11 +50,13 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, latitude: str
 
             // mapInitRef.current && mapInitRef.current.on(
             //     'load', () => {
-            //         generateNewMarker({
+            //         const marker = generateNewMarker({
             //             map: mapInitRef.current!,
-            //             ...mapInitRef.current!.getCenter()
+            //             ...mapInitRef.current!.getCenter(),
+            //             color: "#63df29",
+            //             draggable: true
             //         });
-
+            //         setMarkersArray(prevNames => [...prevNames, marker])
             //     }
 
             // );
@@ -59,14 +65,20 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, latitude: str
             mapInitRef.current && mapInitRef.current.on(
                 'dblclick',
                 ({ lngLat }) => {
-                    generateNewMarker({
+                    // markersArray[markersArray.length-1].remove();
+                    const marker = generateNewMarker({
                         map: mapInitRef.current!,
-                        ...lngLat
+                        ...lngLat,
+                        color: "#63df29",
+                        draggable: true
                     });
+
+                    setCurrentMarker(marker);
+                    
                     handleLongtitude(lngLat.lng);
                     handleLatitude(lngLat.lat);
+                    setMarkersArray(prevNames => [...prevNames, marker])
                 }
-
             )
             return () => {
                 mapInitRef.current?.off('dblclick', generateNewMarker)
@@ -74,6 +86,22 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, latitude: str
         }
 
     }, []);
+
+    useEffect(() => {
+        if (container.current) {
+            if (markersArray.length > 1) {
+                const marker = markersArray[markersArray.length - 2];
+                marker.remove()
+            }
+
+        }
+    }, [currentMarker]);
+    useEffect(() => {
+        if (container.current) {
+            console.log(lnglat);
+        }
+        console.log(lnglat);
+    }, [lnglat]);
 
     useEffect(() => {
 
@@ -147,21 +175,31 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, latitude: str
             const v = new LngLat(Number(longtitude), Number(latitude))
             generateNewMarker({
                 map: mapInitRef.current!,
-                ...v
+                ...v,
+                color: "rgb(70, 104, 242)",
+                draggable: false
             });
-
         }
     }, [flag]);
+    useEffect(() => {
+        if (container.current) {
+            currentMarker?.remove();
+            console.log(currentMarker?.getLngLat());
+        }
 
+    }, [deleteFlag]);
     useEffect(() => {
         if (container.current) {
             for (let i = 0; i < csvData.length; i++) {
                 console.log('cnt');
                 const v = new LngLat(Number(csvData[i]?.lng), Number(csvData[i]?.lat))
-                generateNewMarker({
+                const marker = generateNewMarker({
                     map: mapInitRef.current!,
-                    ...v
+                    ...v,
+                    color: "rgb(70, 104, 242)",
+                    draggable: false
                 });
+                // setMarkersArray(prevNames => [...prevNames, marker])
             }
         }
     }, [csvData]);
@@ -171,5 +209,5 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, latitude: str
             mapInitRef.current?.setStyle(geoStyleName);
         }
     }, [geoStyleName]);
- 
+
 }
