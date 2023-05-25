@@ -96,8 +96,16 @@ const SatelitteMap = () => {
   const [address, setAddress] = useState('');
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [content, setContent] = useState('');
 
-
+  const [pid, setPid] = useState('');
+  const [pname, setPName] = useState('');
+  const [paddress, setPaddress] = useState('');
+  const [pemail, setPemail] = useState('');
+  const [pphone, setPphone] = useState('');
+  const [pfacebook, setPfacebook] = useState('');
+  const [plinkdin, setPlinkdin] = useState('');
+  const [ptwitter, setPtwitter] = useState('');
 
   const handleOnChange = (e: any) => {
     // setFile(e.target.files[0]);
@@ -470,17 +478,56 @@ const SatelitteMap = () => {
                   searchQuery: query,
                   size: 10,
                 }).then((data) => {
-                  console.log(data);
+                  console.log(data['data'][0]);
+                  const str = "id:" + data['data'][0]['id'] + "\n" + "Name:" + data['data'][0]['full_name'] + "\n" + "Address:" + data['data'][0]['location_street_address'] +
+                    "\n" + "Emails:" + data['data'][0]['personal_emails'] + "\n" + "Phone Number:" + data['data'][0]['phone_numbers'] + "\n" +
+                    "facebook_id:" + data['data'][0]['facebook_id'] + ",  Url:" + data['data'][0]['facebook_url'] +
+                    ",   Username:" + data['data'][0]['facebook_username'] + "\n" +
+                    "linkedin_id:" + data['data'][0]['linkedin_id'] + ",  Url:" + data['data'][0]['linkedin_url'] +
+                    ",   Username:" + data['data'][0]['linkedin_username'] + "\n" +
+                    "Twitter_Url:" + data['data'][0]['twitter_url'] +
+                    ",   Username:" + data['data'][0]['twitter_username'];
+
+                  setPid("id  : " + data['data'][0]['id']);
+                  setPName("Name  : " + data['data'][0]['full_name']);
+                  setPaddress("Address  : " + data['data'][0]['location_street_address']);
+                  setPemail("Emails : " + data['data'][0]['personal_emails']);
+                  setPphone("Phone Number : " + data['data'][0]['phone_numbers']);
+                  setPfacebook("facebook => id  : " + data['data'][0]['facebook_id'] + ",  Url  : " + data['data'][0]['facebook_url'] + ",   Username : " + data['data'][0]['facebook_username']);
+                  setPlinkdin("linkedin => id : " + data['data'][0]['linkedin_id'] + ",  Url  : " + data['data'][0]['linkedin_url'] + ",   Username : " + data['data'][0]['linkedin_username']);
+                  setPtwitter("Twitter => Url : " + data['data'][0]['twitter_url'] + ",   Username  : " + data['data'][0]['twitter_username']);
+
+                  // JSON.parse(data);
+                  setContent(str);
+                  console.log(content)
+
                 }).catch((error) => {
+                  setContent('No search results');
                   console.log(error);
                 });
               }}
             >Search</button>
+            <button className='geoStyleBtn' style={{ marginLeft: '20px' }}
+              onClick={() => {
+
+              }}
+            >Download</button>
           </Box>
         </div>
         <div style={{ width: '70%', height: '100%', borderTopRightRadius: '10px', borderBottomRightRadius: '10px' }}>
           <div style={{ fontSize: '24px', lineHeight: '45px', color: 'white', width: '100%', height: '50px', textAlign: 'center', borderBottom: '0.05em solid white' }}>
             Content
+          </div>
+          <div style={{ color: "white", padding: "100px", textAlign: 'center' }}>
+            <div>{pid}</div>
+            <div>{pname}</div>
+            <div>{paddress}</div>
+            <div>{pemail}</div>
+            <div>{pphone}</div>
+            <div>{pfacebook}</div>
+            <div>{plinkdin}</div>
+            <div>{ptwitter}</div>
+
           </div>
         </div>
       </div>
