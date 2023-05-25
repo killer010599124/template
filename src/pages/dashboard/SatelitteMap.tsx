@@ -11,7 +11,8 @@ import DrawControl from 'react-mapbox-gl-draw';
 // import Geocoder from './Geocoder'; 
 import { AddressAutofill } from '@mapbox/search-js-react';
 import { Box, Tabs } from '@mui/material';
-import {CSVLink, CSVDownload} from "react-csv";
+import { CSVLink, CSVDownload } from "react-csv";
+import PDLJSClient from './PDL';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -44,6 +45,9 @@ function a11yProps(index: number) {
     id: `simple-tab-${index}`,
     'aria-controls': `simple-tabpanel-${index}`,
   };
+}
+function makeQuery(first_name: string, last_name: string, address: string, email: string, phone: string) {
+  return `SELECT * FROM person WHERE first_name = '${first_name}' AND last_name ='${last_name}' AND personal_emails ='${email}' AND phone_numbers = '${phone}' ;`
 }
 
 const SatelitteMap = () => {
@@ -82,8 +86,18 @@ const SatelitteMap = () => {
   const [data, setData] = useState<Geo>();
   const [allData, setAllData] = useState<Geo[]>([]);
   const [array, setArray] = useState<Geo[]>([]);
-  const [csvData, setCsvData] = useState<Geo>({description: "The capital of Russia", name: "Moscow", lng: "-99.1319063199852", lat: "25.16901932031443" })
+  const [csvData, setCsvData] = useState<Geo>({ description: "The capital of Russia", name: "Moscow", lng: "-99.1319063199852", lat: "25.16901932031443" })
   const fileReader = new FileReader();
+
+  //--------   P&B search engine-----------//
+
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [address, setAddress] = useState('');
+  const [email, setEmail] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+
+
 
   const handleOnChange = (e: any) => {
     // setFile(e.target.files[0]);
@@ -101,8 +115,8 @@ const SatelitteMap = () => {
 
 
   let names = [
-    {firstName: 'John',lastName: 'Cena'},
-    {firstName: 'Rey',lastName: 'Mysterio'},
+    { firstName: 'John', lastName: 'Cena' },
+    { firstName: 'Rey', lastName: 'Mysterio' },
   ]
   const csvFileToArray = (string: string) => {
     const csvHeader = string.slice(0, string.indexOf("\n") - 1).split(",");
@@ -118,7 +132,7 @@ const SatelitteMap = () => {
         return object;
       }, {});
       console.log(obj);
-      if(!Number.isNaN(Number(obj.lng))) manageAllData(obj);
+      if (!Number.isNaN(Number(obj.lng))) manageAllData(obj);
       // if (obj['name']) setCsvData(obj)
       return obj;
     });
@@ -150,7 +164,7 @@ const SatelitteMap = () => {
 
   };
 
-  const myMap = useMap(mapRef,name, description, lat, lng, addFlag, "mapbox://styles/mapbox/satellite-streets-v12", handleLongtitude, handleLatitude, geoStyleName, array, drawMode, toggle, deleteFlag)
+  const myMap = useMap(mapRef, name, description, lat, lng, addFlag, "mapbox://styles/mapbox/satellite-streets-v12", handleLongtitude, handleLatitude, geoStyleName, array, drawMode, toggle, deleteFlag)
 
   useEffect(() => {
     if (flag == 1) {
@@ -164,6 +178,8 @@ const SatelitteMap = () => {
   return (
     <>
 
+
+      {/* --------------------------- Side Tool Bar --------------------------- */}
       <div style={{
         position: "absolute",
         marginTop: "4%",
@@ -195,7 +211,16 @@ const SatelitteMap = () => {
           }}>
           Draw
         </button>
+        <button className='toolButton'
+          onClick={() => {
+
+          }}>
+          P&B
+        </button>
       </div>
+
+      {/* ----------------------------Basic Map Style layout --------------------- */}
+
       <div style={layerVisible ? { display: "none" } :
         {
           position: "absolute",
@@ -211,6 +236,8 @@ const SatelitteMap = () => {
         <button className="geoStyleBtn" onClick={() => setGeoStyleName("mapbox://styles/mapbox/streets-v12")}>Street</button>
         <button className="geoStyleBtn" onClick={() => setGeoStyleName("mapbox://styles/mapbox/satellite-streets-v12")}>Satelitte</button>
       </div>
+
+      {/* ----------------------Draw Geofence tool layout ---------------------- */}
 
       <div style={drawToolVisible ? { display: "none" } :
         {
@@ -310,7 +337,7 @@ const SatelitteMap = () => {
         </Box>
       </div>
 
-
+      {/* ---------------------------Point Data layout ----------------------- */}
       <div style={{
         position: "absolute",
         right: "0px",
@@ -335,7 +362,7 @@ const SatelitteMap = () => {
             <input type="text" placeholder="Longtitude" value={lng.toString()} onChange={(e) => { setLng(e.target.value) }} />
             <input type="text" placeholder="Latitude" value={lat.toString()} onChange={(e) => { setLat(e.target.value) }} />
           </div>
-          <textarea placeholder="Description" value={description} onChange={(e) => {setDescription(e.target.value)}}></textarea>
+          <textarea placeholder="Description" value={description} onChange={(e) => { setDescription(e.target.value) }}></textarea>
           <div style={{
             display: 'flex',
             flexDirection: 'row',
@@ -344,8 +371,8 @@ const SatelitteMap = () => {
           }}>
             <input type="button" value={"Add"} onClick={() => {
               setAddFlag(!addFlag);
-              manageData({description, name, lat, lng });
-              manageAllData({description, name, lat, lng });
+              manageData({ description, name, lat, lng });
+              manageAllData({ description, name, lat, lng });
               console.log(data);
             }} />
             <input type="button" value={"Edit"} />
@@ -356,6 +383,110 @@ const SatelitteMap = () => {
 
         </form>
       </div>
+
+      {/* -------------------------   P&B layout --------------------- */}
+
+      <div style={{
+        position: "absolute",
+        right: "20%",
+        marginTop: "7%",
+
+        zIndex: "1",
+        width: "60%",
+        height: "600px",
+        backgroundColor: "black",
+        display: 'flex',
+        flexDirection: 'row',
+        borderRadius: '10px',
+        opacity: '0.75'
+      }}>
+        <div style={{
+          width: "30%", height: "100%", borderTopLeftRadius: '10px', borderBottomLeftRadius: '10px',
+          borderRight: '0.1rem solid white'
+        }}>
+          <Box sx={{ width: '100%' }}>
+            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+              <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
+                <Tab label="Person" {...a11yProps(0)} style={{ color: "white", width: '50%' }}
+                />
+                <Tab label="company" {...a11yProps(1)} style={{ color: "white", width: '50%' }}
+                />
+              </Tabs>
+            </Box>
+            <TabPanel value={value} index={0} >
+
+              <div className='drawTab'>
+                <div style={{ paddingBottom: "10px" }}>
+
+                </div>
+
+                <div style={{ display: "flex" }}>
+
+
+                  <input type="text" placeholder='First Name' value={firstName} onChange={(e) => { setFirstName(e.target.value) }} style={{ borderColor: "white" }} />
+                  <input type="text" placeholder='Last Name' value={lastName} onChange={(e) => { setLastName(e.target.value) }} style={{ marginLeft: '5px', borderColor: "white" }} />
+                </div>
+
+                <div style={{ display: "flex" }}>
+                  <input type="text" placeholder='Address' value={address} onChange={(e) => { setAddress(e.target.value) }} style={{ width: '95%', borderColor: "white" }} />
+                </div>
+                <div style={{ display: "flex" }}>
+                  <input type="text" placeholder='Email' value={email} onChange={(e) => setEmail(e.target.value)} style={{ width: '95%', borderColor: "white" }} />
+                </div>
+                <div style={{ display: "flex" }}>
+                  <input type="text" placeholder='Phone' value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} style={{ width: '95%', borderColor: "white" }} />
+                </div>
+
+              </div>
+            </TabPanel>
+            <TabPanel value={value} index={1}>
+              <div className='drawTab'>
+                <div style={{ paddingBottom: "10px" }}>
+
+                </div>
+
+                <div style={{ display: "flex" }}>
+                  <input type="text" placeholder='Name' style={{ width: '95%', borderColor: "white" }} />
+                </div>
+
+                <div style={{ display: "flex" }}>
+                  <input type="text" placeholder='Profile' style={{ width: '95%', borderColor: "white" }} />
+                </div>
+                <div style={{ display: "flex" }}>
+                  <input type="text" placeholder='Ticker' style={{ width: '95%', borderColor: "white" }} />
+                </div>
+                <div style={{ display: "flex" }}>
+                  <input type="text" placeholder='Location' style={{ width: '95%', borderColor: "white" }} />
+                </div>
+              </div>
+
+            </TabPanel>
+
+            <button className='geoStyleBtn' style={{ marginLeft: '20px' }}
+              onClick={() => {
+                const query = makeQuery(firstName, lastName, address, email, phoneNumber);
+                console.log(query);
+                PDLJSClient.person.search.sql({
+                  searchQuery: query,
+                  size: 10,
+                }).then((data) => {
+                  console.log(data);
+                }).catch((error) => {
+                  console.log(error);
+                });
+              }}
+            >Search</button>
+          </Box>
+        </div>
+        <div style={{ width: '70%', height: '100%', borderTopRightRadius: '10px', borderBottomRightRadius: '10px' }}>
+          <div style={{ fontSize: '24px', lineHeight: '45px', color: 'white', width: '100%', height: '50px', textAlign: 'center', borderBottom: '0.05em solid white' }}>
+            Content
+          </div>
+        </div>
+      </div>
+
+
+      {/* ------------------------- Geo Point Table layout-------------------- */}
       <div style={dataVisible ? { display: "none" } : {
         display: "block",
         position: "absolute",
@@ -422,7 +553,7 @@ const SatelitteMap = () => {
           {/* <label className='csv'>
             Export CSV
           </label> */}
-          <CSVLink data={allData}><button className='csv' style = {{height:'33px', fontSize:'15px'}}>Export CSV</button></CSVLink>
+          <CSVLink data={allData}><button className='csv' style={{ height: '33px', fontSize: '15px' }}>Export CSV</button></CSVLink>
         </div>
       </div>
 
