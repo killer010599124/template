@@ -58,11 +58,13 @@ const SatelitteMap = () => {
 
   const mapRef = useRef<HTMLDivElement>(null);
   const childRef = useRef(null);
-  const reportTemplateRef = useRef(null);
+  const reportTemplateRef = useRef<HTMLDivElement>(null);
 
   const [dataVisible, setDataVisible] = useState(1);
   const [layerVisible, setLayerVisible] = useState(1);
   const [drawToolVisible, setDrawToolVisible] = useState(1);
+  const [pbVisible, setPbVisible] = useState(1);
+
   const [value, setValue] = React.useState(0);
   const [drawMode, setDrawMode] = useState('');
 
@@ -75,15 +77,13 @@ const SatelitteMap = () => {
     setToggle(!toggle);
   }
   const handleGeneratePdf = () => {
-    const doc = new jsPDF({
-      format: 'a4',
-      unit: 'px',
-    });
+    const doc = new jsPDF('p', 'mm', [700,510]);
 
     // Adding the fonts.
     doc.setFont('Inter-Regular', 'normal');
-
-    doc.html(reportTemplateRef.current, {
+    const input = document.getElementsByClassName('PBData')[0];
+    const el1: HTMLElement = input as HTMLElement; 
+    doc.html(el1, {
       async callback(doc) {
         doc.save('report.pdf');
       },
@@ -255,7 +255,8 @@ const SatelitteMap = () => {
         </button>
         <button className='toolButton'
           onClick={() => {
-
+            if (pbVisible) setPbVisible(0);
+            else setPbVisible(1);
           }}>
           P&B
         </button>
@@ -428,8 +429,9 @@ const SatelitteMap = () => {
 
       {/* -------------------------   P&B layout --------------------- */}
 
-      <div className='PDdata' style={{
-        position: "absolute",
+      <div className='PDdata' style={pbVisible ? { display: "none" } :
+        {
+          position: "absolute",
         right: "30%",
         marginTop: "7%",
 
@@ -441,7 +443,8 @@ const SatelitteMap = () => {
         flexDirection: 'row',
         borderRadius: '10px',
         opacity: '0.75'
-      }}>
+        }}
+       >
         <div style={{
           width: "30%", height: "100%", borderTopLeftRadius: '10px', borderBottomLeftRadius: '10px',
           borderRight: '0.1rem solid white'
@@ -559,23 +562,22 @@ const SatelitteMap = () => {
             >Download</button>
           </Box>
         </div>
-        <div style={{ width: '70%', height: '100%', borderTopRightRadius: '10px', borderBottomRightRadius: '10px' }}>
-          <div style={{ fontSize: '24px', lineHeight: '45px', color: 'white', width: '100%', height: '50px', textAlign: 'center', borderBottom: '0.05em solid white' }}>
-            Content
+        <div  style={{ width: '70%', height: '100%', borderTopRightRadius: '10px', borderBottomRightRadius: '10px' }}>
+          <div style={{ fontSize: '24px', lineHeight: '45px', color: 'white', width: '100%', height: '50px', textAlign: 'center', paddingTop:'10px' }}>
+          Identity Details
           </div>
-          <div style={{ color: "white", padding: "20px" }} ref={reportTemplateRef}>
-            <div>
-              ------------------------------------------------------------------------------------------------------------------------
-              <br />
+          <div className='PBData' style={{ color: "white", padding: "20px" }} ref={reportTemplateRef}>
+            <div style={{ fontWeight:'bold', textAlign:'center',padding:'5px',borderBottom:'0.05em solid',borderTop:'0.05em solid'}}>
+              
               PERSONAL INFORMATION
               <br />
-              ------------------------------------------------------------------------------------------------------------------------
+         
             </div>
-            <div style={{ display: 'flex', flexDirection: 'row' }}>
-              <div style={{ color: 'red', width: '10%', marginLeft: '3%' }}>
+            <div style={{ display: 'flex', flexDirection: 'row', padding:'15px' }}>
+              <div style={{  width: '10%', marginLeft: '3%' }}>
                 ID:<br />Name:<br />Address:<br />Emails:<br />Phone:
               </div>
-              <div style={{ color: 'green', marginLeft: '25px' }}>
+              <div style={{  marginLeft: '25px' }}>
                 <div>{pid}</div>
                 <div>{pname}</div>
                 <div>{paddress}</div>
@@ -584,21 +586,19 @@ const SatelitteMap = () => {
               </div>
             </div>
 
-            <div>
-              ------------------------------------------------------------------------------------------------------------------------
-              <br />
+            <div style={{color:'white', fontWeight:'bold',textAlign:'center',padding:'5px',borderBottom:'0.05em solid',borderTop:'0.05em solid'}}>
+            
               SOCIAL MEDIA INFORMATION
               <br />
-              ------------------------------------------------------------------------------------------------------------------------
             </div>
-            <div>
-              <div>
-                <div style={{ color: 'red', marginLeft: '3%' }}>Facebook:</div>
+            <div style={{padding:'15px'}}>
+              <div >
+                <div style={{ color: 'white', marginLeft: '3%' }}>Facebook:</div>
                 <div style={{ display: 'flex', flexDirection: 'row' }}>
-                  <div style={{ color: 'red', width: '10%', marginLeft: '5%', padding: '10px', fontSize: '14px' }}>
+                  <div style={{ color: 'white', width: '10%', marginLeft: '5%', padding: '10px', fontSize: '14px' }}>
                     ID:<br />URL:<br />Username:
                   </div>
-                  <div style={{ color: 'green', padding: '10px', marginLeft: '25px', fontSize: '14px' }}>
+                  <div style={{ color: 'white', padding: '10px', marginLeft: '25px', fontSize: '14px' }}>
                     <div>{pfacebook_id}</div>
                     <div>{pfacebook_url}</div>
                     <div>{pfacebook_un}</div>
@@ -607,12 +607,12 @@ const SatelitteMap = () => {
               </div>
 
               <div>
-                <div style={{ color: 'red', marginLeft: '3%' }}>LinkedIn:</div>
+                <div style={{ color: 'white', marginLeft: '3%' }}>LinkedIn:</div>
                 <div style={{ display: 'flex', flexDirection: 'row' }}>
-                  <div style={{ color: 'red', width: '10%', marginLeft: '5%', padding: '10px', fontSize: '14px' }}>
+                  <div style={{ color: 'white', width: '10%', marginLeft: '5%', padding: '10px', fontSize: '14px' }}>
                     ID:<br />URL:<br />Username:
                   </div>
-                  <div style={{ color: 'green', padding: '10px', marginLeft: '25px', fontSize: '14px' }}>
+                  <div style={{ color: 'white', padding: '10px', marginLeft: '25px', fontSize: '14px' }}>
                     <div>{plinkdin_id}</div>
                     <div>{plinkdin_url}</div>
                     <div>{plinkdin_un}</div>
@@ -620,12 +620,12 @@ const SatelitteMap = () => {
                 </div>
               </div>
               <div>
-                <div style={{ color: 'red', marginLeft: '3%' }}>Twitter:</div>
+                <div style={{ color: 'white', marginLeft: '3%' }}>Twitter:</div>
                 <div style={{ display: 'flex', flexDirection: 'row' }}>
-                  <div style={{ color: 'red', width: '10%', marginLeft: '5%', padding: '10px', fontSize: '14px' }}>
+                  <div style={{ color: 'white', width: '10%', marginLeft: '5%', padding: '10px', fontSize: '14px' }}>
                     URL:<br />Username:
                   </div>
-                  <div style={{ color: 'green', padding: '10px', marginLeft: '25px', fontSize: '14px' }}>
+                  <div style={{ color: 'white', padding: '10px', marginLeft: '25px', fontSize: '14px' }}>
                     <div>{ptwitter_url}</div>
                     <div>{ptwitter_un}</div>
                   </div>
