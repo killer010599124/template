@@ -13,6 +13,10 @@ import { AddressAutofill } from '@mapbox/search-js-react';
 import { Box, Tabs } from '@mui/material';
 import { CSVLink, CSVDownload } from "react-csv";
 import PDLJSClient from './PDL';
+import { PDFViewer } from '@react-pdf/renderer';
+import MyDocument from './generatePDF';
+import jsPDF from 'jspdf';
+
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -106,6 +110,14 @@ const SatelitteMap = () => {
   const [pfacebook, setPfacebook] = useState('');
   const [plinkdin, setPlinkdin] = useState('');
   const [ptwitter, setPtwitter] = useState('');
+
+
+
+  const doc = new jsPDF({
+    orientation: 'landscape',
+    unit: 'in',
+    format: [3, 2],
+  });
 
   const handleOnChange = (e: any) => {
     // setFile(e.target.files[0]);
@@ -431,18 +443,18 @@ const SatelitteMap = () => {
                 <div style={{ display: "flex" }}>
 
 
-                  <input type="text" placeholder='First Name' value={firstName} onChange={(e) => { setFirstName(e.target.value) }} style={{ borderColor: "white" }} />
-                  <input type="text" placeholder='Last Name' value={lastName} onChange={(e) => { setLastName(e.target.value) }} style={{ marginLeft: '5px', borderColor: "white" }} />
+                  <input type="text" placeholder='First Name' value={firstName} onChange={(e) => { setFirstName(e.target.value) }} style={{ borderColor: "white", width: '50%' }} />
+                  <input type="text" placeholder='Last Name' value={lastName} onChange={(e) => { setLastName(e.target.value) }} style={{ marginLeft: '5px', width: "50%", borderColor: "white" }} />
                 </div>
 
                 <div style={{ display: "flex" }}>
-                  <input type="text" placeholder='Address' value={address} onChange={(e) => { setAddress(e.target.value) }} style={{ width: '95%', borderColor: "white" }} />
+                  <input type="text" placeholder='Address' value={address} onChange={(e) => { setAddress(e.target.value) }} style={{ width: '100%', borderColor: "white" }} />
                 </div>
                 <div style={{ display: "flex" }}>
-                  <input type="text" placeholder='Email' value={email} onChange={(e) => setEmail(e.target.value)} style={{ width: '95%', borderColor: "white" }} />
+                  <input type="text" placeholder='Email' value={email} onChange={(e) => setEmail(e.target.value)} style={{ width: '100%', borderColor: "white" }} />
                 </div>
                 <div style={{ display: "flex" }}>
-                  <input type="text" placeholder='Phone' value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} style={{ width: '95%', borderColor: "white" }} />
+                  <input type="text" placeholder='Phone' value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} style={{ width: '100%', borderColor: "white" }} />
                 </div>
 
               </div>
@@ -454,17 +466,17 @@ const SatelitteMap = () => {
                 </div>
 
                 <div style={{ display: "flex" }}>
-                  <input type="text" placeholder='Name' style={{ width: '95%', borderColor: "white" }} />
+                  <input type="text" placeholder='Name' style={{ width: '100%', borderColor: "white" }} />
                 </div>
 
                 <div style={{ display: "flex" }}>
-                  <input type="text" placeholder='Profile' style={{ width: '95%', borderColor: "white" }} />
+                  <input type="text" placeholder='Profile' style={{ width: '100%', borderColor: "white" }} />
                 </div>
                 <div style={{ display: "flex" }}>
-                  <input type="text" placeholder='Ticker' style={{ width: '95%', borderColor: "white" }} />
+                  <input type="text" placeholder='Ticker' style={{ width: '100%', borderColor: "white" }} />
                 </div>
                 <div style={{ display: "flex" }}>
-                  <input type="text" placeholder='Location' style={{ width: '95%', borderColor: "white" }} />
+                  <input type="text" placeholder='Location' style={{ width: '100%', borderColor: "white" }} />
                 </div>
               </div>
 
@@ -509,7 +521,8 @@ const SatelitteMap = () => {
             >Search</button>
             <button className='geoStyleBtn' style={{ marginLeft: '20px' }}
               onClick={() => {
-
+                doc.text('Hello world!', 1, 1);
+                doc.save('helloWorld.pdf');
               }}
             >Download</button>
           </Box>

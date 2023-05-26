@@ -10,6 +10,7 @@
     "@mapbox/search-js-react": "^1.0.0-beta.16",
     "@mui/icons-material": "^5.10.9",
     "@mui/material": "^5.10.12",
+    "@react-pdf/renderer": "^3.1.9",
     "@reduxjs/toolkit": "^1.8.6",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^13.0.0",
@@ -25,6 +26,7 @@
     "csv-parser": "^3.0.0",
     "csvtojson": "^2.0.10",
     "dotenv": "^16.0.3",
+    "jspdf": "^2.5.1",
     "mapbox-gl": "^2.14.1",
     "mapbox-gl-draw": "^0.16.0",
     "mapbox-gl-draw-circle": "^1.1.2",
@@ -79,8 +81,8 @@
     "@types/mapbox__mapbox-gl-draw": "^1.4.0",
     "@types/mapbox__mapbox-gl-geocoder": "^4.7.3",
     "@types/mapbox-gl": "^2.7.11",
-    "dotenv": "^16.0.3",
     "@types/react-swipeable-views": "^0.13.1",
-    "@types/react-table": "^7.7.14"
+    "@types/react-table": "^7.7.14",
+    "dotenv": "^16.0.3"
   }
 }
