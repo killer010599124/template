@@ -13,7 +13,8 @@ const styles = StyleSheet.create({
   });
   
   // Create Document Component
-  const MyDocument = () => (
+  const MyDocument = (id:string, name: string, address:string, phone:string, email: string, facebook_id:string, facebook_url:string,facebook_username:string,
+                        linkedin_id:string, linkedin_url:string, linkedin_username: string, twitter_url:string, twitter_username:string)=> (
     <Document>
       <Page size="A4" style={styles.page}>
         <View style={styles.section}>

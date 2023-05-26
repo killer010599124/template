@@ -17,7 +17,6 @@ import { PDFViewer } from '@react-pdf/renderer';
 import MyDocument from './generatePDF';
 import jsPDF from 'jspdf';
 
-
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
@@ -54,10 +53,13 @@ function makeQuery(first_name: string, last_name: string, address: string, email
   return `SELECT * FROM person WHERE first_name = '${first_name}' AND last_name ='${last_name}' AND personal_emails ='${email}' AND phone_numbers = '${phone}' ;`
 }
 
+
 const SatelitteMap = () => {
 
   const mapRef = useRef<HTMLDivElement>(null);
   const childRef = useRef(null);
+  const reportTemplateRef = useRef(null);
+
   const [dataVisible, setDataVisible] = useState(1);
   const [layerVisible, setLayerVisible] = useState(1);
   const [drawToolVisible, setDrawToolVisible] = useState(1);
@@ -72,6 +74,21 @@ const SatelitteMap = () => {
   const handleToggle = () => {
     setToggle(!toggle);
   }
+  const handleGeneratePdf = () => {
+    const doc = new jsPDF({
+      format: 'a4',
+      unit: 'px',
+    });
+
+    // Adding the fonts.
+    doc.setFont('Inter-Regular', 'normal');
+
+    doc.html(reportTemplateRef.current, {
+      async callback(doc) {
+        doc.save('report.pdf');
+      },
+    });
+  };
 
   const [lng, setLng] = useState("");
   const [lat, setLat] = useState("");
@@ -107,17 +124,22 @@ const SatelitteMap = () => {
   const [paddress, setPaddress] = useState('');
   const [pemail, setPemail] = useState('');
   const [pphone, setPphone] = useState('');
-  const [pfacebook, setPfacebook] = useState('');
-  const [plinkdin, setPlinkdin] = useState('');
-  const [ptwitter, setPtwitter] = useState('');
+
+  const [pfacebook_id, setPfacebook_id] = useState('');
+  const [pfacebook_url, setPfacebook_url] = useState('');
+  const [pfacebook_un, setPfacebook_un] = useState('');
+
+  const [plinkdin_id, setPlinkdin_id] = useState('');
+  const [plinkdin_url, setPlinkdin_url] = useState('');
+  const [plinkdin_un, setPlinkdin_un] = useState('');
+
+  const [ptwitter_url, setPtwitter_url] = useState('');
+  const [ptwitter_un, setPtwitter_un] = useState('');
 
 
 
-  const doc = new jsPDF({
-    orientation: 'landscape',
-    unit: 'in',
-    format: [3, 2],
-  });
+  const doc = new jsPDF('l', 'pt', 'a4');
+
 
   const handleOnChange = (e: any) => {
     // setFile(e.target.files[0]);
@@ -406,14 +428,14 @@ const SatelitteMap = () => {
 
       {/* -------------------------   P&B layout --------------------- */}
 
-      <div style={{
+      <div className='PDdata' style={{
         position: "absolute",
-        right: "20%",
+        right: "30%",
         marginTop: "7%",
 
         zIndex: "1",
-        width: "60%",
-        height: "600px",
+        width: "40%",
+        height: "650px",
         backgroundColor: "black",
         display: 'flex',
         flexDirection: 'row',
@@ -500,14 +522,21 @@ const SatelitteMap = () => {
                     "Twitter_Url:" + data['data'][0]['twitter_url'] +
                     ",   Username:" + data['data'][0]['twitter_username'];
 
-                  setPid("id  : " + data['data'][0]['id']);
-                  setPName("Name  : " + data['data'][0]['full_name']);
-                  setPaddress("Address  : " + data['data'][0]['location_street_address']);
-                  setPemail("Emails : " + data['data'][0]['personal_emails']);
-                  setPphone("Phone Number : " + data['data'][0]['phone_numbers']);
-                  setPfacebook("facebook => id  : " + data['data'][0]['facebook_id'] + ",  Url  : " + data['data'][0]['facebook_url'] + ",   Username : " + data['data'][0]['facebook_username']);
-                  setPlinkdin("linkedin => id : " + data['data'][0]['linkedin_id'] + ",  Url  : " + data['data'][0]['linkedin_url'] + ",   Username : " + data['data'][0]['linkedin_username']);
-                  setPtwitter("Twitter => Url : " + data['data'][0]['twitter_url'] + ",   Username  : " + data['data'][0]['twitter_username']);
+                  setPid("" + data['data'][0]['id']);
+                  setPName("" + data['data'][0]['full_name']);
+                  setPaddress("" + data['data'][0]['location_street_address']);
+                  setPemail("" + data['data'][0]['personal_emails']);
+                  setPphone("" + data['data'][0]['phone_numbers']);
+                  setPfacebook_id("" + data['data'][0]['facebook_id']);
+                  setPfacebook_url("" + data['data'][0]['facebook_url']);
+                  setPfacebook_un("" + data['data'][0]['facebook_username']);
+
+                  setPlinkdin_id("" + data['data'][0]['linkedin_id']);
+                  setPlinkdin_url("" + data['data'][0]['linkedin_url']);
+                  setPlinkdin_un("" + data['data'][0]['linkedin_username']);
+
+                  setPtwitter_url("" + data['data'][0]['twitter_url']);
+                  setPtwitter_un("" + data['data'][0]['twitter_username']);
 
                   // JSON.parse(data);
                   setContent(str);
@@ -521,8 +550,11 @@ const SatelitteMap = () => {
             >Search</button>
             <button className='geoStyleBtn' style={{ marginLeft: '20px' }}
               onClick={() => {
-                doc.text('Hello world!', 1, 1);
-                doc.save('helloWorld.pdf');
+                // doc.text(`${pid} \n ${pname} \n ${paddress} \n ${pemail} \n 
+                // ${pphone} \n ${pfacebook} \n ${plinkdin} \n ${ptwitter}`, 1, 1);
+
+                // doc.save('helloWorld.pdf');
+                handleGeneratePdf();
               }}
             >Download</button>
           </Box>
@@ -531,15 +563,76 @@ const SatelitteMap = () => {
           <div style={{ fontSize: '24px', lineHeight: '45px', color: 'white', width: '100%', height: '50px', textAlign: 'center', borderBottom: '0.05em solid white' }}>
             Content
           </div>
-          <div style={{ color: "white", padding: "100px", textAlign: 'center' }}>
-            <div>{pid}</div>
-            <div>{pname}</div>
-            <div>{paddress}</div>
-            <div>{pemail}</div>
-            <div>{pphone}</div>
-            <div>{pfacebook}</div>
-            <div>{plinkdin}</div>
-            <div>{ptwitter}</div>
+          <div style={{ color: "white", padding: "20px" }} ref={reportTemplateRef}>
+            <div>
+              ------------------------------------------------------------------------------------------------------------------------
+              <br />
+              PERSONAL INFORMATION
+              <br />
+              ------------------------------------------------------------------------------------------------------------------------
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'row' }}>
+              <div style={{ color: 'red', width: '10%', marginLeft: '3%' }}>
+                ID:<br />Name:<br />Address:<br />Emails:<br />Phone:
+              </div>
+              <div style={{ color: 'green', marginLeft: '25px' }}>
+                <div>{pid}</div>
+                <div>{pname}</div>
+                <div>{paddress}</div>
+                <div>{pemail}</div>
+                <div>{pphone}</div>
+              </div>
+            </div>
+
+            <div>
+              ------------------------------------------------------------------------------------------------------------------------
+              <br />
+              SOCIAL MEDIA INFORMATION
+              <br />
+              ------------------------------------------------------------------------------------------------------------------------
+            </div>
+            <div>
+              <div>
+                <div style={{ color: 'red', marginLeft: '3%' }}>Facebook:</div>
+                <div style={{ display: 'flex', flexDirection: 'row' }}>
+                  <div style={{ color: 'red', width: '10%', marginLeft: '5%', padding: '10px', fontSize: '14px' }}>
+                    ID:<br />URL:<br />Username:
+                  </div>
+                  <div style={{ color: 'green', padding: '10px', marginLeft: '25px', fontSize: '14px' }}>
+                    <div>{pfacebook_id}</div>
+                    <div>{pfacebook_url}</div>
+                    <div>{pfacebook_un}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div style={{ color: 'red', marginLeft: '3%' }}>LinkedIn:</div>
+                <div style={{ display: 'flex', flexDirection: 'row' }}>
+                  <div style={{ color: 'red', width: '10%', marginLeft: '5%', padding: '10px', fontSize: '14px' }}>
+                    ID:<br />URL:<br />Username:
+                  </div>
+                  <div style={{ color: 'green', padding: '10px', marginLeft: '25px', fontSize: '14px' }}>
+                    <div>{plinkdin_id}</div>
+                    <div>{plinkdin_url}</div>
+                    <div>{plinkdin_un}</div>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <div style={{ color: 'red', marginLeft: '3%' }}>Twitter:</div>
+                <div style={{ display: 'flex', flexDirection: 'row' }}>
+                  <div style={{ color: 'red', width: '10%', marginLeft: '5%', padding: '10px', fontSize: '14px' }}>
+                    URL:<br />Username:
+                  </div>
+                  <div style={{ color: 'green', padding: '10px', marginLeft: '25px', fontSize: '14px' }}>
+                    <div>{ptwitter_url}</div>
+                    <div>{ptwitter_un}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
 
           </div>
         </div>
