@@ -77,15 +77,18 @@ const SatelitteMap = () => {
     setToggle(!toggle);
   }
   const handleGeneratePdf = () => {
-    const doc = new jsPDF('p', 'mm', [700,510]);
+    const doc = new jsPDF('p', 'mm', [700, 610]);
 
     // Adding the fonts.
     doc.setFont('Inter-Regular', 'normal');
+
     const input = document.getElementsByClassName('PBData')[0];
-    const el1: HTMLElement = input as HTMLElement; 
+    const el1: HTMLElement = input as HTMLElement;
+    el1.style.color = 'black';
     doc.html(el1, {
       async callback(doc) {
         doc.save('report.pdf');
+        el1.style.color = 'white';
       },
     });
   };
@@ -432,19 +435,19 @@ const SatelitteMap = () => {
       <div className='PDdata' style={pbVisible ? { display: "none" } :
         {
           position: "absolute",
-        right: "30%",
-        marginTop: "7%",
+          right: "30%",
+          marginTop: "7%",
 
-        zIndex: "1",
-        width: "40%",
-        height: "650px",
-        backgroundColor: "black",
-        display: 'flex',
-        flexDirection: 'row',
-        borderRadius: '10px',
-        opacity: '0.75'
+          zIndex: "1",
+          width: "40%",
+          height: "650px",
+          backgroundColor: "black",
+          display: 'flex',
+          flexDirection: 'row',
+          borderRadius: '10px',
+          opacity: '0.75'
         }}
-       >
+      >
         <div style={{
           width: "30%", height: "100%", borderTopLeftRadius: '10px', borderBottomLeftRadius: '10px',
           borderRight: '0.1rem solid white'
@@ -563,77 +566,79 @@ const SatelitteMap = () => {
           </Box>
         </div>
         <div  style={{ width: '70%', height: '100%', borderTopRightRadius: '10px', borderBottomRightRadius: '10px' }}>
-          <div style={{ fontSize: '24px', lineHeight: '45px', color: 'white', width: '100%', height: '50px', textAlign: 'center', paddingTop:'10px' }}>
-          Identity Details
-          </div>
-          <div className='PBData' style={{ color: "white", padding: "20px" }} ref={reportTemplateRef}>
-            <div style={{ fontWeight:'bold', textAlign:'center',padding:'5px',borderBottom:'0.05em solid',borderTop:'0.05em solid'}}>
-              
-              PERSONAL INFORMATION
-              <br />
-         
+          <div className='PBData' style={{color:'white'}}>
+            <div style={{ fontSize: '24px', lineHeight: '45px', width: '100%', height: '50px', textAlign: 'center', paddingTop: '10px' }}>
+              Identity Details
             </div>
-            <div style={{ display: 'flex', flexDirection: 'row', padding:'15px' }}>
-              <div style={{  width: '10%', marginLeft: '3%' }}>
-                ID:<br />Name:<br />Address:<br />Emails:<br />Phone:
-              </div>
-              <div style={{  marginLeft: '25px' }}>
-                <div>{pid}</div>
-                <div>{pname}</div>
-                <div>{paddress}</div>
-                <div>{pemail}</div>
-                <div>{pphone}</div>
-              </div>
-            </div>
+            <div style={{ padding: "20px" }} ref={reportTemplateRef}>
+              <div style={{ fontWeight: 'bold', textAlign: 'center', padding: '5px', borderBottom: '0.05em solid', borderTop: '0.05em solid' }}>
 
-            <div style={{color:'white', fontWeight:'bold',textAlign:'center',padding:'5px',borderBottom:'0.05em solid',borderTop:'0.05em solid'}}>
-            
-              SOCIAL MEDIA INFORMATION
-              <br />
-            </div>
-            <div style={{padding:'15px'}}>
-              <div >
-                <div style={{ color: 'white', marginLeft: '3%' }}>Facebook:</div>
-                <div style={{ display: 'flex', flexDirection: 'row' }}>
-                  <div style={{ color: 'white', width: '10%', marginLeft: '5%', padding: '10px', fontSize: '14px' }}>
-                    ID:<br />URL:<br />Username:
+                PERSONAL INFORMATION
+                <br />
+
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'row', padding: '15px' }}>
+                <div style={{ width: '10%', marginLeft: '3%' }}>
+                  ID:<br />Name:<br />Address:<br />Emails:<br />Phone:
+                </div>
+                <div style={{ marginLeft: '25px' }}>
+                  <div>{pid}</div>
+                  <div>{pname}</div>
+                  <div>{paddress}</div>
+                  <div>{pemail}</div>
+                  <div>{pphone}</div>
+                </div>
+              </div>
+
+              <div style={{ fontWeight: 'bold', textAlign: 'center', padding: '5px', borderBottom: '0.05em solid', borderTop: '0.05em solid' }}>
+
+                SOCIAL MEDIA INFORMATION
+                <br />
+              </div>
+              <div style={{ padding: '15px' }}>
+                <div >
+                  <div style={{ marginLeft: '3%' }}>Facebook:</div>
+                  <div style={{ display: 'flex', flexDirection: 'row' }}>
+                    <div style={{ width: '10%', marginLeft: '5%', padding: '10px', fontSize: '14px' }}>
+                      ID:<br />URL:<br />Username:
+                    </div>
+                    <div style={{ padding: '10px', marginLeft: '25px', fontSize: '14px' }}>
+                      <div>{pfacebook_id}</div>
+                      <div>{pfacebook_url}</div>
+                      <div>{pfacebook_un}</div>
+                    </div>
                   </div>
-                  <div style={{ color: 'white', padding: '10px', marginLeft: '25px', fontSize: '14px' }}>
-                    <div>{pfacebook_id}</div>
-                    <div>{pfacebook_url}</div>
-                    <div>{pfacebook_un}</div>
+                </div>
+
+                <div>
+                  <div style={{ marginLeft: '3%' }}>LinkedIn:</div>
+                  <div style={{ display: 'flex', flexDirection: 'row' }}>
+                    <div style={{ width: '10%', marginLeft: '5%', padding: '10px', fontSize: '14px' }}>
+                      ID:<br />URL:<br />Username:
+                    </div>
+                    <div style={{ padding: '10px', marginLeft: '25px', fontSize: '14px' }}>
+                      <div>{plinkdin_id}</div>
+                      <div>{plinkdin_url}</div>
+                      <div>{plinkdin_un}</div>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <div style={{ marginLeft: '3%' }}>Twitter:</div>
+                  <div style={{ display: 'flex', flexDirection: 'row' }}>
+                    <div style={{ width: '10%', marginLeft: '5%', padding: '10px', fontSize: '14px' }}>
+                      URL:<br />Username:
+                    </div>
+                    <div style={{ padding: '10px', marginLeft: '25px', fontSize: '14px' }}>
+                      <div>{ptwitter_url}</div>
+                      <div>{ptwitter_un}</div>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div>
-                <div style={{ color: 'white', marginLeft: '3%' }}>LinkedIn:</div>
-                <div style={{ display: 'flex', flexDirection: 'row' }}>
-                  <div style={{ color: 'white', width: '10%', marginLeft: '5%', padding: '10px', fontSize: '14px' }}>
-                    ID:<br />URL:<br />Username:
-                  </div>
-                  <div style={{ color: 'white', padding: '10px', marginLeft: '25px', fontSize: '14px' }}>
-                    <div>{plinkdin_id}</div>
-                    <div>{plinkdin_url}</div>
-                    <div>{plinkdin_un}</div>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <div style={{ color: 'white', marginLeft: '3%' }}>Twitter:</div>
-                <div style={{ display: 'flex', flexDirection: 'row' }}>
-                  <div style={{ color: 'white', width: '10%', marginLeft: '5%', padding: '10px', fontSize: '14px' }}>
-                    URL:<br />Username:
-                  </div>
-                  <div style={{ color: 'white', padding: '10px', marginLeft: '25px', fontSize: '14px' }}>
-                    <div>{ptwitter_url}</div>
-                    <div>{ptwitter_un}</div>
-                  </div>
-                </div>
-              </div>
+
             </div>
-
-
           </div>
         </div>
       </div>

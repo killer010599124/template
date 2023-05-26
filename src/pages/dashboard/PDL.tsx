@@ -43,6 +43,15 @@ export default PDLJSClient;
 //   console.log(error);
 // });
 
+// PDLJSClient.company.search.sql({
+//   searchQuery: "SELECT * FROM person WHERE first_name = 'sharon' AND location_country='japan' AND job_title_role='health' AND phone_numbers IS NOT NULL ;",
+//   size: 10,
+// }).then((data) => {
+//   console.log(data);
+// }).catch((error) => {
+//   console.log(error);
+// });
+
 // PDLJSClient.person.retrieve({ id: 'qEnOZ5Oh0poWnQ1luFBfVw_0000' }).then((data) => {
 //   console.log(data);
 // }).catch((error) => {
@@ -70,20 +79,20 @@ export default PDLJSClient;
 //   console.log(error);
 // });
 
-// PDLJSClient.company.search.elastic({
-//   searchQuery: {
-//     query: {
-//       bool: {
-//         must: [{ term: { website: 'peopledatalabs.com' } }],
-//       },
-//     },
-//   },
-//   size: 10,
-// }).then((data) => {
-//   console.log(data);
-// }).catch((error) => {
-//   console.log(error);
-// });
+PDLJSClient.company.search.elastic({
+  searchQuery: {
+    query: {
+      bool: {
+        must: [{ term: { website: 'peopledatalabs.com' } }],
+      },
+    },
+  },
+  size: 10,
+}).then((data) => {
+  console.log(data);
+}).catch((error) => {
+  console.log(error);
+});
 
 // // Supporting APIs
 
