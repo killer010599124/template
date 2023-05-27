@@ -49,9 +49,14 @@ function a11yProps(index: number) {
     'aria-controls': `simple-tabpanel-${index}`,
   };
 }
-function makeQuery(first_name: string, last_name: string, address: string, email: string, phone: string) {
+function makePersonQuery(first_name: string, last_name: string, address: string, email: string, phone: string) {
   return `SELECT * FROM person WHERE first_name = '${first_name}' AND last_name ='${last_name}' AND personal_emails ='${email}' AND phone_numbers = '${phone}' ;`
 }
+function makeCompanyQuery(name: string, ticker: string, website: string) {
+  return `SELECT * FROM company WHERE name = '${name}' AND ticker ='${ticker}' AND website ='${website}';`
+}
+
+
 
 
 const SatelitteMap = () => {
@@ -113,7 +118,7 @@ const SatelitteMap = () => {
   const [csvData, setCsvData] = useState<Geo>({ description: "The capital of Russia", name: "Moscow", lng: "-99.1319063199852", lat: "25.16901932031443" })
   const fileReader = new FileReader();
 
-  //--------   P&B search engine-----------//
+  //--------   Person search engine-----------//
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -139,7 +144,28 @@ const SatelitteMap = () => {
   const [ptwitter_url, setPtwitter_url] = useState('');
   const [ptwitter_un, setPtwitter_un] = useState('');
 
+  const [pbMode, setPbMode] = useState('person');
 
+  //------------------------- Company Search Engine ------------------//
+
+  const [cName, setCName] = useState('');
+  const [cWebsite, setCWebsite] = useState('');
+  const [cticker, setCticker] = useState('');
+
+
+
+  const [bid, setBid] = useState('');
+  const [bname, setBname] = useState('');
+  const [bfounded, setBfounded] = useState<number>();
+  const [bindustry, setBindustry] = useState('');
+  const [bwebsite, setBwebsite] = useState('');
+  const [bsummary, setBsummary] = useState('');
+
+  // Linkdlin:<br />Facebook:<br />Twitter:<br />Crunchbase:
+  const [blinkdin, setBlinkdin] = useState('');
+  const [bfacebook, setBfacebook] = useState('');
+  const [btwitter, setBtwitter] = useState('');
+  const [bcrunchbase, setCrunchbase] = useState('');
 
   const doc = new jsPDF('l', 'pt', 'a4');
 
@@ -186,6 +212,57 @@ const SatelitteMap = () => {
     // allData.pop()
     setArray(array);
   };
+
+  const getPersonData = () => {
+    const query = makePersonQuery(firstName, lastName, address, email, phoneNumber);
+    console.log(query);
+    PDLJSClient.person.search.sql({
+      searchQuery: query,
+      size: 10,
+    }).then((data) => {
+
+      setPid("" + data['data'][0]['id']);
+      setPName("" + data['data'][0]['full_name']);
+      setPaddress("" + data['data'][0]['location_street_address']);
+      setPemail("" + data['data'][0]['personal_emails']);
+      setPphone("" + data['data'][0]['phone_numbers']);
+      setPfacebook_id("" + data['data'][0]['facebook_id']);
+      setPfacebook_url("" + data['data'][0]['facebook_url']);
+      setPfacebook_un("" + data['data'][0]['facebook_username']);
+
+      setPlinkdin_id("" + data['data'][0]['linkedin_id']);
+      setPlinkdin_url("" + data['data'][0]['linkedin_url']);
+      setPlinkdin_un("" + data['data'][0]['linkedin_username']);
+
+      setPtwitter_url("" + data['data'][0]['twitter_url']);
+      setPtwitter_un("" + data['data'][0]['twitter_username']);
+
+    }).catch((error) => {
+
+      console.log(error);
+    });
+  }
+  const getCompanyData = (ticker: string, name: string, website: string) => {
+    const query = makeCompanyQuery(name, ticker, website);
+
+    PDLJSClient.company.search.sql({
+      searchQuery: query,
+      size: 10,
+    }).then((data) => {
+      console.log(data);
+      setBid(data['data'][0].id as string);
+      setBname(data['data'][0].name as string);
+      setBfounded(data['data'][0].founded as number);
+      setBindustry(data['data'][0].industry as string);
+      setBwebsite(data['data'][0].website as string);
+      setBsummary(data['data'][0].summary as string);
+    }).catch((error) => {
+      console.log(error);
+    });
+
+    
+  }
+
   const headerKeys = Object.keys(Object.assign({}, ...array));
 
   const handleLongtitude = (num: number) => {
@@ -455,9 +532,9 @@ const SatelitteMap = () => {
           <Box sx={{ width: '100%' }}>
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
               <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
-                <Tab label="Person" {...a11yProps(0)} style={{ color: "white", width: '50%' }}
+                <Tab label="Person" {...a11yProps(0)} style={{ color: "white", width: '50%' }} onClick={() => { setPbMode('person') }}
                 />
-                <Tab label="company" {...a11yProps(1)} style={{ color: "white", width: '50%' }}
+                <Tab label="company" {...a11yProps(1)} style={{ color: "white", width: '50%' }} onClick={() => { setPbMode('company') }}
                 />
               </Tabs>
             </Box>
@@ -494,17 +571,14 @@ const SatelitteMap = () => {
                 </div>
 
                 <div style={{ display: "flex" }}>
-                  <input type="text" placeholder='Name' style={{ width: '100%', borderColor: "white" }} />
+                  <input type="text" placeholder='Name' value={cName} onChange={(e) => { setCName(e.target.value) }} style={{ width: '100%', borderColor: "white" }} />
                 </div>
 
                 <div style={{ display: "flex" }}>
-                  <input type="text" placeholder='Profile' style={{ width: '100%', borderColor: "white" }} />
+                  <input type="text" placeholder='Ticker' value={cticker} onChange={(e) => { setCticker(e.target.value) }} style={{ width: '100%', borderColor: "white" }} />
                 </div>
                 <div style={{ display: "flex" }}>
-                  <input type="text" placeholder='Ticker' style={{ width: '100%', borderColor: "white" }} />
-                </div>
-                <div style={{ display: "flex" }}>
-                  <input type="text" placeholder='Location' style={{ width: '100%', borderColor: "white" }} />
+                  <input type="text" placeholder='Website' value={cWebsite} onChange={(e) => { setCWebsite(e.target.value) }} style={{ width: '100%', borderColor: "white" }} />
                 </div>
               </div>
 
@@ -512,133 +586,147 @@ const SatelitteMap = () => {
 
             <button className='geoStyleBtn' style={{ marginLeft: '20px' }}
               onClick={() => {
-                const query = makeQuery(firstName, lastName, address, email, phoneNumber);
-                console.log(query);
-                PDLJSClient.person.search.sql({
-                  searchQuery: query,
-                  size: 10,
-                }).then((data) => {
-                  console.log(data['data'][0]);
-                  const str = "id:" + data['data'][0]['id'] + "\n" + "Name:" + data['data'][0]['full_name'] + "\n" + "Address:" + data['data'][0]['location_street_address'] +
-                    "\n" + "Emails:" + data['data'][0]['personal_emails'] + "\n" + "Phone Number:" + data['data'][0]['phone_numbers'] + "\n" +
-                    "facebook_id:" + data['data'][0]['facebook_id'] + ",  Url:" + data['data'][0]['facebook_url'] +
-                    ",   Username:" + data['data'][0]['facebook_username'] + "\n" +
-                    "linkedin_id:" + data['data'][0]['linkedin_id'] + ",  Url:" + data['data'][0]['linkedin_url'] +
-                    ",   Username:" + data['data'][0]['linkedin_username'] + "\n" +
-                    "Twitter_Url:" + data['data'][0]['twitter_url'] +
-                    ",   Username:" + data['data'][0]['twitter_username'];
-
-                  setPid("" + data['data'][0]['id']);
-                  setPName("" + data['data'][0]['full_name']);
-                  setPaddress("" + data['data'][0]['location_street_address']);
-                  setPemail("" + data['data'][0]['personal_emails']);
-                  setPphone("" + data['data'][0]['phone_numbers']);
-                  setPfacebook_id("" + data['data'][0]['facebook_id']);
-                  setPfacebook_url("" + data['data'][0]['facebook_url']);
-                  setPfacebook_un("" + data['data'][0]['facebook_username']);
-
-                  setPlinkdin_id("" + data['data'][0]['linkedin_id']);
-                  setPlinkdin_url("" + data['data'][0]['linkedin_url']);
-                  setPlinkdin_un("" + data['data'][0]['linkedin_username']);
-
-                  setPtwitter_url("" + data['data'][0]['twitter_url']);
-                  setPtwitter_un("" + data['data'][0]['twitter_username']);
-
-                  // JSON.parse(data);
-                  setContent(str);
-                  console.log(content)
-
-                }).catch((error) => {
-                  setContent('No search results');
-                  console.log(error);
-                });
+                if (pbMode === 'person')
+                  getPersonData();
+                else if (pbMode === 'company') getCompanyData(cticker, cName, cWebsite);
               }}
             >Search</button>
             <button className='geoStyleBtn' style={{ marginLeft: '20px' }}
               onClick={() => {
-                // doc.text(`${pid} \n ${pname} \n ${paddress} \n ${pemail} \n 
-                // ${pphone} \n ${pfacebook} \n ${plinkdin} \n ${ptwitter}`, 1, 1);
 
-                // doc.save('helloWorld.pdf');
+
                 handleGeneratePdf();
               }}
             >Download</button>
           </Box>
         </div>
-        <div  style={{ width: '70%', height: '100%', borderTopRightRadius: '10px', borderBottomRightRadius: '10px' }}>
-          <div className='PBData' style={{color:'white'}}>
-            <div style={{ fontSize: '24px', lineHeight: '45px', width: '100%', height: '50px', textAlign: 'center', paddingTop: '10px' }}>
-              Identity Details
-            </div>
-            <div style={{ padding: "20px" }} ref={reportTemplateRef}>
-              <div style={{ fontWeight: 'bold', textAlign: 'center', padding: '5px', borderBottom: '0.05em solid', borderTop: '0.05em solid' }}>
+        <div style={{ width: '70%', height: '100%', borderTopRightRadius: '10px', borderBottomRightRadius: '10px' }}>
+          <div className='PBData' style={{ color: 'white', overflowY: 'scroll', height: '100%' }}>
 
-                PERSONAL INFORMATION
-                <br />
-
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'row', padding: '15px' }}>
-                <div style={{ width: '10%', marginLeft: '3%' }}>
-                  ID:<br />Name:<br />Address:<br />Emails:<br />Phone:
+            {(pbMode === 'person') ? (
+              <div>
+                <div style={{ fontSize: '24px', lineHeight: '45px', width: '100%', height: '50px', textAlign: 'center', paddingTop: '10px' }}>
+                  Identity Details
                 </div>
-                <div style={{ marginLeft: '25px' }}>
-                  <div>{pid}</div>
-                  <div>{pname}</div>
-                  <div>{paddress}</div>
-                  <div>{pemail}</div>
-                  <div>{pphone}</div>
-                </div>
-              </div>
+                <div style={{ padding: "20px" }} ref={reportTemplateRef}>
+                  <div style={{ fontWeight: 'bold', textAlign: 'center', padding: '5px', borderBottom: '0.05em solid', borderTop: '0.05em solid' }}>
 
-              <div style={{ fontWeight: 'bold', textAlign: 'center', padding: '5px', borderBottom: '0.05em solid', borderTop: '0.05em solid' }}>
+                    PERSONAL INFORMATION
+                    <br />
 
-                SOCIAL MEDIA INFORMATION
-                <br />
-              </div>
-              <div style={{ padding: '15px' }}>
-                <div >
-                  <div style={{ marginLeft: '3%' }}>Facebook:</div>
-                  <div style={{ display: 'flex', flexDirection: 'row' }}>
-                    <div style={{ width: '10%', marginLeft: '5%', padding: '10px', fontSize: '14px' }}>
-                      ID:<br />URL:<br />Username:
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'row', padding: '15px' }}>
+                    <div style={{ width: '10%', marginLeft: '3%' }}>
+                      ID:<br />Name:<br />Address:<br />Emails:<br />Phone:
                     </div>
-                    <div style={{ padding: '10px', marginLeft: '25px', fontSize: '14px' }}>
-                      <div>{pfacebook_id}</div>
-                      <div>{pfacebook_url}</div>
-                      <div>{pfacebook_un}</div>
+                    <div style={{ marginLeft: '25px' }}>
+                      <div>{pid}</div>
+                      <div>{pname}</div>
+                      <div>{paddress}</div>
+                      <div>{pemail}</div>
+                      <div>{pphone}</div>
                     </div>
                   </div>
-                </div>
 
-                <div>
-                  <div style={{ marginLeft: '3%' }}>LinkedIn:</div>
-                  <div style={{ display: 'flex', flexDirection: 'row' }}>
-                    <div style={{ width: '10%', marginLeft: '5%', padding: '10px', fontSize: '14px' }}>
-                      ID:<br />URL:<br />Username:
+                  <div style={{ fontWeight: 'bold', textAlign: 'center', padding: '5px', borderBottom: '0.05em solid', borderTop: '0.05em solid' }}>
+
+                    SOCIAL MEDIA INFORMATION
+                    <br />
+                  </div>
+                  <div style={{ padding: '15px' }}>
+                    <div >
+                      <div style={{ marginLeft: '3%' }}>Facebook:</div>
+                      <div style={{ display: 'flex', flexDirection: 'row' }}>
+                        <div style={{ width: '10%', marginLeft: '5%', padding: '10px', fontSize: '14px' }}>
+                          ID:<br />URL:<br />Username:
+                        </div>
+                        <div style={{ padding: '10px', marginLeft: '25px', fontSize: '14px' }}>
+                          <div>{pfacebook_id}</div>
+                          <div>{pfacebook_url}</div>
+                          <div>{pfacebook_un}</div>
+                        </div>
+                      </div>
                     </div>
-                    <div style={{ padding: '10px', marginLeft: '25px', fontSize: '14px' }}>
-                      <div>{plinkdin_id}</div>
-                      <div>{plinkdin_url}</div>
-                      <div>{plinkdin_un}</div>
+
+                    <div>
+                      <div style={{ marginLeft: '3%' }}>LinkedIn:</div>
+                      <div style={{ display: 'flex', flexDirection: 'row' }}>
+                        <div style={{ width: '10%', marginLeft: '5%', padding: '10px', fontSize: '14px' }}>
+                          ID:<br />URL:<br />Username:
+                        </div>
+                        <div style={{ padding: '10px', marginLeft: '25px', fontSize: '14px' }}>
+                          <div>{plinkdin_id}</div>
+                          <div>{plinkdin_url}</div>
+                          <div>{plinkdin_un}</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ marginLeft: '3%' }}>Twitter:</div>
+                      <div style={{ display: 'flex', flexDirection: 'row' }}>
+                        <div style={{ width: '10%', marginLeft: '5%', padding: '10px', fontSize: '14px' }}>
+                          URL:<br />Username:
+                        </div>
+                        <div style={{ padding: '10px', marginLeft: '25px', fontSize: '14px' }}>
+                          <div>{ptwitter_url}</div>
+                          <div>{ptwitter_un}</div>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div>
-                  <div style={{ marginLeft: '3%' }}>Twitter:</div>
-                  <div style={{ display: 'flex', flexDirection: 'row' }}>
-                    <div style={{ width: '10%', marginLeft: '5%', padding: '10px', fontSize: '14px' }}>
-                      URL:<br />Username:
-                    </div>
-                    <div style={{ padding: '10px', marginLeft: '25px', fontSize: '14px' }}>
-                      <div>{ptwitter_url}</div>
-                      <div>{ptwitter_un}</div>
-                    </div>
-                  </div>
+
+
                 </div>
               </div>
 
+            ) : (
+              <div>
+                <div style={{ fontSize: '24px', lineHeight: '45px', width: '100%', height: '50px', textAlign: 'center', paddingTop: '10px' }}>
+                  Company Details.
+                </div>
+                <div style={{ padding: "20px" }} ref={reportTemplateRef}>
+                  <div style={{ fontWeight: 'bold', textAlign: 'center', padding: '5px', borderBottom: '0.05em solid', borderTop: '0.05em solid' }}>
 
-            </div>
+                    BUSINESS INFORMATION
+                    <br />
+
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'row', padding: '15px' }}>
+                    <div style={{ width: '10%', marginLeft: '3%' }}>
+                      ID:<br />Name:<br />Founded:<br />Industry:<br />Website:<br />Summary:
+                    </div>
+                    <div style={{ marginLeft: '25px' }}>
+                      <div>{bid}</div>
+                      <div>{bname}</div>
+                      <div>{bfounded}</div>
+                      <div>{bindustry}</div>
+                      <div>{bwebsite}</div>
+                      <div>{bsummary}</div>
+                    </div>
+                  </div>
+
+                  <div style={{ fontWeight: 'bold', textAlign: 'center', padding: '5px', borderBottom: '0.05em solid', borderTop: '0.05em solid' }}>
+
+                    SOCIAL MEDIA INFORMATION
+                    <br />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'row', padding: '15px' }}>
+                    <div style={{ width: '10%', marginLeft: '3%' }}>
+                      Linkdlin:<br />Facebook:<br />Twitter:<br />Crunchbase:
+                    </div>
+                    <div style={{ marginLeft: '25px' }}>
+                      <div>{blinkdin}</div>
+                      <div>{bfacebook}</div>
+                      <div>{btwitter}</div>
+                      <div>{bcrunchbase}</div>
+                    </div>
+                  </div>
+
+
+                </div>
+              </div>
+            )}
+
           </div>
         </div>
       </div>
