@@ -82,7 +82,7 @@ const SatelitteMap = () => {
     setToggle(!toggle);
   }
   const handleGeneratePdf = () => {
-    const doc = new jsPDF('p', 'mm', [700, 610]);
+    const doc = new jsPDF('p', 'mm', [1000, 750]);
 
     // Adding the fonts.
     doc.setFont('Inter-Regular', 'normal');
@@ -256,6 +256,12 @@ const SatelitteMap = () => {
       setBindustry(data['data'][0].industry as string);
       setBwebsite(data['data'][0].website as string);
       setBsummary(data['data'][0].summary as string);
+      
+      setBlinkdin(data['data'][0].linkedin_url as string);
+      setBfacebook(data['data'][0].facebook_url as string);
+      setBtwitter(data['data'][0].twitter_url as string);
+      setCrunchbase((data['data'][0].profiles)?.at(4) as string);
+
     }).catch((error) => {
       console.log(error);
     });
@@ -512,11 +518,11 @@ const SatelitteMap = () => {
       <div className='PDdata' style={pbVisible ? { display: "none" } :
         {
           position: "absolute",
-          right: "30%",
+          right: "25%",
           marginTop: "7%",
 
           zIndex: "1",
-          width: "40%",
+          width: "50%",
           height: "650px",
           backgroundColor: "black",
           display: 'flex',
@@ -601,7 +607,7 @@ const SatelitteMap = () => {
           </Box>
         </div>
         <div style={{ width: '70%', height: '100%', borderTopRightRadius: '10px', borderBottomRightRadius: '10px' }}>
-          <div className='PBData' style={{ color: 'white', overflowY: 'scroll', height: '100%' }}>
+          <div className='PBData' style={{ color: 'white',  height: '100%' }}>
 
             {(pbMode === 'person') ? (
               <div>
@@ -712,7 +718,7 @@ const SatelitteMap = () => {
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'row', padding: '15px' }}>
                     <div style={{ width: '10%', marginLeft: '3%' }}>
-                      Linkdlin:<br />Facebook:<br />Twitter:<br />Crunchbase:
+                      Linkdlin:<br />Facebook:<br />Twitter:<br />Crunch:
                     </div>
                     <div style={{ marginLeft: '25px' }}>
                       <div>{blinkdin}</div>
