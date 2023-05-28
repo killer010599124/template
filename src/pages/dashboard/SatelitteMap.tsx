@@ -145,7 +145,7 @@ const SatelitteMap = () => {
   const [ptwitter_un, setPtwitter_un] = useState('');
 
   const [pbMode, setPbMode] = useState('person');
-
+  const [isSearchResult, setIsSearchResult] = useState(false);
   //------------------------- Company Search Engine ------------------//
 
   const [cName, setCName] = useState('');
@@ -167,8 +167,8 @@ const SatelitteMap = () => {
   const [btwitter, setBtwitter] = useState('');
   const [bcrunchbase, setCrunchbase] = useState('');
 
-  const doc = new jsPDF('l', 'pt', 'a4');
 
+  const doc = new jsPDF('l', 'pt', 'a4');
 
   const handleOnChange = (e: any) => {
     // setFile(e.target.files[0]);
@@ -213,7 +213,25 @@ const SatelitteMap = () => {
     setArray(array);
   };
 
+  const clearPersonData = () =>{
+    setPid("");
+      setPName("");
+      setPaddress("");
+      setPemail("");
+      setPphone("" );
+      setPfacebook_id("");
+      setPfacebook_url("");
+      setPfacebook_un("");
+
+      setPlinkdin_id("");
+      setPlinkdin_url("");
+      setPlinkdin_un("");
+
+      setPtwitter_url("");
+      setPtwitter_un("");
+  }
   const getPersonData = () => {
+    clearPersonData();
     const query = makePersonQuery(firstName, lastName, address, email, phoneNumber);
     console.log(query);
     PDLJSClient.person.search.sql({
@@ -237,12 +255,30 @@ const SatelitteMap = () => {
       setPtwitter_url("" + data['data'][0]['twitter_url']);
       setPtwitter_un("" + data['data'][0]['twitter_username']);
 
-    }).catch((error) => {
+      setIsSearchResult(true);
 
+    }).catch((error) => {
+      setContent('No Search Result');
+      setIsSearchResult(false)
       console.log(error);
     });
   }
+  const clearCompanyData= () =>{
+    setBid('');
+      setBname('');
+      setBfounded(0);
+      setBindustry('');
+      setBwebsite('');
+      setBsummary('');
+
+      setBlinkdin('');
+      setBfacebook('');
+      setBtwitter('');
+      setCrunchbase('');
+  }
   const getCompanyData = (ticker: string, name: string, website: string) => {
+  
+    clearCompanyData();
     const query = makeCompanyQuery(name, ticker, website);
 
     PDLJSClient.company.search.sql({
@@ -256,17 +292,21 @@ const SatelitteMap = () => {
       setBindustry(data['data'][0].industry as string);
       setBwebsite(data['data'][0].website as string);
       setBsummary(data['data'][0].summary as string);
-      
+
       setBlinkdin(data['data'][0].linkedin_url as string);
       setBfacebook(data['data'][0].facebook_url as string);
       setBtwitter(data['data'][0].twitter_url as string);
       setCrunchbase((data['data'][0].profiles)?.at(4) as string);
 
+      setIsSearchResult(true);
+
     }).catch((error) => {
+      setContent('No Search Result');
+      setIsSearchResult(false);
       console.log(error);
     });
 
-    
+
   }
 
   const headerKeys = Object.keys(Object.assign({}, ...array));
@@ -605,9 +645,22 @@ const SatelitteMap = () => {
               }}
             >Download</button>
           </Box>
+          <div style={{ textAlign: 'center', marginTop: '170px', color: 'white' }}>
+            {isSearchResult ? (
+              <div>
+                
+              </div>
+            ) :
+            ( <div>
+              {content}
+            </div>)
+            }
+
+          </div>
         </div>
         <div style={{ width: '70%', height: '100%', borderTopRightRadius: '10px', borderBottomRightRadius: '10px' }}>
-          <div className='PBData' style={{ color: 'white',  height: '100%' }}>
+          <div className='PBData' style={{ color: 'white', height: '100%' }}>
+
 
             {(pbMode === 'person') ? (
               <div>
