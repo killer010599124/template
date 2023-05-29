@@ -23,7 +23,7 @@ interface TabPanelProps {
   value: number;
 }
 
-function TabPanel(props: TabPanelProps) {
+function TabPanel_Draw(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
 
   return (
@@ -42,13 +42,40 @@ function TabPanel(props: TabPanelProps) {
     </div>
   );
 }
-
-function a11yProps(index: number) {
+function a11yProps_Draw(index: number) {
   return {
     id: `simple-tab-${index}`,
     'aria-controls': `simple-tabpanel-${index}`,
   };
 }
+
+
+function TabPanel_PB(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="TabPanel_PB"
+      hidden={value !== index}
+      id={`simple-tabpanel_pb-${index}`}
+      aria-labelledby={`simple-tab_pb-${index}`}
+      {...other}
+    >
+      {value === index && (
+
+        <div>{children}</div>
+
+      )}
+    </div>
+  );
+}
+function a11yProps_PB(index: number) {
+  return {
+    id: `simple-tab-${index}`,
+    'aria-controls': `simple-tabpanel_pb-${index}`,
+  };
+}
+
 function makePersonQuery(first_name: string, last_name: string, address: string, email: string, phone: string) {
   return `SELECT * FROM person WHERE first_name = '${first_name}' AND last_name ='${last_name}' AND personal_emails ='${email}' AND phone_numbers = '${phone}' ;`
 }
@@ -70,14 +97,19 @@ const SatelitteMap = () => {
   const [drawToolVisible, setDrawToolVisible] = useState(1);
   const [pbVisible, setPbVisible] = useState(1);
 
-  const [value, setValue] = React.useState(0);
+  const [value_tab_draw, setValue_tab_draw] = React.useState(0);
+  const [value_tab_pb, setValue_tab_pb] = React.useState(0);
   const [drawMode, setDrawMode] = useState('');
 
   const [toggle, setToggle] = useState(true);
 
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    setValue(newValue);
+  const handleTabDrawChange = (event: React.SyntheticEvent, newValue: number) => {
+    setValue_tab_draw(newValue);
   };
+  const handleTabPBChange = (event: React.SyntheticEvent, newValue: number) => {
+    setValue_tab_pb(newValue);
+  };
+
   const handleToggle = () => {
     setToggle(!toggle);
   }
@@ -170,7 +202,7 @@ const SatelitteMap = () => {
 
   const doc = new jsPDF('l', 'pt', 'a4');
 
-  const handleOnChange = (e: any) => {
+  const OpenCSVFile = (e: any) => {
     // setFile(e.target.files[0]);
     const file = e.target.files[0];
     if (file) {
@@ -191,15 +223,16 @@ const SatelitteMap = () => {
   ]
   const csvFileToArray = (string: string) => {
     const csvHeader = string.slice(0, string.indexOf("\n") - 1).split(",");
-
+    for(let i = 0; i < csvHeader.length; i++){
+      csvHeader[i] = csvHeader[i].replaceAll('"','');
+    }
+    console.log(csvHeader);
     const csvRows = string.slice(string.indexOf("\n") + 1).split("\n");
 
     const array = csvRows.map(i => {
       const values = i.split(",");
       const obj = csvHeader.reduce((object: any, header, index) => {
-        object[header] = values[index];
-
-
+        object[header] = values[index].replaceAll('"','');
         return object;
       }, {});
       console.log(obj);
@@ -426,25 +459,25 @@ const SatelitteMap = () => {
 
         <Box sx={{ width: '100%' }}>
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-            <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
-              <Tab label="Rect" {...a11yProps(0)} style={{ color: "white" }}
+            <Tabs value={value_tab_draw} onChange={handleTabDrawChange} aria-label="basic tabs example">
+              <Tab label="Rect" {...a11yProps_Draw(0)} style={{ color: "white" }}
                 onClick={() => {
                   setDrawMode('RECT');
                   handleToggle();
                 }} />
-              <Tab label="Circle" {...a11yProps(1)} style={{ color: "white" }}
+              <Tab label="Circle" {...a11yProps_Draw(1)} style={{ color: "white" }}
                 onClick={() => {
                   setDrawMode('Circle');
                   handleToggle();
                 }} />
-              <Tab label="poly" {...a11yProps(2)} style={{ color: "white" }}
+              <Tab label="poly" {...a11yProps_Draw(2)} style={{ color: "white" }}
                 onClick={() => {
                   setDrawMode('Polygon');
                   handleToggle();
                 }} />
             </Tabs>
           </Box>
-          <TabPanel value={value} index={0} >
+          <TabPanel_Draw value={value_tab_draw} index={0} >
 
             <div className='drawTab'>
               <div style={{ paddingBottom: "10px" }}>
@@ -467,8 +500,8 @@ const SatelitteMap = () => {
                 <input type="text" style={{ borderColor: "white" }} />
               </div>
             </div>
-          </TabPanel>
-          <TabPanel value={value} index={1}>
+          </TabPanel_Draw>
+          <TabPanel_Draw value={value_tab_draw} index={1}>
             <div className='drawTab'>
               <div style={{ paddingBottom: "10px" }}>
                 Properties
@@ -484,8 +517,8 @@ const SatelitteMap = () => {
                 <input type="text" style={{ borderColor: "white" }} />
               </div>
             </div>
-          </TabPanel>
-          <TabPanel value={value} index={2}>
+          </TabPanel_Draw>
+          <TabPanel_Draw value={value_tab_draw} index={2}>
             <div className='drawTab'>
               <div style={{ paddingBottom: "10px" }}>
                 Properties
@@ -501,7 +534,7 @@ const SatelitteMap = () => {
                 <textarea style={{ borderColor: "white", height: "85px" }} />
               </div>
             </div>
-          </TabPanel>
+          </TabPanel_Draw>
           <button className='geoStyleBtn' style={{ marginLeft: '20px' }}>Search</button>
         </Box>
       </div>
@@ -577,14 +610,14 @@ const SatelitteMap = () => {
         }}>
           <Box sx={{ width: '100%' }}>
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-              <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
-                <Tab label="Person" {...a11yProps(0)} style={{ color: "white", width: '50%' }} onClick={() => { setPbMode('person') }}
+              <Tabs value={value_tab_pb} onChange={handleTabPBChange} aria-label="basic tabs example">
+                <Tab label="Person" {...a11yProps_PB(0)} style={{ color: "white", width: '50%' }} onClick={() => { setPbMode('person') }}
                 />
-                <Tab label="company" {...a11yProps(1)} style={{ color: "white", width: '50%' }} onClick={() => { setPbMode('company') }}
+                <Tab label="company" {...a11yProps_PB(1)} style={{ color: "white", width: '50%' }} onClick={() => { setPbMode('company') }}
                 />
               </Tabs>
             </Box>
-            <TabPanel value={value} index={0} >
+            <TabPanel_PB value={value_tab_pb} index={0} >
 
               <div className='drawTab'>
                 <div style={{ paddingBottom: "10px" }}>
@@ -609,8 +642,8 @@ const SatelitteMap = () => {
                 </div>
 
               </div>
-            </TabPanel>
-            <TabPanel value={value} index={1}>
+            </TabPanel_PB>
+            <TabPanel_PB value={value_tab_pb} index={1}>
               <div className='drawTab'>
                 <div style={{ paddingBottom: "10px" }}>
 
@@ -628,7 +661,7 @@ const SatelitteMap = () => {
                 </div>
               </div>
 
-            </TabPanel>
+            </TabPanel_PB>
 
             <button className='geoStyleBtn' style={{ marginLeft: '20px' }}
               onClick={() => {
@@ -852,7 +885,7 @@ const SatelitteMap = () => {
             // overflowY: 'scroll'
           }}>
           <label className='csv'>
-            <input id="Image" type="file" onChange={handleOnChange} />
+            <input id="Image" type="file" onChange={OpenCSVFile} />
             Import CSV
           </label>
           {/* <label className='csv'>

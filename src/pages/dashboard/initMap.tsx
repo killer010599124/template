@@ -9,7 +9,7 @@ export const initMap = (container: HTMLDivElement, coords: [number, number], map
         pitchWithRotate: false,
         center: coords,
         
-        zoom: 15,
+        zoom: 3,
         accessToken: "pk.eyJ1Ijoib2FrdHJlZWFuYWx5dGljcyIsImEiOiJjbGhvdWFzOHQxemYwM2ZzNmQxOW1xZXdtIn0.JPcZgPfkVUutq8t8Z_BaHg",
         doubleClickZoom: false
     });

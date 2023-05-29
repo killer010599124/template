@@ -13,3 +13,6 @@
 # Preview
 
 !["React sidebar with dropdown menu"](https://user-images.githubusercontent.com/67447840/200093500-325d52c0-365e-4bef-9f63-3be736c917cb.gif "React sidebar with dropdown menu")
+
+# when deploy server, some mapbox functionality is not working. Solution is below
+https://docs.mapbox.com/mapbox-gl-js/guides/install/#transpiling

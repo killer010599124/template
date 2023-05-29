@@ -1,8 +1,8 @@
 {
   "name": "react-sidebar-with-dropdown",
- 
   "version": "0.1.0",
   "private": true,
+  "homepage": "http://argosfusion.com/",
   "dependencies": {
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
@@ -66,11 +66,16 @@
       "react-app/jest"
     ]
   },
+  
   "browserslist": {
     "production": [
       ">0.2%",
       "not dead",
-      "not op_mini all"
+      "not op_mini all",
+      "not safari < 10",
+      "not chrome < 51",
+      "not android < 5",
+      "not ie < 12"
     ],
     "development": [
       "last 1 chrome version",
@@ -85,5 +90,9 @@
     "@types/react-swipeable-views": "^0.13.1",
     "@types/react-table": "^7.7.14",
     "dotenv": "^16.0.3"
-  }
+  },
+  "description": "![\"React sidebar with dropdown menu\"](https://user-images.githubusercontent.com/67447840/200093301-c5560000-3d09-4f21-b94d-50d2071d09dd.png \"React sidebar with dropdown menu\")",
+  "main": "index.js",
+  "author": "",
+  "license": "ISC"
 }
