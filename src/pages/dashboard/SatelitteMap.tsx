@@ -151,8 +151,12 @@ const SatelitteMap = () => {
   const [data, setData] = useState<Geo>();
   const [allData, setAllData] = useState<Geo[]>([]);
   const [array, setArray] = useState<Geo[]>([]);
+  const [csvData, setCsvData] = useState<any[]>([]);
+  const [csvHeader, setCsvHeader] = useState<string[]>([]);
 
-  const [csvData, setCsvData] = useState<Geo>({ description: "The capital of Russia", name: "Moscow", lng: "-99.1319063199852", lat: "25.16901932031443" })
+  const [dataLayer, setDataLayer] = useState<string[]>(["vessel", "people", 'business']);
+
+
   const fileReader = new FileReader();
 
   //--------   Person search engine-----------//
@@ -229,6 +233,7 @@ const SatelitteMap = () => {
       csvHeader[i] = csvHeader[i].replaceAll('"', '');
     }
     console.log(csvHeader);
+    setCsvHeader(csvHeader);
     const csvRows = string.slice(string.indexOf("\n") + 1).split("\n");
 
     const array = csvRows.map(i => {
@@ -238,14 +243,14 @@ const SatelitteMap = () => {
         return object;
       }, {});
       console.log(obj);
-      if (!Number.isNaN(Number(obj.lng))) manageAllData(obj);
-      // if (obj['name']) setCsvData(obj)
+      manageCsvData(obj);
+      //  if (!Number.isNaN(Number(obj.lng))) manageAllData(obj);
+
       return obj;
     });
     console.log(array)
-    // setAllData(array);
-    // allData.pop()
-    setArray(array);
+
+    // setArray(array);
   };
 
   const clearPersonData = () => {
@@ -372,6 +377,9 @@ const SatelitteMap = () => {
   const manageAllData = (data: Geo) => {
     setAllData(prevNames => [...prevNames, data])
   };
+  const manageCsvData = (data: any) => {
+    setCsvData(prevNames => [...prevNames, data])
+  }
   const deleteData = (pointName: string) => {
     setAllData(allData.filter(item => item.name !== pointName));
     // alert('deleted')
@@ -895,7 +903,7 @@ const SatelitteMap = () => {
           </tbody>
         </table>
         <div
-          style={dataVisible ? { display: "none" } : {
+          style={{
             // display: "block",
             position: "absolute",
             display: 'flex',
@@ -916,7 +924,7 @@ const SatelitteMap = () => {
           {/* <label className='csv'>
             Export CSV
           </label> */}
-          <CSVLink data={allData}><button className='csv' style={{ height: '33px', fontSize: '15px' }}>Export CSV</button></CSVLink>
+          <CSVLink data={allData} style={{ width: '40%' }}><button className='csv' style={{ height: '33px', fontSize: '15px', width: '100%' }}>Export CSV</button></CSVLink>
         </div>
       </div>
 
@@ -942,14 +950,57 @@ const SatelitteMap = () => {
           <div className='PBData' style={{ color: 'white', height: '100%' }}>
             <div>
               <div style={{ fontSize: '24px', lineHeight: '45px', width: '100%', height: '50px', textAlign: 'center', paddingTop: '10px' }}>
-                Layers
+                Options
               </div>
               <div className='drawTab'>
 
-                <div style={{ display: "flex", marginTop:'35px' }}>
-                  <input type="text" placeholder='Enter a layer name'  style={{ width: '100%', borderColor: "white" }} />
+                <div style={{ display: "flex", marginTop: '35px' }}>
+                  <input type="text" placeholder='Enter a layer name' style={{ width: '100%', borderColor: "white" }} />
                 </div>
-
+                <div style={{ fontSize: '16px', lineHeight: '45px', width: '100%', height: '50px', textAlign: 'center', paddingTop: '10px' }}>
+                  Layers
+                </div>
+                <div style={{
+                  width: '100%',
+                  height: '300px',
+                  border: '0.1rem solid white',
+                  borderRadius: '10px'
+                }}>
+                  <ul style={{ width: '100%', height: '100%' }}>
+                    {dataLayer.map((data, index) => {
+                      return (
+                        <li style={{ padding: '10px' }}>
+                          {data}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+                <div
+                  style={{
+                    // display: "block",
+                    position: "absolute",
+                    display: 'flex',
+                    flexDirection: 'row',
+                    justifyContent: "space-evenly",
+                    paddingTop: "5px",
+                    zIndex: '1',
+                    width: "25%",
+                    marginBottom: "4%",
+                    bottom: "0"
+                    // overflowY: 'scroll'
+                  }}>
+                  <label className='csv'>
+                    <input id="Image" type="file" onChange={OpenCSVFile} />
+                    Import CSV
+                  </label>
+                  {/* <label className='csv'>
+            Export CSV
+          </label> */}
+                  <label className='csv'>
+                    Add layer
+                  </label>
+                </div>
               </div>
             </div>
 
@@ -957,12 +1008,32 @@ const SatelitteMap = () => {
         </div>
         <div style={{ width: '70%', height: '100%', borderTopRightRadius: '10px', borderBottomRightRadius: '10px' }}>
           <div className='PBData' style={{ color: 'white', height: '100%' }}>
-            <div>
+            <div style={{width:'100%', height : '100%'}}>
 
               <div style={{ fontSize: '24px', lineHeight: '45px', width: '100%', height: '50px', textAlign: 'center', paddingTop: '10px' }}>
-                CSV Data
+                Preview CSV Data
               </div>
-
+              <table className='large-2' style={{
+                textAlign: "center",
+                width: "100%",
+                height : '92.5%',
+                display : 'flex',
+                overflow : 'scroll'
+                // height: "100%"
+              }}>
+                <thead>
+                  <tr style={{}}>
+                    {csvHeader.map((data, index) => {
+                      return (
+                          <td style={{textAlign:'center', padding:'10px'}}>{data}</td>            
+                      );
+                    })}
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                </tbody>
+              </table>
             </div>
 
           </div>

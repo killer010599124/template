@@ -18,7 +18,7 @@ import { setAppState } from '../../redux/features/appStateSlice';
 
 export const useMap = (container: React.RefObject<HTMLDivElement>, name: string, description: string, latitude: string,
     longtitude: string, addFlag: boolean, editFlag: boolean, mapStyle: string, handleLongtitude: (num: number) => void,
-    handleLatitude: (num: number) => void,handleName: (name: string) => void,handleDescription: (des: string) => void, deleteData: (pointName: string) => void, editData: (pointName: string, data: any) => void, geoStyleName: string, csvData: any, drawMode: string, toggle: boolean,
+    handleLatitude: (num: number) => void,handleName: (name: string) => void,handleDescription: (des: string) => void, deleteData: (pointName: string) => void, editData: (pointName: string, data: any) => void, geoStyleName: string, array: any, drawMode: string, toggle: boolean,
     deleteFlag: boolean) => {
 
 
@@ -243,12 +243,12 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
     }, [deleteFlag]);
     useEffect(() => {
         if (container.current) {
-            for (let i = 0; i < csvData.length; i++) {
+            for (let i = 0; i < array.length; i++) {
                 console.log('cnt');
-                const v = new LngLat(Number(csvData[i]?.lng), Number(csvData[i]?.lat))
+                const v = new LngLat(Number(array[i]?.lng), Number(array[i]?.lat))
                 const marker = generateNewMarker({
-                    name: csvData[i]?.name,
-                    description: csvData[i]?.description,
+                    name: array[i]?.name,
+                    description: array[i]?.description,
                     map: mapInitRef.current!,
                     ...v,
                     color: "rgb(70, 104, 242)",
@@ -258,7 +258,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
                 // setMarkersArray(prevNames => [...prevNames, marker])
             }
         }
-    }, [csvData]);
+    }, [array]);
 
     useEffect(() => {
         if (container.current) {
