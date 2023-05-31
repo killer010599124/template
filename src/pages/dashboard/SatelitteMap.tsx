@@ -134,6 +134,7 @@ const SatelitteMap = () => {
   const [lat, setLat] = useState("");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("")
+
   const [geoStyleName, setGeoStyleName] = useState("mapbox://styles/mapbox/satellite-streets-v12")
   interface Geo {
     description: string;
@@ -141,12 +142,16 @@ const SatelitteMap = () => {
     lat: string;
     lng: string;
   }
+
   const [flag, setFlag] = useState(0);
   const [addFlag, setAddFlag] = useState(true);
+  const [editFlag, setEditFlag] = useState(true);
   const [deleteFlag, setDeleteFlag] = useState(true);
+
   const [data, setData] = useState<Geo>();
   const [allData, setAllData] = useState<Geo[]>([]);
   const [array, setArray] = useState<Geo[]>([]);
+
   const [csvData, setCsvData] = useState<Geo>({ description: "The capital of Russia", name: "Moscow", lng: "-99.1319063199852", lat: "25.16901932031443" })
   const fileReader = new FileReader();
 
@@ -217,14 +222,11 @@ const SatelitteMap = () => {
   };
 
 
-  let names = [
-    { firstName: 'John', lastName: 'Cena' },
-    { firstName: 'Rey', lastName: 'Mysterio' },
-  ]
+ 
   const csvFileToArray = (string: string) => {
     const csvHeader = string.slice(0, string.indexOf("\n") - 1).split(",");
-    for(let i = 0; i < csvHeader.length; i++){
-      csvHeader[i] = csvHeader[i].replaceAll('"','');
+    for (let i = 0; i < csvHeader.length; i++) {
+      csvHeader[i] = csvHeader[i].replaceAll('"', '');
     }
     console.log(csvHeader);
     const csvRows = string.slice(string.indexOf("\n") + 1).split("\n");
@@ -232,7 +234,7 @@ const SatelitteMap = () => {
     const array = csvRows.map(i => {
       const values = i.split(",");
       const obj = csvHeader.reduce((object: any, header, index) => {
-        object[header] = values[index].replaceAll('"','');
+        object[header] = values[index].replaceAll('"', '');
         return object;
       }, {});
       console.log(obj);
@@ -240,28 +242,28 @@ const SatelitteMap = () => {
       // if (obj['name']) setCsvData(obj)
       return obj;
     });
-    console.log(array.pop())
+    console.log(array)
     // setAllData(array);
     // allData.pop()
     setArray(array);
   };
 
-  const clearPersonData = () =>{
+  const clearPersonData = () => {
     setPid("");
-      setPName("");
-      setPaddress("");
-      setPemail("");
-      setPphone("" );
-      setPfacebook_id("");
-      setPfacebook_url("");
-      setPfacebook_un("");
+    setPName("");
+    setPaddress("");
+    setPemail("");
+    setPphone("");
+    setPfacebook_id("");
+    setPfacebook_url("");
+    setPfacebook_un("");
 
-      setPlinkdin_id("");
-      setPlinkdin_url("");
-      setPlinkdin_un("");
+    setPlinkdin_id("");
+    setPlinkdin_url("");
+    setPlinkdin_un("");
 
-      setPtwitter_url("");
-      setPtwitter_un("");
+    setPtwitter_url("");
+    setPtwitter_un("");
   }
   const getPersonData = () => {
     clearPersonData();
@@ -296,21 +298,21 @@ const SatelitteMap = () => {
       console.log(error);
     });
   }
-  const clearCompanyData= () =>{
+  const clearCompanyData = () => {
     setBid('');
-      setBname('');
-      setBfounded(0);
-      setBindustry('');
-      setBwebsite('');
-      setBsummary('');
+    setBname('');
+    setBfounded(0);
+    setBindustry('');
+    setBwebsite('');
+    setBsummary('');
 
-      setBlinkdin('');
-      setBfacebook('');
-      setBtwitter('');
-      setCrunchbase('');
+    setBlinkdin('');
+    setBfacebook('');
+    setBtwitter('');
+    setCrunchbase('');
   }
   const getCompanyData = (ticker: string, name: string, website: string) => {
-  
+
     clearCompanyData();
     const query = makeCompanyQuery(name, ticker, website);
 
@@ -357,15 +359,45 @@ const SatelitteMap = () => {
     // console.log('argument from Child: ', lng);
   };
 
+  const handleName = (name : string) => {
+    setName(name);
+  }
+  const handleDescription = (des : string) => {
+    setDescription(des);
+  }
+
   const manageData = (data: Geo) => {
     setData(data);
   };
   const manageAllData = (data: Geo) => {
     setAllData(prevNames => [...prevNames, data])
-
   };
+  const deleteData = (pointName: string) => {
+    setAllData(allData.filter(item => item.name !== pointName));
+    // alert('deleted')
+  }
+  const editData = (pointName:string, data:any) => {
 
-  const myMap = useMap(mapRef, name, description, lat, lng, addFlag, "mapbox://styles/mapbox/satellite-streets-v12", handleLongtitude, handleLatitude, geoStyleName, array, drawMode, toggle, deleteFlag)
+    console.log(data.name);
+    console.log(data);
+    // const temp : Geo = new Geo();
+    // temp.description = data.description as string;
+    // temp.name = data.name as string;
+    // temp.lat = data.latitude as string;
+    // temp.lng = data.longtitude as string;
+    // manageAllData(temp)
+    let updatedList = allData.map(item => 
+      {
+        if (item.name == pointName){
+          return {...item, name: data.name, description:data.description, lat:data.latitude,lng:data.longtitude}; //gets everything that was already in item, and updates "done"
+        }
+        return item; // else return unmodified item 
+      });
+      
+      setAllData(updatedList);
+  }
+
+  const myMap = useMap(mapRef, name, description, lat, lng, addFlag, editFlag, "mapbox://styles/mapbox/satellite-streets-v12", handleLongtitude, handleLatitude,handleName,handleDescription, deleteData,editData, geoStyleName, array, drawMode, toggle, deleteFlag)
 
   useEffect(() => {
     if (flag == 1) {
@@ -459,18 +491,18 @@ const SatelitteMap = () => {
 
         <Box sx={{ width: '100%' }}>
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-            <Tabs value={value_tab_draw} onChange={handleTabDrawChange} aria-label="basic tabs example">
-              <Tab label="Rect" {...a11yProps_Draw(0)} style={{ color: "white" }}
+            <Tabs value={value_tab_draw} onChange={handleTabDrawChange} aria-label="basic tabs example" style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Tab label="Rect" {...a11yProps_Draw(0)} style={{ color: "white", minWidth: '0px' }}
                 onClick={() => {
                   setDrawMode('RECT');
                   handleToggle();
                 }} />
-              <Tab label="Circle" {...a11yProps_Draw(1)} style={{ color: "white" }}
+              <Tab label="Circle" {...a11yProps_Draw(1)} style={{ color: "white", minWidth: '0px' }}
                 onClick={() => {
                   setDrawMode('Circle');
                   handleToggle();
                 }} />
-              <Tab label="poly" {...a11yProps_Draw(2)} style={{ color: "white" }}
+              <Tab label="poly" {...a11yProps_Draw(2)} style={{ color: "white", minWidth: '0px' }}
                 onClick={() => {
                   setDrawMode('Polygon');
                   handleToggle();
@@ -486,18 +518,14 @@ const SatelitteMap = () => {
 
               <div style={{ display: "flex" }}>
 
-                <label style={{ paddingTop: '3px', paddingRight: '5px', width: '60px' }} >Point</label>
-                <input type="text" style={{ borderColor: "white" }} />
+                <input type="text" placeholder='point' style={{ borderColor: "white", width: '100%' }} />
               </div>
               <div style={{ display: "flex" }}>
 
-                <label style={{ paddingTop: '3px', paddingRight: '5px', width: '60px' }} >width</label>
-                <input type="text" style={{ borderColor: "white" }} />
+                <input type="text" placeholder='width' style={{ borderColor: "white", width: '100%' }} />
               </div>
               <div style={{ display: "flex" }}>
-
-                <label style={{ paddingTop: '3px', paddingRight: '5px', width: '60px' }} >Height</label>
-                <input type="text" style={{ borderColor: "white" }} />
+                <input type="text" placeholder='height' style={{ borderColor: "white", width: '100%' }} />
               </div>
             </div>
           </TabPanel_Draw>
@@ -508,13 +536,10 @@ const SatelitteMap = () => {
               </div>
               <div style={{ display: "flex" }}>
 
-                <label style={{ paddingTop: '3px', paddingRight: '5px', width: '60px' }} >Point</label>
-                <input type="text" style={{ borderColor: "white" }} />
+                <input type="text" placeholder='point' style={{ borderColor: "white", width: '100%' }} />
               </div>
               <div style={{ display: "flex" }}>
-
-                <label style={{ paddingTop: '3px', paddingRight: '5px', width: '60px' }} >Radius</label>
-                <input type="text" style={{ borderColor: "white" }} />
+                <input type="text" placeholder='radius' style={{ borderColor: "white", width: '100%' }} />
               </div>
             </div>
           </TabPanel_Draw>
@@ -524,14 +549,12 @@ const SatelitteMap = () => {
                 Properties
               </div>
               <div style={{ display: "flex" }}>
-
-                <label style={{ paddingTop: '3px', paddingRight: '5px', width: '60px' }} >Count</label>
-                <input type="text" style={{ borderColor: "white" }} />
+                <input type="text" placeholder='count' style={{ borderColor: "white", width: '100%' }} />
               </div>
               <div style={{ display: "flex" }}>
 
-                <label style={{ paddingTop: '3px', paddingRight: '5px', width: '60px' }} >Points</label>
-                <textarea style={{ borderColor: "white", height: "85px" }} />
+
+                <textarea placeholder='polygon vertex (X,Y) coordinate' style={{ borderColor: "white", height: "85px", width: "100%" }} />
               </div>
             </div>
           </TabPanel_Draw>
@@ -573,11 +596,14 @@ const SatelitteMap = () => {
           }}>
             <input type="button" value={"Add"} onClick={() => {
               setAddFlag(!addFlag);
-              manageData({ description, name, lat, lng });
+              // manageData({ description, name, lat, lng });
               manageAllData({ description, name, lat, lng });
               console.log(data);
             }} />
-            <input type="button" value={"Edit"} />
+            <input type="button" value={"Edit"} onClick={() => {
+              setEditFlag(!editFlag);
+          
+            }} />
             <input type="button" value={"Delete"} onClick={() => {
               setDeleteFlag(!deleteFlag);
             }} />
@@ -681,12 +707,12 @@ const SatelitteMap = () => {
           <div style={{ textAlign: 'center', marginTop: '170px', color: 'white' }}>
             {isSearchResult ? (
               <div>
-                
+
               </div>
             ) :
-            ( <div>
-              {content}
-            </div>)
+              (<div>
+                {content}
+              </div>)
             }
 
           </div>
@@ -848,7 +874,7 @@ const SatelitteMap = () => {
           // height: "100%"
         }}>
           <thead>
-            <tr>
+            <tr style={{}}>
               <th>Mark</th>
               <th>Name</th>
               <th>Lng</th>

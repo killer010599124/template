@@ -3,6 +3,8 @@
 import dotenv from 'dotenv';
 import PDLJS from 'peopledatalabs';
 
+
+
 // dotenv.config({ path: '../.env.local' });
 
 const PDLJSClient = new PDLJS({ apiKey: '491e0491a606e4dc3604086455359d0130733451fdc4ba35c9de97a05f06c7bc' });
@@ -34,23 +36,23 @@ export default PDLJSClient;
 //   console.log(error);
 // });
 
-// PDLJSClient.person.search.sql({
-//   searchQuery: "SELECT * FROM person WHERE first_name = 'sharon' AND location_country='japan' AND job_title_role='health' AND phone_numbers IS NOT NULL ;",
-//   size: 10,
-// }).then((data) => {
-//   console.log(data);
-// }).catch((error) => {
-//   console.log(error);
-// });
-
-PDLJSClient.company.search.sql({
-  searchQuery: "SELECT * FROM company WHERE name = 'kellogg company' AND ticker = 'K' AND website = 'kelloggcompany.com'   ",
+PDLJSClient.person.search.sql({
+  searchQuery: "SELECT * FROM person WHERE first_name = 'mattehew'  ;",
   size: 10,
 }).then((data) => {
   console.log(data);
 }).catch((error) => {
   console.log(error);
 });
+
+// PDLJSClient.company.search.sql({
+//   searchQuery: "SELECT * FROM company WHERE name = 'kellogg company' AND ticker = 'K' AND website = 'kelloggcompany.com'   ",
+//   size: 10,
+// }).then((data) => {
+//   console.log(data);
+// }).catch((error) => {
+//   console.log(error);
+// });
 
 // PDLJSClient.person.retrieve({ id: 'qEnOZ5Oh0poWnQ1luFBfVw_0000' }).then((data) => {
 //   console.log(data);

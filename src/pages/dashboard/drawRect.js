@@ -1,6 +1,9 @@
 import createRectangle from './utils/create-rectangle';
 import { enableZoom, disableZoom } from './utils/zoom';
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
+
+
+
 const DrawRectangleDrag = {
   onSetup() {
     const rectangle = this.newFeature(createRectangle());

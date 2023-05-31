@@ -16,9 +16,9 @@ import drawRect from './drawRect';
 import { setAppState } from '../../redux/features/appStateSlice';
 
 
-export const useMap = (container: React.RefObject<HTMLDivElement>,name:string, description:string, latitude: string,
-    longtitude: string, flag: boolean, mapStyle: string, handleLongtitude: (num: number) => void,
-    handleLatitude: (num: number) => void, geoStyleName: string, csvData: any, drawMode: string, toggle: boolean,
+export const useMap = (container: React.RefObject<HTMLDivElement>, name: string, description: string, latitude: string,
+    longtitude: string, addFlag: boolean, editFlag: boolean, mapStyle: string, handleLongtitude: (num: number) => void,
+    handleLatitude: (num: number) => void,handleName: (name: string) => void,handleDescription: (des: string) => void, deleteData: (pointName: string) => void, editData: (pointName: string, data: any) => void, geoStyleName: string, csvData: any, drawMode: string, toggle: boolean,
     deleteFlag: boolean) => {
 
 
@@ -26,11 +26,24 @@ export const useMap = (container: React.RefObject<HTMLDivElement>,name:string, d
 
     const [markersArray, setMarkersArray] = useState<Marker[]>([]);
     const [currentMarker, setCurrentMarker] = useState<Marker>();
+    const [currentBlueMaker, setCurrentBlueMaker] = useState<Marker>();
+    const [currentMakerName, setCurrentMakerName] = useState<string>()
+    const [currentMakerDescription, setCurrentMakerDescription] = useState<string>()
+
     const [lnglat, setLnglat] = useState<LngLat>()
 
     const [rect, setRect] = useState(false);
     const [circle, setCircle] = useState(false);
     const [polygon, setPolygon] = useState(false);
+
+    const handleBlueMaker = (maker: Marker, pointName: string, description: string) => {
+        setCurrentBlueMaker(maker);
+        setCurrentMakerName(pointName);
+        setCurrentMakerDescription(description);
+    }
+
+
+
     useEffect(() => {
         if (container.current) {
 
@@ -67,16 +80,17 @@ export const useMap = (container: React.RefObject<HTMLDivElement>,name:string, d
                 ({ lngLat }) => {
                     // markersArray[markersArray.length-1].remove();
                     const marker = generateNewMarker({
-                        name:'',
-                        description:'',
+                        name: '',
+                        description: '',
                         map: mapInitRef.current!,
                         ...lngLat,
                         color: "#63df29",
-                        draggable: true
+                        draggable: true,
+                        setBlueMaker: handleBlueMaker
                     });
 
                     setCurrentMarker(marker);
-                    
+
                     handleLongtitude(lngLat.lng);
                     handleLatitude(lngLat.lat);
                     setMarkersArray(prevNames => [...prevNames, marker])
@@ -98,6 +112,18 @@ export const useMap = (container: React.RefObject<HTMLDivElement>,name:string, d
 
         }
     }, [currentMarker]);
+
+    useEffect(() => {
+        if (container.current) {
+            if (currentBlueMaker) {
+                handleLongtitude(currentBlueMaker?.getLngLat().lng);
+                handleLatitude(currentBlueMaker?.getLngLat().lat);
+                handleName(currentMakerName as string);
+                handleDescription(currentMakerDescription as string);
+            }
+        }
+    }, [currentBlueMaker]);
+
     useEffect(() => {
         if (container.current) {
             console.log(lnglat);
@@ -176,21 +202,44 @@ export const useMap = (container: React.RefObject<HTMLDivElement>,name:string, d
 
             const v = new LngLat(Number(longtitude), Number(latitude))
             generateNewMarker({
-                name : name,
-                description : description,
+                name: name,
+                description: description,
                 map: mapInitRef.current!,
                 ...v,
                 color: "rgb(70, 104, 242)",
-                draggable: false
+                draggable: false,
+                setBlueMaker: handleBlueMaker
             });
         }
-    }, [flag]);
+    }, [addFlag]);
+
+    useEffect(() => {
+        if (container.current) {
+
+            // currentBlueMaker?.setLngLat([Number(longtitude), Number(latitude)]);
+            currentBlueMaker?.remove()
+            const v = new LngLat(Number(longtitude), Number(latitude))
+            generateNewMarker({
+                name: name,
+                description: description,
+                map: mapInitRef.current!,
+                ...v,
+                color: "rgb(70, 104, 242)",
+                draggable: false,
+                setBlueMaker: handleBlueMaker
+            });
+            editData(currentMakerName as string, { description, name, latitude, longtitude })
+            setCurrentMakerName(name);
+        }
+    }, [editFlag]);
+
     useEffect(() => {
         if (container.current) {
             currentMarker?.remove();
-            console.log(currentMarker?.getLngLat());
+            currentBlueMaker?.remove();
+            console.log(currentMakerName);
+            deleteData(currentMakerName as string);
         }
-
     }, [deleteFlag]);
     useEffect(() => {
         if (container.current) {
@@ -198,12 +247,13 @@ export const useMap = (container: React.RefObject<HTMLDivElement>,name:string, d
                 console.log('cnt');
                 const v = new LngLat(Number(csvData[i]?.lng), Number(csvData[i]?.lat))
                 const marker = generateNewMarker({
-                    name : csvData[i]?.name,
-                    description : csvData[i]?.description,
+                    name: csvData[i]?.name,
+                    description: csvData[i]?.description,
                     map: mapInitRef.current!,
                     ...v,
                     color: "rgb(70, 104, 242)",
-                    draggable: false
+                    draggable: false,
+                    setBlueMaker: handleBlueMaker
                 });
                 // setMarkersArray(prevNames => [...prevNames, marker])
             }
