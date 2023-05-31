@@ -222,7 +222,7 @@ const SatelitteMap = () => {
   };
 
 
- 
+
   const csvFileToArray = (string: string) => {
     const csvHeader = string.slice(0, string.indexOf("\n") - 1).split(",");
     for (let i = 0; i < csvHeader.length; i++) {
@@ -359,10 +359,10 @@ const SatelitteMap = () => {
     // console.log('argument from Child: ', lng);
   };
 
-  const handleName = (name : string) => {
+  const handleName = (name: string) => {
     setName(name);
   }
-  const handleDescription = (des : string) => {
+  const handleDescription = (des: string) => {
     setDescription(des);
   }
 
@@ -376,7 +376,7 @@ const SatelitteMap = () => {
     setAllData(allData.filter(item => item.name !== pointName));
     // alert('deleted')
   }
-  const editData = (pointName:string, data:any) => {
+  const editData = (pointName: string, data: any) => {
 
     console.log(data.name);
     console.log(data);
@@ -386,18 +386,17 @@ const SatelitteMap = () => {
     // temp.lat = data.latitude as string;
     // temp.lng = data.longtitude as string;
     // manageAllData(temp)
-    let updatedList = allData.map(item => 
-      {
-        if (item.name == pointName){
-          return {...item, name: data.name, description:data.description, lat:data.latitude,lng:data.longtitude}; //gets everything that was already in item, and updates "done"
-        }
-        return item; // else return unmodified item 
-      });
-      
-      setAllData(updatedList);
+    let updatedList = allData.map(item => {
+      if (item.name == pointName) {
+        return { ...item, name: data.name, description: data.description, lat: data.latitude, lng: data.longtitude }; //gets everything that was already in item, and updates "done"
+      }
+      return item; // else return unmodified item 
+    });
+
+    setAllData(updatedList);
   }
 
-  const myMap = useMap(mapRef, name, description, lat, lng, addFlag, editFlag, "mapbox://styles/mapbox/satellite-streets-v12", handleLongtitude, handleLatitude,handleName,handleDescription, deleteData,editData, geoStyleName, array, drawMode, toggle, deleteFlag)
+  const myMap = useMap(mapRef, name, description, lat, lng, addFlag, editFlag, "mapbox://styles/mapbox/satellite-streets-v12", handleLongtitude, handleLatitude, handleName, handleDescription, deleteData, editData, geoStyleName, array, drawMode, toggle, deleteFlag)
 
   useEffect(() => {
     if (flag == 1) {
@@ -602,7 +601,7 @@ const SatelitteMap = () => {
             }} />
             <input type="button" value={"Edit"} onClick={() => {
               setEditFlag(!editFlag);
-          
+
             }} />
             <input type="button" value={"Delete"} onClick={() => {
               setDeleteFlag(!deleteFlag);
@@ -918,6 +917,55 @@ const SatelitteMap = () => {
             Export CSV
           </label> */}
           <CSVLink data={allData}><button className='csv' style={{ height: '33px', fontSize: '15px' }}>Export CSV</button></CSVLink>
+        </div>
+      </div>
+
+      {/* -----------------------------import various csv , Data layer  */}
+      <div className='' style={dataVisible ? { display: "none" } :
+        {
+          position: "absolute",
+          right: "25%",
+          marginTop: "7%",
+          zIndex: "2",
+          width: "50%",
+          height: "650px",
+          display: 'flex',
+          backgroundColor: "black",
+          borderRadius: '10px',
+          opacity: '0.75'
+        }}
+      >
+        <div style={{
+          width: "30%", height: "100%", borderTopLeftRadius: '10px', borderBottomLeftRadius: '10px',
+          borderRight: '0.1rem solid white'
+        }}>
+          <div className='PBData' style={{ color: 'white', height: '100%' }}>
+            <div>
+              <div style={{ fontSize: '24px', lineHeight: '45px', width: '100%', height: '50px', textAlign: 'center', paddingTop: '10px' }}>
+                Layers
+              </div>
+              <div className='drawTab'>
+
+                <div style={{ display: "flex", marginTop:'35px' }}>
+                  <input type="text" placeholder='Enter a layer name'  style={{ width: '100%', borderColor: "white" }} />
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+        <div style={{ width: '70%', height: '100%', borderTopRightRadius: '10px', borderBottomRightRadius: '10px' }}>
+          <div className='PBData' style={{ color: 'white', height: '100%' }}>
+            <div>
+
+              <div style={{ fontSize: '24px', lineHeight: '45px', width: '100%', height: '50px', textAlign: 'center', paddingTop: '10px' }}>
+                CSV Data
+              </div>
+
+            </div>
+
+          </div>
         </div>
       </div>
 
