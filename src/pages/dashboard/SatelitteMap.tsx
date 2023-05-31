@@ -239,16 +239,16 @@ const SatelitteMap = () => {
     const array = csvRows.map(i => {
       const values = i.split(",");
       const obj = csvHeader.reduce((object: any, header, index) => {
-        object[header] = values[index].replaceAll('"', '');
+        object[header] = values[index];
         return object;
       }, {});
       console.log(obj);
-      manageCsvData(obj);
+      // manageCsvData(obj);
       //  if (!Number.isNaN(Number(obj.lng))) manageAllData(obj);
 
       return obj;
     });
-    console.log(array)
+    setCsvData(array);
 
     // setArray(array);
   };
@@ -388,12 +388,7 @@ const SatelitteMap = () => {
 
     console.log(data.name);
     console.log(data);
-    // const temp : Geo = new Geo();
-    // temp.description = data.description as string;
-    // temp.name = data.name as string;
-    // temp.lat = data.latitude as string;
-    // temp.lng = data.longtitude as string;
-    // manageAllData(temp)
+
     let updatedList = allData.map(item => {
       if (item.name == pointName) {
         return { ...item, name: data.name, description: data.description, lat: data.latitude, lng: data.longtitude }; //gets everything that was already in item, and updates "done"
@@ -1008,30 +1003,40 @@ const SatelitteMap = () => {
         </div>
         <div style={{ width: '70%', height: '100%', borderTopRightRadius: '10px', borderBottomRightRadius: '10px' }}>
           <div className='PBData' style={{ color: 'white', height: '100%' }}>
-            <div style={{width:'100%', height : '100%'}}>
+            <div style={{ width: '100%', height: '100%' }}>
 
               <div style={{ fontSize: '24px', lineHeight: '45px', width: '100%', height: '50px', textAlign: 'center', paddingTop: '10px' }}>
                 Preview CSV Data
               </div>
               <table className='large-2' style={{
-                textAlign: "center",
+                // textAlign: "center",
                 width: "100%",
-                height : '92.5%',
-                display : 'flex',
-                overflow : 'scroll'
+                height: '92.5%',
+                display: 'table-cell',
+                overflow: 'scroll'
                 // height: "100%"
               }}>
-                <thead>
+                <thead style={{background: 'lightslategray', position:'sticky', top:'0' }}>
                   <tr style={{}}>
                     {csvHeader.map((data, index) => {
                       return (
-                          <td style={{textAlign:'center', padding:'10px'}}>{data}</td>            
+                        <td style={{ textAlign: 'center' }}>{data}</td>
                       );
                     })}
                   </tr>
                 </thead>
-                <tbody>
-                  
+                <tbody style = {{}}>
+                  {csvData.map((data, index) => {
+                    return (
+                      <tr style={{}}>
+                        {csvHeader.map((header, index) => {
+                          return (
+                            <td style={{ textAlign: 'center', padding: '10px' }}>{data[header]}</td>
+                          );
+                        })}
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
