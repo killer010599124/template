@@ -237,20 +237,21 @@ const SatelitteMap = () => {
     const csvRows = string.slice(string.indexOf("\n") + 1).split("\n");
 
     const array = csvRows.map(i => {
+      console.log(i)
       const values = i.split(",");
       const obj = csvHeader.reduce((object: any, header, index) => {
-        object[header] = values[index];
+        object[header] = values[index].replaceAll('"', '');
         return object;
       }, {});
       console.log(obj);
       // manageCsvData(obj);
-      //  if (!Number.isNaN(Number(obj.lng))) manageAllData(obj);
+       if (!Number.isNaN(Number(obj.lng))) manageAllData(obj);
 
       return obj;
     });
     setCsvData(array);
 
-    // setArray(array);
+    setArray(array);
   };
 
   const clearPersonData = () => {
