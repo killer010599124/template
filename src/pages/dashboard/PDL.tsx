@@ -6,7 +6,6 @@ import PDLJS from 'peopledatalabs';
 
 
 // dotenv.config({ path: '../.env.local' });
-
 const PDLJSClient = new PDLJS({ apiKey: '491e0491a606e4dc3604086455359d0130733451fdc4ba35c9de97a05f06c7bc' });
 export default PDLJSClient;
 // Person APIs

@@ -16,11 +16,12 @@ import drawRect from './drawRect';
 import { setAppState } from '../../redux/features/appStateSlice';
 import { assert } from 'console';
 import assets from '../../assets';
+import { randomInt } from 'crypto';
 
 
 export const useMap = (container: React.RefObject<HTMLDivElement>, name: string, description: string, latitude: string,
-    longtitude: string, addFlag: boolean, editFlag: boolean, mapStyle: string, handleLongtitude: (num: number) => void,
-    handleLatitude: (num: number) => void, handleName: (name: string) => void, handleDescription: (des: string) => void, deleteData: (pointName: string) => void, editData: (pointName: string, data: any) => void, geoStyleName: string, array: any, geodata: any, drawMode: string, toggle: boolean,
+    longtitude: string, addFlag: boolean, editFlag: boolean,dataLayerFlag : boolean, mapStyle: string, handleLongtitude: (num: number) => void,
+    handleLatitude: (num: number) => void, handleName: (name: string) => void, handleDescription: (des: string) => void, deleteData: (pointName: string) => void, editData: (pointName: string, data: any) => void, geoStyleName: string,layerName:string, array: any, geodata: any, drawMode: string, toggle: boolean,
     deleteFlag: boolean) => {
 
 
@@ -265,58 +266,30 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
 
     useEffect(() => {
         if (geodata) {
-
-            mapInitRef.current?.addSource('urban-areas', {
-                'type': 'geojson',
-                'data': geodata
-            });
-            mapInitRef.current?.addLayer(
-                {
-                    'id': 'urban-areas-fill',
-                    'type': 'symbol',
-                    'source': 'urban-areas',
-
-                    'layout': {
-                        'icon-image': 'custom-marker',
-                        // get the title name from the source's "title" property
-                        'text-field': ['get', 'title'],
-                        'text-font': [
-                            'Open Sans Semibold',
-                            'Arial Unicode MS Bold'
-                        ],
-                        'text-offset': [0, 1.25],
-                        'text-anchor': 'top'
-                    }
-                    // This is the important part of this example: the addLayer
-                    // method takes 2 arguments: the layer as an object, and a string
-                    // representing another layer's name. If the other layer
-                    // exists in the style already, the new layer will be positioned
-                    // right before that layer in the stack, making it possible to put
-                    // 'overlays' anywhere in the layer stack.
-                    // Insert the layer beneath the first symbol layer.
-                },
-
-            );
+            console.log(layerName);
+            const layerImage = [assets.images.blueMarker,assets.images.grayMarker,assets.images.greenMarker,assets.images.orangeMarker,
+                assets.images.pinkMarker, assets.images.purpleMarker, assets.images.redMarker,assets.images.yellowMarker]
+            const randomNum = Math.floor(Math.random() * 7);
             mapInitRef.current?.loadImage(
-                assets.images.marker,
+                layerImage[randomNum],
                 (error:any, image:any) => {
                     if (error) throw error;
-                    mapInitRef.current?.addImage('custom-marker', image);
+                    mapInitRef.current?.addImage(layerName, image);
                     // Add a GeoJSON source with 2 points
-                    mapInitRef.current?.addSource('points', {
+                    mapInitRef.current?.addSource(layerName, {
                         'type': 'geojson',
                         'data': geodata
                     });
 
                     // Add a symbol layer
                     mapInitRef.current?.addLayer({
-                        'id': 'points',
+                        'id': layerName,
                         'type': 'symbol',
-                        'source': 'points',
+                        'source': layerName,
                         'layout': {
-                            'icon-image': 'custom-marker',
+                            'icon-image': layerName,
                             // get the title name from the source's "title" property
-                            'text-field': ['get', 'title'],
+                            'text-field': ['get', 'name'],
                             'text-font': [
                                 'Open Sans Semibold',
                                 'Arial Unicode MS Bold'
@@ -327,9 +300,9 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
                     });
                 }
             );
-            console.log(geodata);
+            
         }
-    }, [geodata]);
+    }, [dataLayerFlag]);
 
     useEffect(() => {
         if (container.current) {

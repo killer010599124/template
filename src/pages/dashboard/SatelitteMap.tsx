@@ -149,6 +149,7 @@ const SatelitteMap = (context: any) => {
   const [addFlag, setAddFlag] = useState(true);
   const [editFlag, setEditFlag] = useState(true);
   const [deleteFlag, setDeleteFlag] = useState(true);
+  const [dataLayerFlag, setDataLayerFlag] = useState(true);
 
   const csv2geojson = require('csv2geojson');
   const geojsonNormalize = require('@mapbox/geojson-normalize');
@@ -249,8 +250,27 @@ const SatelitteMap = (context: any) => {
           if (err) {
 
           } else {
+
+            setGeodata([]);
             setGeodata(result);
-            // console.log(result)
+
+            setCsvData([]);
+
+            const cheader = Object.keys(result.features[0].properties);
+            setCsvHeader(cheader);
+            const array = result.features.map((i: any) => {
+
+              const values = i.properties;
+              const obj = cheader.reduce((object: any, header, index) => {
+       
+                object[header] = values[header];
+                return object;
+              }, {});
+              manageCsvData(obj);
+              return obj;
+            });
+
+      
           }
         }
       );
@@ -433,7 +453,7 @@ const SatelitteMap = (context: any) => {
     setAllData(updatedList);
   }
 
-  const myMap = useMap(mapRef, name, description, lat, lng, addFlag, editFlag, "mapbox://styles/mapbox/satellite-streets-v12", handleLongtitude, handleLatitude, handleName, handleDescription, deleteData, editData, geoStyleName, array, geodata, drawMode, toggle, deleteFlag)
+  const myMap = useMap(mapRef, name, description, lat, lng, addFlag, editFlag, dataLayerFlag, "mapbox://styles/mapbox/satellite-streets-v12", handleLongtitude, handleLatitude, handleName, handleDescription, deleteData, editData, geoStyleName, layer, array, geodata, drawMode, toggle, deleteFlag)
 
   useEffect(() => {
     if (flag == 1) {
@@ -1029,6 +1049,7 @@ const SatelitteMap = (context: any) => {
           </label> */}
                   <label className='csv' onClick={() => {
                     setDataLayers(layers => [...layers, layer])
+                    setDataLayerFlag(!dataLayerFlag);
                   }}>
                     Add layer
                   </label>
