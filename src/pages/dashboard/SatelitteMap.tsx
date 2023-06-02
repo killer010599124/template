@@ -17,6 +17,8 @@ import { PDFViewer } from '@react-pdf/renderer';
 import MyDocument from './generatePDF';
 import jsPDF from 'jspdf';
 
+
+
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
@@ -86,7 +88,7 @@ function makeCompanyQuery(name: string, ticker: string, website: string) {
 
 
 
-const SatelitteMap = () => {
+const SatelitteMap = (context: any) => {
 
   const mapRef = useRef<HTMLDivElement>(null);
   const childRef = useRef(null);
@@ -148,13 +150,19 @@ const SatelitteMap = () => {
   const [editFlag, setEditFlag] = useState(true);
   const [deleteFlag, setDeleteFlag] = useState(true);
 
+  const csv2geojson = require('csv2geojson');
+  const geojsonNormalize = require('@mapbox/geojson-normalize');
+  const readFile = require('./readCsvFile');
+
   const [data, setData] = useState<Geo>();
   const [allData, setAllData] = useState<Geo[]>([]);
   const [array, setArray] = useState<Geo[]>([]);
   const [csvData, setCsvData] = useState<any[]>([]);
   const [csvHeader, setCsvHeader] = useState<string[]>([]);
+  const [geodata, setGeodata] = useState<any>()
+  const [layer, setLayer] = useState('');
 
-  const [dataLayer, setDataLayer] = useState<string[]>(["vessel", "people", 'business']);
+  const [dataLayers, setDataLayers] = useState<string[]>([]);
 
 
   const fileReader = new FileReader();
@@ -225,6 +233,30 @@ const SatelitteMap = () => {
     }
   };
 
+  const readCSVFile = (e: any,) => {
+    const file = e.target.files[0];
+
+    // setGeodata({});
+    readFile.readAsText(file, (err: any, text: any) => {
+      // console.log(text)
+
+      csv2geojson.csv2geojson(
+        text,
+        {
+          delimiter: 'auto'
+        },
+        (err: any, result: any) => {
+          if (err) {
+
+          } else {
+            setGeodata(result);
+            // console.log(result)
+          }
+        }
+      );
+    });
+  }
+
 
 
   const csvFileToArray = (string: string) => {
@@ -245,14 +277,15 @@ const SatelitteMap = () => {
       }, {});
       console.log(obj);
       // manageCsvData(obj);
-       if (!Number.isNaN(Number(obj.lng))) manageAllData(obj);
+      if (!Number.isNaN(Number(obj.lng))) manageAllData(obj);
 
       return obj;
     });
-    setCsvData(array);
+    // setCsvData(array);
 
     setArray(array);
   };
+
 
   const clearPersonData = () => {
     setPid("");
@@ -400,7 +433,7 @@ const SatelitteMap = () => {
     setAllData(updatedList);
   }
 
-  const myMap = useMap(mapRef, name, description, lat, lng, addFlag, editFlag, "mapbox://styles/mapbox/satellite-streets-v12", handleLongtitude, handleLatitude, handleName, handleDescription, deleteData, editData, geoStyleName, array, drawMode, toggle, deleteFlag)
+  const myMap = useMap(mapRef, name, description, lat, lng, addFlag, editFlag, "mapbox://styles/mapbox/satellite-streets-v12", handleLongtitude, handleLatitude, handleName, handleDescription, deleteData, editData, geoStyleName, array, geodata, drawMode, toggle, deleteFlag)
 
   useEffect(() => {
     if (flag == 1) {
@@ -464,7 +497,7 @@ const SatelitteMap = () => {
           marginTop: "5%",
           marginLeft: "5%", zIndex: "2",
           opacity: "0.75",
-          background: "black",
+          background: "transparent",
           padding: "8px",
           borderRadius: "20px"
         }}>
@@ -934,6 +967,7 @@ const SatelitteMap = () => {
           width: "50%",
           height: "650px",
           display: 'flex',
+          // display : 'none',
           backgroundColor: "black",
           borderRadius: '10px',
           opacity: '0.75'
@@ -951,7 +985,7 @@ const SatelitteMap = () => {
               <div className='drawTab'>
 
                 <div style={{ display: "flex", marginTop: '35px' }}>
-                  <input type="text" placeholder='Enter a layer name' style={{ width: '100%', borderColor: "white" }} />
+                  <input type="text" placeholder='Enter a layer name' value={layer} onChange={(e) => { setLayer(e.target.value) }} style={{ width: '100%', borderColor: "white" }} />
                 </div>
                 <div style={{ fontSize: '16px', lineHeight: '45px', width: '100%', height: '50px', textAlign: 'center', paddingTop: '10px' }}>
                   Layers
@@ -963,7 +997,7 @@ const SatelitteMap = () => {
                   borderRadius: '10px'
                 }}>
                   <ul style={{ width: '100%', height: '100%' }}>
-                    {dataLayer.map((data, index) => {
+                    {dataLayers.map((data, index) => {
                       return (
                         <li style={{ padding: '10px' }}>
                           {data}
@@ -987,13 +1021,15 @@ const SatelitteMap = () => {
                     // overflowY: 'scroll'
                   }}>
                   <label className='csv'>
-                    <input id="Image" type="file" onChange={OpenCSVFile} />
+                    <input id="Image" type="file" onChange={readCSVFile} />
                     Import CSV
                   </label>
                   {/* <label className='csv'>
             Export CSV
           </label> */}
-                  <label className='csv'>
+                  <label className='csv' onClick={() => {
+                    setDataLayers(layers => [...layers, layer])
+                  }}>
                     Add layer
                   </label>
                 </div>
@@ -1017,7 +1053,7 @@ const SatelitteMap = () => {
                 overflow: 'scroll'
                 // height: "100%"
               }}>
-                <thead style={{background: 'lightslategray', position:'sticky', top:'0' }}>
+                <thead style={{ background: 'lightslategray', position: 'sticky', top: '0' }}>
                   <tr style={{}}>
                     {csvHeader.map((data, index) => {
                       return (
@@ -1026,7 +1062,7 @@ const SatelitteMap = () => {
                     })}
                   </tr>
                 </thead>
-                <tbody style = {{}}>
+                <tbody style={{}}>
                   {csvData.map((data, index) => {
                     return (
                       <tr style={{}}>
@@ -1056,3 +1092,5 @@ const SatelitteMap = () => {
 };
 
 export default SatelitteMap;
+
+
