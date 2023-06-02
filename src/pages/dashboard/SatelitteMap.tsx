@@ -16,7 +16,14 @@ import PDLJSClient from './PDL';
 import { PDFViewer } from '@react-pdf/renderer';
 import MyDocument from './generatePDF';
 import jsPDF from 'jspdf';
-
+import colorConfigs from '../../configs/colorConfigs';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import Divider from '@mui/material/Divider';
+import ListItemText from '@mui/material/ListItemText';
+import ListItemAvatar from '@mui/material/ListItemAvatar';
+import Avatar from '@mui/material/Avatar';
+import Typography from '@mui/material/Typography';
 
 
 interface TabPanelProps {
@@ -71,11 +78,39 @@ function TabPanel_PB(props: TabPanelProps) {
     </div>
   );
 }
+
 function a11yProps_PB(index: number) {
   return {
     id: `simple-tab-${index}`,
     'aria-controls': `simple-tabpanel_pb-${index}`,
   };
+}
+
+function a11yProps_DV(index: number) {
+  return {
+    id: `simple-tab-${index}`,
+    'aria-controls': `simple-tabpanel_dv-${index}`,
+  };
+}
+
+function TabPanel_DV(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="TabPanel_DV"
+      hidden={value !== index}
+      id={`simple-tabpanel_dv-${index}`}
+      aria-labelledby={`simple-tab_dv-${index}`}
+      {...other}
+    >
+      {value === index && (
+
+        <div>{children}</div>
+
+      )}
+    </div>
+  );
 }
 
 function makePersonQuery(first_name: string, last_name: string, address: string, email: string, phone: string) {
@@ -101,6 +136,8 @@ const SatelitteMap = (context: any) => {
 
   const [value_tab_draw, setValue_tab_draw] = React.useState(0);
   const [value_tab_pb, setValue_tab_pb] = React.useState(0);
+  const [value_tab_dv, setValue_tab_dv] = React.useState(0);
+
   const [drawMode, setDrawMode] = useState('');
 
   const [toggle, setToggle] = useState(true);
@@ -110,6 +147,9 @@ const SatelitteMap = (context: any) => {
   };
   const handleTabPBChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue_tab_pb(newValue);
+  };
+  const handleTabDVChange = (event: React.SyntheticEvent, newValue: number) => {
+    setValue_tab_dv(newValue);
   };
 
   const handleToggle = () => {
@@ -194,6 +234,7 @@ const SatelitteMap = (context: any) => {
   const [ptwitter_url, setPtwitter_url] = useState('');
   const [ptwitter_un, setPtwitter_un] = useState('');
 
+  const [dvMode, setDvMode] = useState('table');
   const [pbMode, setPbMode] = useState('person');
   const [isSearchResult, setIsSearchResult] = useState(false);
   //------------------------- Company Search Engine ------------------//
@@ -262,7 +303,7 @@ const SatelitteMap = (context: any) => {
 
               const values = i.properties;
               const obj = cheader.reduce((object: any, header, index) => {
-       
+
                 object[header] = values[header];
                 return object;
               }, {});
@@ -270,7 +311,7 @@ const SatelitteMap = (context: any) => {
               return obj;
             });
 
-      
+
           }
         }
       );
@@ -619,7 +660,7 @@ const SatelitteMap = (context: any) => {
       </div>
 
       {/* ---------------------------Point Data layout ----------------------- */}
-      <div style={{
+      {/* <div style={{
         position: "absolute",
         right: "0px",
         marginTop: "-1%",
@@ -666,6 +707,133 @@ const SatelitteMap = (context: any) => {
           </div>
 
         </form>
+      </div> */}
+
+      <div style={{
+        position: "fixed",
+        right: "0%",
+        zIndex: "1",
+        width: '20%',
+        height: '94%',
+        opacity: 0.75,
+        background: 'black'
+      }}>
+
+        <div>
+          <button style={{
+            position: 'absolute',
+            width: '40px',
+            height: '30px',
+            marginLeft: '-40px',
+            top: '50%',
+            background: 'black',
+            opacity: '0.75',
+            color: 'white'
+          }}>H/V</button>
+        </div>
+        <Box sx={{ width: '100%' }}>
+          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            <Tabs value={value_tab_dv} onChange={handleTabDVChange} aria-label="basic tabs example">
+              <Tab label="Layer" {...a11yProps_DV(0)} style={{ color: "white", width: '50%' }} onClick={() => { setDvMode('layer') }}
+              />
+              <Tab label="Data" {...a11yProps_DV(1)} style={{ color: "white", width: '50%' }} onClick={() => { setDvMode('table') }}
+              />
+            </Tabs>
+          </Box>
+          <TabPanel_PB value={value_tab_dv} index={0} >
+            <List style={{background: 'black', padding : '7%', maxWidth:'100%'}} sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}>
+              <ListItem alignItems="flex-start" style={{textAlign:'center', alignItems:'center', color: 'white'}}>
+                <ListItemAvatar>
+                  <Avatar style={{width:'100%', height:'120px', borderRadius: '10px'}} alt="Remy Sharp" src={assets.images.logo} />
+                </ListItemAvatar>
+                <ListItemText
+                style={{marginLeft: '15px'}}
+                  primary="Vessel"
+             
+                />
+              </ListItem>
+              <Divider variant="inset" component="li" />
+              <ListItem alignItems="flex-start"  style={{textAlign:'center', alignItems:'center', color: 'white'}}>
+                <ListItemAvatar>
+                <Avatar style={{width:'100%', height:'120px', borderRadius: '10px'}} alt="Remy Sharp" src={assets.images.logo} />
+                </ListItemAvatar>
+                <ListItemText
+                style={{marginLeft: '15px'}}
+                  primary="Company"
+                 
+                />
+              </ListItem>
+              <Divider variant="inset" component="li" />
+              <ListItem alignItems="flex-start"  style={{textAlign:'center', alignItems:'center', color: 'white'}}>
+                <ListItemAvatar>
+                <Avatar style={{width:'100%', height:'120px', borderRadius: '10px'}} alt="Remy Sharp" src={assets.images.logo} />
+                </ListItemAvatar>
+                <ListItemText
+                style={{marginLeft: '15px'}}
+                  primary="People"
+                 
+                />
+              </ListItem>
+            </List>
+
+          </TabPanel_PB>
+          <TabPanel_PB value={value_tab_dv} index={1}>
+            <div>
+              <div style={{
+                color: 'white',
+                textAlign: 'center',
+                padding: '20px'
+              }}>Data Table</div>
+              <div className='' style={{
+                position: 'absolute',
+                right: "0px",
+                zIndex: "1",
+                background: "black",
+                opacity: "0.75",
+                color: "white",
+                height: "85%",
+                padding: "5px",
+                width: '100%',
+              }}>
+                <table className='large-2' style={{
+                  textAlign: "center",
+                  width: "100%",
+                  overflowY: 'scroll',
+                  display: 'block',
+                  height: "100%"
+                }}>
+                  <thead style={{ top: '0', position: 'sticky', background: 'gray' }}>
+                    <tr style={{}}>
+                      {csvHeader.map((data, index) => {
+                        return (
+                          <td style={{ textAlign: 'center' }}>{data}</td>
+                        );
+                      })}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {csvData.map((data, index) => {
+                      return (
+                        <tr style={{}}>
+                          {csvHeader.map((header, index) => {
+                            return (
+                              <td style={{ textAlign: 'center', padding: '10px' }}>{data[header]}</td>
+                            );
+                          })}
+                        </tr>
+                      );
+                    })}
+
+                  </tbody>
+                </table>
+
+              </div>
+            </div>
+
+          </TabPanel_PB>
+
+        </Box>
+
       </div>
 
       {/* -------------------------   P&B layout --------------------- */}
@@ -907,7 +1075,7 @@ const SatelitteMap = (context: any) => {
 
 
       {/* ------------------------- Geo Point Table layout-------------------- */}
-      <div style={dataVisible ? { display: "none" } : {
+      {/* <div style={dataVisible ? { display: "none" } : {
         display: "block",
         position: "absolute",
         right: "0px",
@@ -970,12 +1138,10 @@ const SatelitteMap = (context: any) => {
             <input id="Image" type="file" onChange={OpenCSVFile} />
             Import CSV
           </label>
-          {/* <label className='csv'>
-            Export CSV
-          </label> */}
+          
           <CSVLink data={allData} style={{ width: '40%' }}><button className='csv' style={{ height: '33px', fontSize: '15px', width: '100%' }}>Export CSV</button></CSVLink>
         </div>
-      </div>
+      </div> */}
 
       {/* -----------------------------import various csv , Data layer  */}
       <div className='' style={dataVisible ? { display: "none" } :
@@ -1074,7 +1240,7 @@ const SatelitteMap = (context: any) => {
                 overflow: 'scroll'
                 // height: "100%"
               }}>
-                <thead style={{ background: 'lightslategray', position: 'sticky', top: '0' }}>
+                <thead style={{ background: 'gray', position: 'sticky', top: '0' }}>
                   <tr style={{}}>
                     {csvHeader.map((data, index) => {
                       return (

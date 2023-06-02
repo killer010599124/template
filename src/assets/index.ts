@@ -1,6 +1,6 @@
 const assets = {
   images: {
-    logo: require("./images/geofence.png"),
+    logo: require("./images/maxresdefault.jpg"),
     data : require("./images/data.png"),
     geoMark : require("./images/geoMark.png"),
     marker: require("./images/marker.png"),

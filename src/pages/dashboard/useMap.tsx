@@ -2,6 +2,7 @@ import { useEffect, forwardRef, useImperativeHandle, useRef, useState } from 're
 import { LngLat, Map, Marker, } from 'mapbox-gl';
 import { initMap } from './initMap';
 import { generateNewMarker } from './generateNewMarker';
+import { addMarkers } from './addMarkers';
 import MapboxDraw from "@mapbox/mapbox-gl-draw"
 import MapBoxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import DrawControl from 'react-mapbox-gl-draw';
@@ -17,11 +18,12 @@ import { setAppState } from '../../redux/features/appStateSlice';
 import { assert } from 'console';
 import assets from '../../assets';
 import { randomInt } from 'crypto';
+import { store } from '../../redux/store';
 
 
 export const useMap = (container: React.RefObject<HTMLDivElement>, name: string, description: string, latitude: string,
-    longtitude: string, addFlag: boolean, editFlag: boolean,dataLayerFlag : boolean, mapStyle: string, handleLongtitude: (num: number) => void,
-    handleLatitude: (num: number) => void, handleName: (name: string) => void, handleDescription: (des: string) => void, deleteData: (pointName: string) => void, editData: (pointName: string, data: any) => void, geoStyleName: string,layerName:string, array: any, geodata: any, drawMode: string, toggle: boolean,
+    longtitude: string, addFlag: boolean, editFlag: boolean, dataLayerFlag: boolean, mapStyle: string, handleLongtitude: (num: number) => void,
+    handleLatitude: (num: number) => void, handleName: (name: string) => void, handleDescription: (des: string) => void, deleteData: (pointName: string) => void, editData: (pointName: string, data: any) => void, geoStyleName: string, layerName: string, array: any, geodata: any, drawMode: string, toggle: boolean,
     deleteFlag: boolean) => {
 
 
@@ -30,6 +32,8 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
     const [markersArray, setMarkersArray] = useState<Marker[]>([]);
     const [currentMarker, setCurrentMarker] = useState<Marker>();
     const [currentBlueMaker, setCurrentBlueMaker] = useState<Marker>();
+    const [currentLayerMarker, setCurrentLayerMarker] = useState<Marker>();
+
     const [currentMakerName, setCurrentMakerName] = useState<string>()
     const [currentMakerDescription, setCurrentMakerDescription] = useState<string>()
 
@@ -43,6 +47,10 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
         setCurrentBlueMaker(maker);
         setCurrentMakerName(pointName);
         setCurrentMakerDescription(description);
+    }
+
+    const handleLayerMarker = (marker:Marker) => {
+        setCurrentLayerMarker(marker);
     }
 
 
@@ -265,14 +273,18 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
     }, [array]);
 
     useEffect(() => {
+
+
         if (geodata) {
-            console.log(layerName);
-            const layerImage = [assets.images.blueMarker,assets.images.grayMarker,assets.images.greenMarker,assets.images.orangeMarker,
-                assets.images.pinkMarker, assets.images.purpleMarker, assets.images.redMarker,assets.images.yellowMarker]
+            // buildLocationList(geodata);
+            addMarkers(geodata,mapInitRef.current!,handleLayerMarker);
+
+            const layerImage = [assets.images.blueMarker, assets.images.grayMarker, assets.images.greenMarker, assets.images.orangeMarker,
+            assets.images.pinkMarker, assets.images.purpleMarker, assets.images.redMarker, assets.images.yellowMarker]
             const randomNum = Math.floor(Math.random() * 7);
             mapInitRef.current?.loadImage(
                 layerImage[randomNum],
-                (error:any, image:any) => {
+                (error: any, image: any) => {
                     if (error) throw error;
                     mapInitRef.current?.addImage(layerName, image);
                     // Add a GeoJSON source with 2 points
@@ -280,8 +292,8 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
                         'type': 'geojson',
                         'data': geodata
                     });
-
                     // Add a symbol layer
+
                     mapInitRef.current?.addLayer({
                         'id': layerName,
                         'type': 'symbol',
@@ -289,7 +301,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
                         'layout': {
                             'icon-image': layerName,
                             // get the title name from the source's "title" property
-                            'text-field': ['get', 'name'],
+                            // 'text-field': ['get', 'name'],
                             'text-font': [
                                 'Open Sans Semibold',
                                 'Arial Unicode MS Bold'
@@ -300,7 +312,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
                     });
                 }
             );
-            
+
         }
     }, [dataLayerFlag]);
 
@@ -310,4 +322,10 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
         }
     }, [geoStyleName]);
 
+    function buildLocationList(stores: any) {
+        const array = stores.features.map((i: any, index: number) => {
+            i.properties.id = index;
+        });
+    }
+    
 }

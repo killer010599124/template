@@ -12,6 +12,7 @@ export const generateNewMarker = ({name, description, lat, lng, map, color, drag
         .setPopup(popUp)
         .addTo(map);
         
+        
     marker.getElement().addEventListener('click', (e) => {{
         setBlueMaker(marker,name,description);
         popUp.setHTML(`
