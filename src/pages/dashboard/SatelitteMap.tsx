@@ -9,7 +9,7 @@ import Tab from '@mui/material/Tab/Tab';
 import DrawControl from 'react-mapbox-gl-draw';
 // import "react-map-gl-geocoder/dist/mapbox-gl-geocoder.css";
 // import Geocoder from './Geocoder'; 
-import { AddressAutofill } from '@mapbox/search-js-react';
+import { AddressAutofill, useSearchSession } from '@mapbox/search-js-react';
 import { Box, Tabs } from '@mui/material';
 import { CSVLink, CSVDownload } from "react-csv";
 import PDLJSClient from './PDL';
@@ -17,6 +17,8 @@ import { PDFViewer } from '@react-pdf/renderer';
 import MyDocument from './generatePDF';
 import jsPDF from 'jspdf';
 import colorConfigs from '../../configs/colorConfigs';
+import withStyles from '@mui/material';
+import makeStyles from '@mui/material';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import Divider from '@mui/material/Divider';
@@ -24,6 +26,7 @@ import ListItemText from '@mui/material/ListItemText';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import Avatar from '@mui/material/Avatar';
 import Typography from '@mui/material/Typography';
+import listItemClasses from '@mui/material/ListItem';
 
 
 interface TabPanelProps {
@@ -137,6 +140,7 @@ const SatelitteMap = (context: any) => {
   const [value_tab_draw, setValue_tab_draw] = React.useState(0);
   const [value_tab_pb, setValue_tab_pb] = React.useState(0);
   const [value_tab_dv, setValue_tab_dv] = React.useState(0);
+  const [active, setActive] = useState<string>();
 
   const [drawMode, setDrawMode] = useState('');
 
@@ -155,6 +159,9 @@ const SatelitteMap = (context: any) => {
   const handleToggle = () => {
     setToggle(!toggle);
   }
+
+
+
   const handleGeneratePdf = () => {
     const doc = new jsPDF('p', 'mm', [1000, 750]);
 
@@ -185,6 +192,7 @@ const SatelitteMap = (context: any) => {
     lng: string;
   }
 
+
   const [flag, setFlag] = useState(0);
   const [addFlag, setAddFlag] = useState(true);
   const [editFlag, setEditFlag] = useState(true);
@@ -198,10 +206,18 @@ const SatelitteMap = (context: any) => {
   const [data, setData] = useState<Geo>();
   const [allData, setAllData] = useState<Geo[]>([]);
   const [array, setArray] = useState<Geo[]>([]);
+
   const [csvData, setCsvData] = useState<any[]>([]);
   const [csvHeader, setCsvHeader] = useState<string[]>([]);
+
+
+
   const [geodata, setGeodata] = useState<any>()
+  const [allGeodata, setAllGeodata] = useState<any[]>([]);
   const [layer, setLayer] = useState('');
+  const [currentLayerName, setCurrentLayerName] = useState('');
+  const [currentLayerData, setCurrentLayerData] = useState<any[]>([]);
+  const [currentLayerDataHeader, setCurrentLayerDataHeader] = useState<string[]>([]);
 
   const [dataLayers, setDataLayers] = useState<string[]>([]);
 
@@ -268,7 +284,6 @@ const SatelitteMap = (context: any) => {
       fileReader.onload = function (event: any) {
         const csvOutput = event.target.result;
         csvFileToArray(csvOutput);
-        // console.log(csvOutput)
       };
 
       fileReader.readAsText(file);
@@ -278,9 +293,7 @@ const SatelitteMap = (context: any) => {
   const readCSVFile = (e: any,) => {
     const file = e.target.files[0];
 
-    // setGeodata({});
     readFile.readAsText(file, (err: any, text: any) => {
-      // console.log(text)
 
       csv2geojson.csv2geojson(
         text,
@@ -299,6 +312,7 @@ const SatelitteMap = (context: any) => {
 
             const cheader = Object.keys(result.features[0].properties);
             setCsvHeader(cheader);
+
             const array = result.features.map((i: any) => {
 
               const values = i.properties;
@@ -320,23 +334,56 @@ const SatelitteMap = (context: any) => {
 
 
 
+  const addDataLayer = () => {
+    setDataLayers(layers => [...layers, layer])
+    // setDataLayerFlag(!dataLayerFlag);
+    if (geodata) {
+      const temp = { name: layer, data: geodata };
+      setAllGeodata(prevNames => [...prevNames, temp]);
+
+    }
+  }
+
+  useEffect(() => {
+    if (currentLayerName) {
+      allGeodata.map((data, index) => {
+        if (data.name === currentLayerName) {
+          const cheader = Object.keys(data.data.features[0].properties);
+          setCurrentLayerDataHeader(cheader);
+          const array = data.data.features.map((i: any) => {
+
+            const values = i.properties;
+            const obj = cheader.reduce((object: any, header, index) => {
+
+              object[header] = values[header];
+              return object;
+            }, {});
+            
+            setCurrentLayerData(prevNames => [...prevNames, obj])  
+          });
+        }
+      });
+      
+    }
+  }, [currentLayerName]);
+
+
   const csvFileToArray = (string: string) => {
     const csvHeader = string.slice(0, string.indexOf("\n") - 1).split(",");
     for (let i = 0; i < csvHeader.length; i++) {
       csvHeader[i] = csvHeader[i].replaceAll('"', '');
     }
-    console.log(csvHeader);
+
     setCsvHeader(csvHeader);
     const csvRows = string.slice(string.indexOf("\n") + 1).split("\n");
 
     const array = csvRows.map(i => {
-      console.log(i)
+
       const values = i.split(",");
       const obj = csvHeader.reduce((object: any, header, index) => {
         object[header] = values[index].replaceAll('"', '');
         return object;
       }, {});
-      console.log(obj);
       // manageCsvData(obj);
       if (!Number.isNaN(Number(obj.lng))) manageAllData(obj);
 
@@ -368,7 +415,6 @@ const SatelitteMap = (context: any) => {
   const getPersonData = () => {
     clearPersonData();
     const query = makePersonQuery(firstName, lastName, address, email, phoneNumber);
-    console.log(query);
     PDLJSClient.person.search.sql({
       searchQuery: query,
       size: 10,
@@ -420,7 +466,6 @@ const SatelitteMap = (context: any) => {
       searchQuery: query,
       size: 10,
     }).then((data) => {
-      console.log(data);
       setBid(data['data'][0].id as string);
       setBname(data['data'][0].name as string);
       setBfounded(data['data'][0].founded as number);
@@ -449,14 +494,12 @@ const SatelitteMap = (context: any) => {
   const handleLongtitude = (num: number) => {
     // 👇️ take the parameter passed from the Child component
     setLng(num.toString());
-    // console.log('argument from Child: ', lng);
   };
 
   const handleLatitude = (num: number) => {
     // 👇️ take the parameter passed from the Child component
     setLat(num.toString());
     setFlag(1);
-    // console.log('argument from Child: ', lng);
   };
 
   const handleName = (name: string) => {
@@ -481,8 +524,7 @@ const SatelitteMap = (context: any) => {
   }
   const editData = (pointName: string, data: any) => {
 
-    console.log(data.name);
-    console.log(data);
+
 
     let updatedList = allData.map(item => {
       if (item.name == pointName) {
@@ -740,44 +782,37 @@ const SatelitteMap = (context: any) => {
               />
             </Tabs>
           </Box>
-          <TabPanel_PB value={value_tab_dv} index={0} >
-            <List style={{background: 'black', padding : '7%', maxWidth:'100%'}} sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}>
-              <ListItem alignItems="flex-start" style={{textAlign:'center', alignItems:'center', color: 'white'}}>
-                <ListItemAvatar>
-                  <Avatar style={{width:'100%', height:'120px', borderRadius: '10px'}} alt="Remy Sharp" src={assets.images.logo} />
-                </ListItemAvatar>
-                <ListItemText
-                style={{marginLeft: '15px'}}
-                  primary="Vessel"
-             
-                />
-              </ListItem>
-              <Divider variant="inset" component="li" />
-              <ListItem alignItems="flex-start"  style={{textAlign:'center', alignItems:'center', color: 'white'}}>
-                <ListItemAvatar>
-                <Avatar style={{width:'100%', height:'120px', borderRadius: '10px'}} alt="Remy Sharp" src={assets.images.logo} />
-                </ListItemAvatar>
-                <ListItemText
-                style={{marginLeft: '15px'}}
-                  primary="Company"
-                 
-                />
-              </ListItem>
-              <Divider variant="inset" component="li" />
-              <ListItem alignItems="flex-start"  style={{textAlign:'center', alignItems:'center', color: 'white'}}>
-                <ListItemAvatar>
-                <Avatar style={{width:'100%', height:'120px', borderRadius: '10px'}} alt="Remy Sharp" src={assets.images.logo} />
-                </ListItemAvatar>
-                <ListItemText
-                style={{marginLeft: '15px'}}
-                  primary="People"
-                 
-                />
-              </ListItem>
+          <TabPanel_DV value={value_tab_dv} index={0} >
+            <List
+              sx={{
+
+                width: '100%', maxWidth: 360, bgcolor: 'background.paper'
+              }}
+              style={{ background: 'black', padding: '7%', maxWidth: '100%' }} >
+
+              {dataLayers.map((data, index) => {
+                return (
+                  <ListItem
+                    alignItems="flex-start"
+                    onClick={() => setCurrentLayerName(data)}
+                    className={`list-item ${currentLayerName == data && "active"}`}
+                    style={{ textAlign: 'center', alignItems: 'center', color: 'white' }}>
+                    <ListItemAvatar>
+                      <Avatar style={{ width: '100%', height: '120px', borderRadius: '10px' }} alt="Remy Sharp" src={assets.images.logo} />
+                    </ListItemAvatar>
+                    <ListItemText
+                      style={{ marginLeft: '15px' }}
+                      primary={data}
+
+                    />
+                  </ListItem>
+                );
+              })}
+
             </List>
 
-          </TabPanel_PB>
-          <TabPanel_PB value={value_tab_dv} index={1}>
+          </TabPanel_DV>
+          <TabPanel_DV value={value_tab_dv} index={1}>
             <div>
               <div style={{
                 color: 'white',
@@ -804,7 +839,7 @@ const SatelitteMap = (context: any) => {
                 }}>
                   <thead style={{ top: '0', position: 'sticky', background: 'gray' }}>
                     <tr style={{}}>
-                      {csvHeader.map((data, index) => {
+                      {currentLayerDataHeader.map((data, index) => {
                         return (
                           <td style={{ textAlign: 'center' }}>{data}</td>
                         );
@@ -812,10 +847,10 @@ const SatelitteMap = (context: any) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {csvData.map((data, index) => {
+                    {currentLayerData.map((data, index) => {
                       return (
                         <tr style={{}}>
-                          {csvHeader.map((header, index) => {
+                          {currentLayerDataHeader.map((header, index) => {
                             return (
                               <td style={{ textAlign: 'center', padding: '10px' }}>{data[header]}</td>
                             );
@@ -830,7 +865,7 @@ const SatelitteMap = (context: any) => {
               </div>
             </div>
 
-          </TabPanel_PB>
+          </TabPanel_DV>
 
         </Box>
 
@@ -1063,12 +1098,9 @@ const SatelitteMap = (context: any) => {
                       <div>{bcrunchbase}</div>
                     </div>
                   </div>
-
-
                 </div>
               </div>
             )}
-
           </div>
         </div>
       </div>
@@ -1185,7 +1217,7 @@ const SatelitteMap = (context: any) => {
                   <ul style={{ width: '100%', height: '100%' }}>
                     {dataLayers.map((data, index) => {
                       return (
-                        <li style={{ padding: '10px' }}>
+                        <li style={{ padding: '10px', borderRadius: '10px' }}>
                           {data}
                         </li>
                       );
@@ -1214,8 +1246,7 @@ const SatelitteMap = (context: any) => {
             Export CSV
           </label> */}
                   <label className='csv' onClick={() => {
-                    setDataLayers(layers => [...layers, layer])
-                    setDataLayerFlag(!dataLayerFlag);
+                    addDataLayer()
                   }}>
                     Add layer
                   </label>

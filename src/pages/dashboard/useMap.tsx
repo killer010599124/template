@@ -138,9 +138,8 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
 
     useEffect(() => {
         if (container.current) {
-            console.log(lnglat);
         }
-        console.log(lnglat);
+      
     }, [lnglat]);
 
     useEffect(() => {
@@ -249,14 +248,13 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
         if (container.current) {
             currentMarker?.remove();
             currentBlueMaker?.remove();
-            console.log(currentMakerName);
             deleteData(currentMakerName as string);
         }
     }, [deleteFlag]);
     useEffect(() => {
         if (container.current) {
             for (let i = 0; i < array.length; i++) {
-                console.log('cnt');
+               
                 const v = new LngLat(Number(array[i]?.lng), Number(array[i]?.lat))
                 const marker = generateNewMarker({
                     name: array[i]?.name,

@@ -376,3 +376,19 @@ input[type="button"] {
   background-color: #737272;
   border: 1px solid #000;
 }
+ul li a {
+  display:block;
+ }
+ 
+ ul li:hover {
+  background: slategray;
+  color:white;
+ }
+
+.list-item {
+  cursor: pointer;
+}
+.list-item.active {
+  background-color: steelblue ;
+}
+ 
