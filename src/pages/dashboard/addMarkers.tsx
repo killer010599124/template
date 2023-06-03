@@ -20,7 +20,7 @@ export const addMarkers = (geodata: any, map: Map, handleLayerMarker : (marker :
             }, {});
             html += `<button onclick = "alert('hello')"> delete </button>`
 
-            const popUp = new Popup({ closeButton: false, anchor: 'left', })
+            const popUp = new Popup({  anchor: 'left', })
                 .setHTML(html);
 
 

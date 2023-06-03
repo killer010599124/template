@@ -23,7 +23,8 @@ import { store } from '../../redux/store';
 
 export const useMap = (container: React.RefObject<HTMLDivElement>, name: string, description: string, latitude: string,
     longtitude: string, addFlag: boolean, editFlag: boolean, dataLayerFlag: boolean, mapStyle: string, handleLongtitude: (num: number) => void,
-    handleLatitude: (num: number) => void, handleName: (name: string) => void, handleDescription: (des: string) => void, deleteData: (pointName: string) => void, editData: (pointName: string, data: any) => void, geoStyleName: string, layerName: string, array: any, geodata: any, drawMode: string, toggle: boolean,
+    handleLatitude: (num: number) => void, handleName: (name: string) => void, handleDescription: (des: string) => void, deleteData: (pointName: string) => void,
+    editData: (pointName: string, data: any) => void, geoStyleName: string, layerName: string, currentLayerName: string, array: any, geodata: any, allGeodata: any, drawMode: string, toggle: boolean,
     deleteFlag: boolean) => {
 
 
@@ -49,7 +50,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
         setCurrentMakerDescription(description);
     }
 
-    const handleLayerMarker = (marker:Marker) => {
+    const handleLayerMarker = (marker: Marker) => {
         setCurrentLayerMarker(marker);
     }
 
@@ -138,7 +139,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
     useEffect(() => {
         if (container.current) {
         }
-      
+
     }, [lnglat]);
 
     useEffect(() => {
@@ -253,7 +254,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
     useEffect(() => {
         if (container.current) {
             for (let i = 0; i < array.length; i++) {
-               
+
                 const v = new LngLat(Number(array[i]?.lng), Number(array[i]?.lat))
                 const marker = generateNewMarker({
                     name: array[i]?.name,
@@ -274,7 +275,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
 
         if (geodata) {
             // buildLocationList(geodata);
-            addMarkers(geodata,mapInitRef.current!,handleLayerMarker);
+            addMarkers(geodata, mapInitRef.current!, handleLayerMarker);
 
             const layerImage = [assets.images.blueMarker, assets.images.grayMarker, assets.images.greenMarker, assets.images.orangeMarker,
             assets.images.pinkMarker, assets.images.purpleMarker, assets.images.redMarker, assets.images.yellowMarker]
@@ -315,6 +316,20 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
 
     useEffect(() => {
         if (container.current) {
+            allGeodata.map((data : any, index : any) => {
+                if (data.name === currentLayerName) {
+                    console.log(data.data)
+                    mapInitRef.current!.flyTo({
+                        center: data.data.features[0].geometry.coordinates,
+                        zoom: 16
+                    });
+                }
+            });
+        }
+    }, [currentLayerName]);
+
+    useEffect(() => {
+        if (container.current) {
             mapInitRef.current?.setStyle(geoStyleName);
         }
     }, [geoStyleName]);
@@ -324,5 +339,5 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
             i.properties.id = index;
         });
     }
-    
+
 }

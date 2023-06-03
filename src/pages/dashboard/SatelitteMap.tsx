@@ -364,7 +364,6 @@ const SatelitteMap = (context: any) => {
           });
         }
       });
-      console.log(currentLayerData)
       
     }
   }, [currentLayerName]);
@@ -538,7 +537,7 @@ const SatelitteMap = (context: any) => {
     setAllData(updatedList);
   }
 
-  const myMap = useMap(mapRef, name, description, lat, lng, addFlag, editFlag, dataLayerFlag, "mapbox://styles/mapbox/satellite-streets-v12", handleLongtitude, handleLatitude, handleName, handleDescription, deleteData, editData, geoStyleName, layer, array, geodata, drawMode, toggle, deleteFlag)
+  const myMap = useMap(mapRef, name, description, lat, lng, addFlag, editFlag, dataLayerFlag, "mapbox://styles/mapbox/satellite-streets-v12", handleLongtitude, handleLatitude, handleName, handleDescription, deleteData, editData, geoStyleName, layer,currentLayerName, array, geodata,allGeodata, drawMode, toggle, deleteFlag)
 
   useEffect(() => {
     if (flag == 1) {
