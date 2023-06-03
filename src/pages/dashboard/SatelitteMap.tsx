@@ -336,7 +336,7 @@ const SatelitteMap = (context: any) => {
 
   const addDataLayer = () => {
     setDataLayers(layers => [...layers, layer])
-    // setDataLayerFlag(!dataLayerFlag);
+    setDataLayerFlag(!dataLayerFlag);
     if (geodata) {
       const temp = { name: layer, data: geodata };
       setAllGeodata(prevNames => [...prevNames, temp]);
@@ -350,6 +350,7 @@ const SatelitteMap = (context: any) => {
         if (data.name === currentLayerName) {
           const cheader = Object.keys(data.data.features[0].properties);
           setCurrentLayerDataHeader(cheader);
+          setCurrentLayerData([]);
           const array = data.data.features.map((i: any) => {
 
             const values = i.properties;
@@ -363,6 +364,7 @@ const SatelitteMap = (context: any) => {
           });
         }
       });
+      console.log(currentLayerData)
       
     }
   }, [currentLayerName]);

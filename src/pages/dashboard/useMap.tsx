@@ -121,7 +121,6 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
                 const marker = markersArray[markersArray.length - 2];
                 marker.remove()
             }
-
         }
     }, [currentMarker]);
 
@@ -297,7 +296,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
                         'type': 'symbol',
                         'source': layerName,
                         'layout': {
-                            'icon-image': layerName,
+                            'icon-image': '',
                             // get the title name from the source's "title" property
                             // 'text-field': ['get', 'name'],
                             'text-font': [
