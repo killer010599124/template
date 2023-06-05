@@ -1,6 +1,6 @@
 import { Popup, Marker, Map } from 'mapbox-gl';
 
-export const addMarkers = (geodata: any, map: Map, handleLayerMarker : (marker : Marker) => void) => {
+export const addMarkers = (geodata: any, map: Map, handleLayerMarker: (marker: Marker) => void) => {
 
     const layerImage = ['gray', 'red', 'blue', 'green', 'black', 'yello', 'pink', 'purple']
     const randomNum = Math.floor(Math.random() * 7);
@@ -14,14 +14,16 @@ export const addMarkers = (geodata: any, map: Map, handleLayerMarker : (marker :
             const values = i.properties;
             const obj = cheader.reduce((object: any, header, index) => {
 
-                html += `<div>${header} : ${values[header]}</div>`
+                html += `<div class = "${header}">${header} : ${values[header]}</div>`
                 // object[header] = values[header];
                 // return object;
             }, {});
-            html += `<button onclick = "alert('hello')"> delete </button>`
-
-            const popUp = new Popup({  anchor: 'left', })
+            html += `<button  class = 'deletemarker' > delete </button>`;
+            html += `<button  class = 'editmarker' > edit </button>`;
+            // html += `<button  class = 'deletemarker' > delete </button>`;
+            const popUp = new Popup({ anchor: 'left', })
                 .setHTML(html);
+          
 
 
             const marker = new Marker({ color: layerImage[randomNum], scale: 0.8 })
@@ -38,23 +40,22 @@ export const addMarkers = (geodata: any, map: Map, handleLayerMarker : (marker :
                     // marker.remove()
                 }
             }, false);
-            
+            if (document.getElementsByClassName('deletemarker')[0]) {
+
+            }
+
         }
-        // function deleteMarker() {
-        //     marker.remove()
-        // }
 
     }
 
     );
-
+    function deleteMarker() {
+        alert('delete');
+    }
     function flyToStore(currentFeature: any) {
         map.flyTo({
             center: currentFeature.geometry.coordinates,
-            zoom: 16
+            zoom: 18
         });
     }
-    // console.log(marker.getLngLat())
-    // markerArray.push(marker);
-    // console.log(markerArray[0].getLngLat())
 }

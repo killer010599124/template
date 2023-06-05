@@ -1,4 +1,5 @@
 import { useEffect, forwardRef, useImperativeHandle, useRef, useState } from 'react';
+import ReactDOM from "react-dom";
 import { LngLat, Map, Marker, } from 'mapbox-gl';
 import { initMap } from './initMap';
 import { generateNewMarker } from './generateNewMarker';
@@ -29,11 +30,14 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
 
 
     const mapInitRef = useRef<Map | null>(null);
+    const popUpRef = useRef(new mapboxgl.Popup({ offset: 15 }))
 
     const [markersArray, setMarkersArray] = useState<Marker[]>([]);
     const [currentMarker, setCurrentMarker] = useState<Marker>();
     const [currentBlueMaker, setCurrentBlueMaker] = useState<Marker>();
     const [currentLayerMarker, setCurrentLayerMarker] = useState<Marker>();
+    const [cLayerName, setCLayerName] = useState('');
+
 
     const [currentMakerName, setCurrentMakerName] = useState<string>()
     const [currentMakerDescription, setCurrentMakerDescription] = useState<string>()
@@ -88,10 +92,43 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
             // );
 
 
+            // mapInitRef.current && mapInitRef.current.on("click", (e : any) => {
+
+            //     const features = mapInitRef.current!.queryRenderedFeatures(e.point, {
+            //         layers : [currentLayerName],
+            //     })
+
+            //     if (features.length > 0) {
+            //         const feature = features[0];
+
+            //         // const coordinates = e.features[0].geometry.coordinates;
+            //         // console.log(coordinates)
+
+
+
+            //         // create popup nod
+            //         const popupNode = document.createElement("div")
+            //         ReactDOM.render(
+            //             <>
+            //                 <div>{feature?.properties?.ID}</div>
+            //             </>,
+            //             popupNode
+            //         )
+            //         popUpRef.current
+            //             .setLngLat(e.lngLat)
+            //             .setDOMContent(popupNode)
+            //             .addTo(mapInitRef.current!)
+            //     }
+            //     return () => {
+            //         mapInitRef.current!.off('click', noti);
+            //       }
+            // })
+
             mapInitRef.current && mapInitRef.current.on(
                 'dblclick',
                 ({ lngLat }) => {
                     // markersArray[markersArray.length-1].remove();
+
                     const marker = generateNewMarker({
                         name: '',
                         description: '',
@@ -113,7 +150,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
                 mapInitRef.current?.off('dblclick', generateNewMarker)
             }
         }
-
+        return () => mapInitRef.current?.remove()
     }, []);
 
     useEffect(() => {
@@ -276,7 +313,10 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
         if (geodata) {
             // buildLocationList(geodata);
             addMarkers(geodata, mapInitRef.current!, handleLayerMarker);
-
+            mapInitRef.current?.flyTo({
+                center: geodata.features[0].geometry.coordinates,
+                zoom: 16
+            });
             const layerImage = [assets.images.blueMarker, assets.images.grayMarker, assets.images.greenMarker, assets.images.orangeMarker,
             assets.images.pinkMarker, assets.images.purpleMarker, assets.images.redMarker, assets.images.yellowMarker]
             const randomNum = Math.floor(Math.random() * 7);
@@ -315,10 +355,11 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
     }, [dataLayerFlag]);
 
     useEffect(() => {
+
         if (container.current) {
-            allGeodata.map((data : any, index : any) => {
+            allGeodata.map((data: any, index: any) => {
                 if (data.name === currentLayerName) {
-                    console.log(data.data)
+
                     mapInitRef.current!.flyTo({
                         center: data.data.features[0].geometry.coordinates,
                         zoom: 16
@@ -330,6 +371,22 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
 
     useEffect(() => {
         if (container.current) {
+            if (currentLayerMarker) {
+                setTimeout(() => {
+                    console.log(document.getElementsByClassName('mapboxgl-popup-content')[0]);
+                    console.log(document.getElementsByClassName('Description')[0]);
+                    document.getElementsByClassName('deletemarker')[0].addEventListener('click',editMarker );
+                    document.getElementsByClassName('editmarker')[0].addEventListener('click',deleteMarker);
+                }, 100)
+
+                // document.getElementsByClassName('deletemarker')[0].addEventListener('click', (e) => { alert('hello') })
+            }
+        }
+    }, [currentLayerMarker])
+
+    useEffect(() => {
+        if (container.current) {
+
             mapInitRef.current?.setStyle(geoStyleName);
         }
     }, [geoStyleName]);
@@ -339,5 +396,25 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
             i.properties.id = index;
         });
     }
+    function deleteMarker (){
+        currentLayerMarker?.remove();
+    }
+    function editMarker (){
+        alert('edit')
+    }
+    const Popup = () => (
+        <div className="popup">
+            <h3 className="route-name">routeName</h3>
+            <div className="route-metric-row">
+                <h4 className="row-title">Route #</h4>
+                <div className="row-value">routeNumber</div>
+            </div>
+            <div className="route-metric-row">
+                <h4 className="row-title">Route Type</h4>
+                <div className="row-value">type</div>
+            </div>
+            <p className="route-city">Serves city</p>
+        </div>
+    )
 
 }
