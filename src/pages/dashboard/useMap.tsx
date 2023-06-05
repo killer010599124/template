@@ -36,7 +36,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
     const [currentMarker, setCurrentMarker] = useState<Marker>();
     const [currentBlueMaker, setCurrentBlueMaker] = useState<Marker>();
     const [currentLayerMarker, setCurrentLayerMarker] = useState<Marker>();
-    const [cLayerName, setCLayerName] = useState('');
+    const [currentLayerGeoData, setCurrentLayerGeoData] = useState<any>();
 
 
     const [currentMakerName, setCurrentMakerName] = useState<string>()
@@ -359,7 +359,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
         if (container.current) {
             allGeodata.map((data: any, index: any) => {
                 if (data.name === currentLayerName) {
-
+                    setCurrentLayerGeoData(data.data);
                     mapInitRef.current!.flyTo({
                         center: data.data.features[0].geometry.coordinates,
                         zoom: 16
@@ -373,10 +373,13 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
         if (container.current) {
             if (currentLayerMarker) {
                 setTimeout(() => {
+                    // console.log(document.getElementsByClassName('mapboxgl-popup-content')[0]);
+                    
+                    const cheader = Object.keys(currentLayerGeoData.features[0].properties);
+                    console.log(cheader);
                     console.log(document.getElementsByClassName('mapboxgl-popup-content')[0]);
-                    console.log(document.getElementsByClassName('Description')[0]);
-                    document.getElementsByClassName('deletemarker')[0].addEventListener('click',editMarker );
-                    document.getElementsByClassName('editmarker')[0].addEventListener('click',deleteMarker);
+                    document.getElementsByClassName('deletemarker')[0].addEventListener('click',deleteMarker );
+                    document.getElementsByClassName('savemarker')[0].addEventListener('click', editMarker );
                 }, 100)
 
                 // document.getElementsByClassName('deletemarker')[0].addEventListener('click', (e) => { alert('hello') })

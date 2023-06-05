@@ -12,18 +12,43 @@ export const addMarkers = (geodata: any, map: Map, handleLayerMarker: (marker: M
             const cheader = Object.keys(i.properties);
             let html = '';
             const values = i.properties;
-            const obj = cheader.reduce((object: any, header, index) => {
+            // <div style="background:black; color : white; opacity : 0.75;">
+            //     <div style="width:100%; display:flex">
+            //         <label for="name" style="width:30%; text-align:right">Nameasdasd:</label>
+            //         <input type="text" id="name" name="name" style="width:70%">
+            //     </div>
+            //     <br>
+            //         <div style="width:100%; display:flex">
+            //             <label for="name" style="width:30%; text-align:right">fad:</label>
+            //             <input type="text" id="name" name="name" style="width:70%">
+            //         </div>
+            //         <br>
+            //             <div style="width:100%; display:flex">
+            //                 <label for="name" style="width:30%; text-align:right;padding-right:0px">asdf:</label>
+            //                 <input type="text" id="name" name="name" style="width:70%; background:black; border:0.01rem solid white">
+            //             </div>
 
-                html += `<div class = "${header}">${header} : ${values[header]}</div>`
+            //         </div>
+            html += `<div style="background:black; color : white; opacity : 0.75; padding: 10px; border-radius: 10px;">`;
+            const obj = cheader.reduce((object: any, header, index) => {
+                html += `<div style="width:100%; display:flex">
+                         <label for="name" style="width:40%; text-align:right; padding-right: 5px;" >${header} :</label>
+                         <input type="text" id="name" name="name" value = "${values[header]}" style="width:60%; border: 0.01em solid white;" class = "${header}">
+                     </div>
+                     `
+                // html += `<div class = "${header}">${header} : ${values[header]}</div>`
                 // object[header] = values[header];
                 // return object;
             }, {});
-            html += `<button  class = 'deletemarker' > delete </button>`;
-            html += `<button  class = 'editmarker' > edit </button>`;
-            // html += `<button  class = 'deletemarker' > delete </button>`;
+            html += `<div style = "display:flex; justify-content:space-around;">
+            <button class='savemarker' > save </button>
+            <button class='deletemarker' > delete </button>
+            <button class='cancelmarker' > cancel </button>
+          </div>`
+
             const popUp = new Popup({ anchor: 'left', })
                 .setHTML(html);
-          
+
 
 
             const marker = new Marker({ color: layerImage[randomNum], scale: 0.8 })

@@ -11,9 +11,11 @@ html,
 body {
   height: 100%;
 }
-.css-k008qs{
+
+.css-k008qs {
   overflow-y: hidden;
 }
+
 .toolButton {
   width: 50px;
   height: 50px;
@@ -24,14 +26,16 @@ body {
   /* border-width: 3px; */
   margin-top: 20px;
 }
-.css-heg063-MuiTabs-flexContainer{
+
+.css-heg063-MuiTabs-flexContainer {
   display: flex;
-    justify-content: space-around;
+  justify-content: space-around;
 }
+
 body {
   font: 14px/1 'Roboto', sans-serif;
   color: #fff;
-  
+
   -webkit-font-smoothing: antialiased;
 
 }
@@ -333,8 +337,8 @@ textarea {
   font: 20px fontawesome;
 }
 
-input[type="button"]:hover{
-  
+input[type="button"]:hover {
+
   background-color: rgb(46, 44, 44);
 }
 
@@ -348,6 +352,7 @@ input[type="button"] {
   border: 1px solid white;
   background: rgba(0, 0, 0, .75);
 }
+
 .large-2 {
   float: left;
   height: 300px;
@@ -372,23 +377,46 @@ input[type="button"] {
 
 .large-2::-webkit-scrollbar-thumb {
   border-radius: 10px;
-  box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, .3);
   background-color: #737272;
   border: 1px solid #000;
 }
+
 ul li a {
-  display:block;
- }
- 
- ul li:hover {
+  display: block;
+}
+
+ul li:hover {
   background: slategray;
-  color:white;
- }
+  color: white;
+}
 
 .list-item {
   cursor: pointer;
 }
+
 .list-item.active {
-  background-color: steelblue ;
+  background-color: steelblue;
 }
- 
+
+.mapboxgl-popup-content {
+  background: transparent !important;
+  box-shadow: 0px 0px 0px 0px !important;
+}
+
+.mapboxgl-popup {
+  max-width: 500px !important;
+}
+
+.mapboxgl-popup-tip {
+  border-right-color: black !important;
+}
+
+button {
+  background: black;
+  color: white;
+  border: 0.01em solid white;
+  width: 25%;
+  padding: 2px;
+  border-radius: 10px;
+}
