@@ -422,6 +422,13 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
 
         (document.getElementsByClassName('latitude')[0] as HTMLInputElement).setAttribute('value',(document.getElementsByClassName('latitude')[0] as HTMLInputElement).value);
         (document.getElementsByClassName('longtitude')[0] as HTMLInputElement).setAttribute('value',(document.getElementsByClassName('longtitude')[0] as HTMLInputElement).value);
+        const lng = Number((document.getElementsByClassName('longtitude')[0] as HTMLInputElement).getAttribute('value'));
+        const lat =Number((document.getElementsByClassName('latitude')[0] as HTMLInputElement).getAttribute('value'))
+        setTimeout(() => {
+            console.log('edit')
+            currentLayerMarker?.setLngLat([lng , lat ])
+        }, 20);
+       
         currentLayerMarker?.getPopup().remove()
     }
     function cancelMarker() {

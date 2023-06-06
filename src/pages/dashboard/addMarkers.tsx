@@ -41,11 +41,11 @@ export const addMarkers = (geodata: any, map: Map, handleLayerMarker: (marker: M
             }, {});
             html += `<div style="width:100%; display:flex">
                          <label for="name" style="width:40%; text-align:right; padding-right: 5px;" >Latitude :</label>
-                         <input type="text" value = "${i.geometry.coordinates[0]}" style="width:60%; border: 0.01em solid white;" class = "latitude">
+                         <input type="text" value = "${i.geometry.coordinates[1]}" style="width:60%; border: 0.01em solid white;" class = "latitude">
                      </div>`;
             html += `<div style="width:100%; display:flex">
                      <label for="name" style="width:40%; text-align:right; padding-right: 5px;" >Longtitude :</label>
-                     <input type="text" value = "${i.geometry.coordinates[1]}" style="width:60%; border: 0.01em solid white;" class = "longtitude">
+                     <input type="text" value = "${i.geometry.coordinates[0]}" style="width:60%; border: 0.01em solid white;" class = "longtitude">
                  </div>`;
             html += `<div style = "display:flex; justify-content:space-around;">
             <button class='savemarker' > save </button>
@@ -58,7 +58,6 @@ export const addMarkers = (geodata: any, map: Map, handleLayerMarker: (marker: M
             let valuelist: string[] = [];
 
             popUp.on('open', () => {
-
                 for (let i = 0; i < cheader.length; i++) {
                     valuelist[i] = (document.getElementsByClassName(cheader[i])[0] as HTMLInputElement).getAttribute('value') as string;
                 }
@@ -66,7 +65,15 @@ export const addMarkers = (geodata: any, map: Map, handleLayerMarker: (marker: M
                 valuelist[cheader.length + 1] = (document.getElementsByClassName('longtitude')[0] as HTMLInputElement).getAttribute('value') as string;
 
             });
-
+            popUp.on('close', () => {
+                console.log('close')
+                setTimeout(() => {
+                    if(!document.getElementsByClassName('mapboxgl-popup')[0]){
+                        console.log('closed')
+                        marker.setLngLat([Number(valuelist[cheader.length+1]),Number(valuelist[cheader.length])])
+                    }
+                }, 10);     
+            });
             const marker = new Marker({ color: layerImage[randomNum], scale: 0.8 })
                 .setDraggable(false)
                 .setLngLat(i.geometry.coordinates)
@@ -77,7 +84,6 @@ export const addMarkers = (geodata: any, map: Map, handleLayerMarker: (marker: M
                     updateMarkerCoordinates(event.target._lngLat);
                 })
 
-
             marker.getElement().addEventListener('mouseup', (e) => {
                 marker.setDraggable(false);
                 if (!document.getElementsByClassName('mapboxgl-popup')[0]) {
@@ -86,27 +92,19 @@ export const addMarkers = (geodata: any, map: Map, handleLayerMarker: (marker: M
                             (document.getElementsByClassName(cheader[i])[0] as HTMLInputElement).value = valuelist[i]
                         }
                         (document.getElementsByClassName('latitude')[0] as HTMLInputElement).value = valuelist[cheader.length];
-                        (document.getElementsByClassName('longtitude')[0] as HTMLInputElement).value = valuelist[cheader.length + 1];
-                        
+                        (document.getElementsByClassName('longtitude')[0] as HTMLInputElement).value = valuelist[cheader.length + 1];       
                     }, 10)
-
                 }
             })
             marker.getElement().addEventListener('mousedown', (e) => {
                 if (document.getElementsByClassName('mapboxgl-popup')[0]) {
                     marker.setDraggable(true);
                 }
-
-                
             })
             marker.getElement().addEventListener('click', (e) => {
                 {
-                    // marker.setLngLat([10,10]);
-
-
-                    
+                   
                     handleLayerMarker(marker);
-                    // flyToStore(i);
                     map.flyTo({
                         center: marker.getLngLat(),
                         zoom: 18
