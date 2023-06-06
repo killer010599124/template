@@ -312,7 +312,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
 
         if (geodata) {
             // buildLocationList(geodata);
-            addMarkers(geodata, mapInitRef.current!, handleLayerMarker);
+            addMarkers(geodata, mapInitRef.current!, handleLayerMarker, updateMarkerCoordinates);
             mapInitRef.current?.flyTo({
                 center: geodata.features[0].geometry.coordinates,
                 zoom: 16
@@ -374,12 +374,18 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
             if (currentLayerMarker) {
                 setTimeout(() => {
                     // console.log(document.getElementsByClassName('mapboxgl-popup-content')[0]);
-                    
+
                     const cheader = Object.keys(currentLayerGeoData.features[0].properties);
-                    console.log(cheader);
-                    console.log(document.getElementsByClassName('mapboxgl-popup-content')[0]);
-                    document.getElementsByClassName('deletemarker')[0].addEventListener('click',deleteMarker );
-                    document.getElementsByClassName('savemarker')[0].addEventListener('click', editMarker );
+
+                    // for (let i = 0; i < cheader.length; i++) {
+                    //     (document.getElementsByClassName(cheader[i])[0] as HTMLInputElement).value = (document.getElementsByClassName(cheader[i])[0] as HTMLInputElement).getAttribute('value') as string;
+
+                    // }
+
+                    document.getElementsByClassName('deletemarker')[0].addEventListener('click', deleteMarker);
+
+                    document.getElementsByClassName('savemarker')[0].addEventListener('click', editMarker);
+                    document.getElementsByClassName('cancelmarker')[0].addEventListener('click', cancelMarker);
                 }, 100)
 
                 // document.getElementsByClassName('deletemarker')[0].addEventListener('click', (e) => { alert('hello') })
@@ -399,11 +405,27 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
             i.properties.id = index;
         });
     }
-    function deleteMarker (){
+    function updateMarkerCoordinates(coord: any) {
+        (document.getElementsByClassName('latitude')[0] as HTMLInputElement).value = coord.lat;
+        (document.getElementsByClassName('longtitude')[0] as HTMLInputElement).value = coord.lng;
+    }
+    function deleteMarker() {
         currentLayerMarker?.remove();
     }
-    function editMarker (){
-        alert('edit')
+    function editMarker() {
+        const cheader = Object.keys(currentLayerGeoData.features[0].properties);
+
+        for (let i = 0; i < cheader.length; i++) {
+
+            (document.getElementsByClassName(cheader[i])[0] as HTMLInputElement).setAttribute('value', (document.getElementsByClassName(cheader[i])[0] as HTMLInputElement).value)
+        }
+
+        (document.getElementsByClassName('latitude')[0] as HTMLInputElement).setAttribute('value',(document.getElementsByClassName('latitude')[0] as HTMLInputElement).value);
+        (document.getElementsByClassName('longtitude')[0] as HTMLInputElement).setAttribute('value',(document.getElementsByClassName('longtitude')[0] as HTMLInputElement).value);
+        currentLayerMarker?.getPopup().remove()
+    }
+    function cancelMarker() {
+        currentLayerMarker?.getPopup().remove()
     }
     const Popup = () => (
         <div className="popup">

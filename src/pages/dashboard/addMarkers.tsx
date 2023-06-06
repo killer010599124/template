@@ -1,6 +1,6 @@
 import { Popup, Marker, Map } from 'mapbox-gl';
 
-export const addMarkers = (geodata: any, map: Map, handleLayerMarker: (marker: Marker) => void) => {
+export const addMarkers = (geodata: any, map: Map, handleLayerMarker: (marker: Marker) => void, updateMarkerCoordinates: (coord: any) => void) => {
 
     const layerImage = ['gray', 'red', 'blue', 'green', 'black', 'yello', 'pink', 'purple']
     const randomNum = Math.floor(Math.random() * 7);
@@ -27,42 +27,93 @@ export const addMarkers = (geodata: any, map: Map, handleLayerMarker: (marker: M
             //                 <label for="name" style="width:30%; text-align:right;padding-right:0px">asdf:</label>
             //                 <input type="text" id="name" name="name" style="width:70%; background:black; border:0.01rem solid white">
             //             </div>
-
             //         </div>
             html += `<div style="background:black; color : white; opacity : 0.75; padding: 10px; border-radius: 10px;">`;
             const obj = cheader.reduce((object: any, header, index) => {
                 html += `<div style="width:100%; display:flex">
                          <label for="name" style="width:40%; text-align:right; padding-right: 5px;" >${header} :</label>
-                         <input type="text" id="name" name="name" value = "${values[header]}" style="width:60%; border: 0.01em solid white;" class = "${header}">
+                         <input type="text" value = "${values[header]}" style="width:60%; border: 0.01em solid white;" class = "${header}">
                      </div>
                      `
                 // html += `<div class = "${header}">${header} : ${values[header]}</div>`
                 // object[header] = values[header];
                 // return object;
             }, {});
+            html += `<div style="width:100%; display:flex">
+                         <label for="name" style="width:40%; text-align:right; padding-right: 5px;" >Latitude :</label>
+                         <input type="text" value = "${i.geometry.coordinates[0]}" style="width:60%; border: 0.01em solid white;" class = "latitude">
+                     </div>`;
+            html += `<div style="width:100%; display:flex">
+                     <label for="name" style="width:40%; text-align:right; padding-right: 5px;" >Longtitude :</label>
+                     <input type="text" value = "${i.geometry.coordinates[1]}" style="width:60%; border: 0.01em solid white;" class = "longtitude">
+                 </div>`;
             html += `<div style = "display:flex; justify-content:space-around;">
             <button class='savemarker' > save </button>
             <button class='deletemarker' > delete </button>
             <button class='cancelmarker' > cancel </button>
-          </div>`
+          </div>`;
 
             const popUp = new Popup({ anchor: 'left', })
                 .setHTML(html);
+            let valuelist: string[] = [];
 
+            popUp.on('open', () => {
 
+                for (let i = 0; i < cheader.length; i++) {
+                    valuelist[i] = (document.getElementsByClassName(cheader[i])[0] as HTMLInputElement).getAttribute('value') as string;
+                }
+                valuelist[cheader.length] = (document.getElementsByClassName('latitude')[0] as HTMLInputElement).getAttribute('value') as string;
+                valuelist[cheader.length + 1] = (document.getElementsByClassName('longtitude')[0] as HTMLInputElement).getAttribute('value') as string;
+
+            });
 
             const marker = new Marker({ color: layerImage[randomNum], scale: 0.8 })
                 .setDraggable(false)
                 .setLngLat(i.geometry.coordinates)
                 .setPopup(popUp)
-                .addTo(map);
+                .addTo(map)
+                .on('drag', (event: any) => {
+                    // console.log(event.target._lngLat)
+                    updateMarkerCoordinates(event.target._lngLat);
+                })
 
+
+            marker.getElement().addEventListener('mouseup', (e) => {
+                marker.setDraggable(false);
+                if (!document.getElementsByClassName('mapboxgl-popup')[0]) {
+                    setTimeout(() => {
+                        for (let i = 0; i < cheader.length; i++) {
+                            (document.getElementsByClassName(cheader[i])[0] as HTMLInputElement).value = valuelist[i]
+                        }
+                        (document.getElementsByClassName('latitude')[0] as HTMLInputElement).value = valuelist[cheader.length];
+                        (document.getElementsByClassName('longtitude')[0] as HTMLInputElement).value = valuelist[cheader.length + 1];
+
+                    }, 10)
+
+                }
+            })
+            marker.getElement().addEventListener('mousedown', (e) => {
+                if (document.getElementsByClassName('mapboxgl-popup')[0]) {
+                    marker.setDraggable(true);
+                }
+
+                
+            })
             marker.getElement().addEventListener('click', (e) => {
                 {
                     // marker.setLngLat([10,10]);
+
+
+
                     handleLayerMarker(marker);
-                    flyToStore(i);
-                    // marker.remove()
+                    // flyToStore(i);
+                    map.flyTo({
+                        center: marker.getLngLat(),
+                        zoom: 18
+                    });
+
+                    // (document.getElementsByClassName('lattitude')[0] as HTMLInputElement).setAttribute('value', marker.getLngLat().lat.toString());
+                    // (document.getElementsByClassName('longtitude')[0] as HTMLInputElement).setAttribute('value', marker.getLngLat().lng.toString());
                 }
             }, false);
             if (document.getElementsByClassName('deletemarker')[0]) {
