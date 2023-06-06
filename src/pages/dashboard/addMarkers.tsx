@@ -53,7 +53,7 @@ export const addMarkers = (geodata: any, map: Map, handleLayerMarker: (marker: M
             <button class='cancelmarker' > cancel </button>
           </div>`;
 
-            const popUp = new Popup({ anchor: 'left', })
+            const popUp = new Popup({ closeButton: false, anchor: 'left' })
                 .setHTML(html);
             let valuelist: string[] = [];
 
@@ -87,7 +87,7 @@ export const addMarkers = (geodata: any, map: Map, handleLayerMarker: (marker: M
                         }
                         (document.getElementsByClassName('latitude')[0] as HTMLInputElement).value = valuelist[cheader.length];
                         (document.getElementsByClassName('longtitude')[0] as HTMLInputElement).value = valuelist[cheader.length + 1];
-
+                        
                     }, 10)
 
                 }
@@ -104,7 +104,7 @@ export const addMarkers = (geodata: any, map: Map, handleLayerMarker: (marker: M
                     // marker.setLngLat([10,10]);
 
 
-
+                    
                     handleLayerMarker(marker);
                     // flyToStore(i);
                     map.flyTo({
