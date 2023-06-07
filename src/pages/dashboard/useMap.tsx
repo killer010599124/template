@@ -1,9 +1,10 @@
-import { useEffect, forwardRef, useImperativeHandle, useRef, useState } from 'react';
+import { useEffect,useCallback, forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import ReactDOM from "react-dom";
 import { LngLat, Map, Marker, } from 'mapbox-gl';
 import { initMap } from './initMap';
 import { generateNewMarker } from './generateNewMarker';
 import { addMarkers } from './addMarkers';
+import { generateOneMarker } from './createOneMarker';
 import MapboxDraw from "@mapbox/mapbox-gl-draw"
 import MapBoxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import DrawControl from 'react-mapbox-gl-draw';
@@ -20,6 +21,7 @@ import { assert } from 'console';
 import assets from '../../assets';
 import { randomInt } from 'crypto';
 import { store } from '../../redux/store';
+import { render } from '@testing-library/react';
 
 
 export const useMap = (container: React.RefObject<HTMLDivElement>, name: string, description: string, latitude: string,
@@ -124,34 +126,63 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
             //       }
             // })
 
-            mapInitRef.current && mapInitRef.current.on(
-                'dblclick',
-                ({ lngLat }) => {
-                    // markersArray[markersArray.length-1].remove();
+            // mapInitRef.current && mapInitRef.current.on(
+            //     'dblclick',
+            //     ({ lngLat }) => {
+            //         // markersArray[markersArray.length-1].remove();
 
-                    const marker = generateNewMarker({
-                        name: '',
-                        description: '',
-                        map: mapInitRef.current!,
-                        ...lngLat,
-                        color: "#63df29",
-                        draggable: true,
-                        setBlueMaker: handleBlueMaker
-                    });
+            //         const marker = generateNewMarker({
+            //             name: '',
+            //             description: '',
+            //             map: mapInitRef.current!,
+            //             ...lngLat,
+            //             color: "#63df29",
+            //             draggable: true,
+            //             setBlueMaker: handleBlueMaker
+            //         });
 
-                    setCurrentMarker(marker);
+            //         setCurrentMarker(marker);
 
-                    handleLongtitude(lngLat.lng);
-                    handleLatitude(lngLat.lat);
-                    setMarkersArray(prevNames => [...prevNames, marker])
-                }
-            )
-            return () => {
-                mapInitRef.current?.off('dblclick', generateNewMarker)
-            }
+            //         handleLongtitude(lngLat.lng);
+            //         handleLatitude(lngLat.lat);
+            //         setMarkersArray(prevNames => [...prevNames, marker])
+            //     }
+            // )
+
+            // mapInitRef.current && mapInitRef.current.on(
+            //     'dblclick',
+            //     makeMarker
+            // );
+
+            // return () => {
+            //     mapInitRef.current?.off('dblclick', makeMarker)
+            // }
         }
         return () => mapInitRef.current?.remove()
+
     }, []);
+
+    var temp = new Date().getTime();
+
+    useEffect(() => {
+
+        mapInitRef.current?.on('dblclick',  makeMarker  );
+      
+        return () => {
+            mapInitRef.current?.off('dblclick',  makeMarker);
+        }
+
+      }, [ mapInitRef.current, currentLayerGeoData])
+
+    const makeMarker = async (lngLat :any) => {
+      
+        // console.log(currentLayerGeoData)
+        // markersArray[markersArray.length-1].remove();
+
+        generateOneMarker(currentLayerGeoData, mapInitRef.current!, handleLayerMarker, updateMarkerCoordinates, lngLat.lngLat);
+    }
+   
+   
 
     useEffect(() => {
         if (container.current) {
@@ -312,6 +343,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
 
         if (geodata) {
             // buildLocationList(geodata);
+            setCurrentLayerGeoData(geodata);
             addMarkers(geodata, mapInitRef.current!, handleLayerMarker, updateMarkerCoordinates);
             mapInitRef.current?.flyTo({
                 center: geodata.features[0].geometry.coordinates,
@@ -355,7 +387,6 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
     }, [dataLayerFlag]);
 
     useEffect(() => {
-
         if (container.current) {
             allGeodata.map((data: any, index: any) => {
                 if (data.name === currentLayerName) {
@@ -377,11 +408,6 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
 
                     const cheader = Object.keys(currentLayerGeoData.features[0].properties);
 
-                    // for (let i = 0; i < cheader.length; i++) {
-                    //     (document.getElementsByClassName(cheader[i])[0] as HTMLInputElement).value = (document.getElementsByClassName(cheader[i])[0] as HTMLInputElement).getAttribute('value') as string;
-
-                    // }
-
                     document.getElementsByClassName('deletemarker')[0].addEventListener('click', deleteMarker);
 
                     document.getElementsByClassName('savemarker')[0].addEventListener('click', editMarker);
@@ -395,7 +421,6 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
 
     useEffect(() => {
         if (container.current) {
-
             mapInitRef.current?.setStyle(geoStyleName);
         }
     }, [geoStyleName]);
@@ -420,33 +445,20 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
             (document.getElementsByClassName(cheader[i])[0] as HTMLInputElement).setAttribute('value', (document.getElementsByClassName(cheader[i])[0] as HTMLInputElement).value)
         }
 
-        (document.getElementsByClassName('latitude')[0] as HTMLInputElement).setAttribute('value',(document.getElementsByClassName('latitude')[0] as HTMLInputElement).value);
-        (document.getElementsByClassName('longtitude')[0] as HTMLInputElement).setAttribute('value',(document.getElementsByClassName('longtitude')[0] as HTMLInputElement).value);
+        (document.getElementsByClassName('latitude')[0] as HTMLInputElement).setAttribute('value', (document.getElementsByClassName('latitude')[0] as HTMLInputElement).value);
+        (document.getElementsByClassName('longtitude')[0] as HTMLInputElement).setAttribute('value', (document.getElementsByClassName('longtitude')[0] as HTMLInputElement).value);
         const lng = Number((document.getElementsByClassName('longtitude')[0] as HTMLInputElement).getAttribute('value'));
-        const lat =Number((document.getElementsByClassName('latitude')[0] as HTMLInputElement).getAttribute('value'))
+        const lat = Number((document.getElementsByClassName('latitude')[0] as HTMLInputElement).getAttribute('value'))
         setTimeout(() => {
             console.log('edit')
-            currentLayerMarker?.setLngLat([lng , lat ])
-        }, 20);
-       
+            currentLayerMarker?.setLngLat([lng, lat])
+        }, 30);
         currentLayerMarker?.getPopup().remove()
     }
     function cancelMarker() {
         currentLayerMarker?.getPopup().remove()
     }
-    const Popup = () => (
-        <div className="popup">
-            <h3 className="route-name">routeName</h3>
-            <div className="route-metric-row">
-                <h4 className="row-title">Route #</h4>
-                <div className="row-value">routeNumber</div>
-            </div>
-            <div className="route-metric-row">
-                <h4 className="row-title">Route Type</h4>
-                <div className="row-value">type</div>
-            </div>
-            <p className="route-city">Serves city</p>
-        </div>
-    )
-
+    function test() {
+        return currentLayerName;
+    }
 }

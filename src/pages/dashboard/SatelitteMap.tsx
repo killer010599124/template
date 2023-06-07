@@ -359,12 +359,12 @@ const SatelitteMap = (context: any) => {
               object[header] = values[header];
               return object;
             }, {});
-            
-            setCurrentLayerData(prevNames => [...prevNames, obj])  
+
+            setCurrentLayerData(prevNames => [...prevNames, obj])
           });
         }
       });
-      
+
     }
   }, [currentLayerName]);
 
@@ -537,7 +537,7 @@ const SatelitteMap = (context: any) => {
     setAllData(updatedList);
   }
 
-  const myMap = useMap(mapRef, name, description, lat, lng, addFlag, editFlag, dataLayerFlag, "mapbox://styles/mapbox/satellite-streets-v12", handleLongtitude, handleLatitude, handleName, handleDescription, deleteData, editData, geoStyleName, layer,currentLayerName, array, geodata,allGeodata, drawMode, toggle, deleteFlag)
+  const myMap = useMap(mapRef, name, description, lat, lng, addFlag, editFlag, dataLayerFlag, "mapbox://styles/mapbox/satellite-streets-v12", handleLongtitude, handleLatitude, handleName, handleDescription, deleteData, editData, geoStyleName, layer, currentLayerName, array, geodata, allGeodata, drawMode, toggle, deleteFlag)
 
   useEffect(() => {
     if (flag == 1) {
@@ -761,7 +761,7 @@ const SatelitteMap = (context: any) => {
         opacity: 0.75,
         background: 'black'
       }}>
-
+        
         <div>
           <button style={{
             position: 'absolute',
