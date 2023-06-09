@@ -130,7 +130,7 @@ function makeCompanyQuery(name: string, ticker: string, website: string) {
 const SatelitteMap = (context: any) => {
 
   const mapRef = useRef<HTMLDivElement>(null);
-  const childRef = useRef(null);
+
   const reportTemplateRef = useRef<HTMLDivElement>(null);
 
   const [dataVisible, setDataVisible] = useState(1);
@@ -141,7 +141,7 @@ const SatelitteMap = (context: any) => {
   const [value_tab_draw, setValue_tab_draw] = React.useState(0);
   const [value_tab_pb, setValue_tab_pb] = React.useState(0);
   const [value_tab_dv, setValue_tab_dv] = React.useState(0);
-  const [active, setActive] = useState<string>();
+
 
   const [drawMode, setDrawMode] = useState('');
 
@@ -180,10 +180,6 @@ const SatelitteMap = (context: any) => {
     });
   };
 
-  const [lng, setLng] = useState("");
-  const [lat, setLat] = useState("");
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("")
 
   const [geoStyleName, setGeoStyleName] = useState("mapbox://styles/mapbox/satellite-streets-v12")
   interface Geo {
@@ -194,17 +190,13 @@ const SatelitteMap = (context: any) => {
   }
 
 
-  const [flag, setFlag] = useState(0);
-  const [addFlag, setAddFlag] = useState(true);
-  const [editFlag, setEditFlag] = useState(true);
-  const [deleteFlag, setDeleteFlag] = useState(true);
+
   const [dataLayerFlag, setDataLayerFlag] = useState(true);
 
   const csv2geojson = require('csv2geojson');
-  const geojsonNormalize = require('@mapbox/geojson-normalize');
   const readFile = require('./readCsvFile');
 
-  const [data, setData] = useState<Geo>();
+  
   const [allData, setAllData] = useState<Geo[]>([]);
   const [array, setArray] = useState<Geo[]>([]);
 
@@ -281,18 +273,7 @@ const SatelitteMap = (context: any) => {
 
   const doc = new jsPDF('l', 'pt', 'a4');
 
-  const OpenCSVFile = (e: any) => {
-    // setFile(e.target.files[0]);
-    const file = e.target.files[0];
-    if (file) {
-      fileReader.onload = function (event: any) {
-        const csvOutput = event.target.result;
-        csvFileToArray(csvOutput);
-      };
 
-      fileReader.readAsText(file);
-    }
-  };
 
   const readCSVFile = (e: any,) => {
     const file = e.target.files[0];
@@ -387,31 +368,7 @@ const SatelitteMap = (context: any) => {
     setCurrentLayerData(newState);
   }
 
-  const csvFileToArray = (string: string) => {
-    const csvHeader = string.slice(0, string.indexOf("\n") - 1).split(",");
-    for (let i = 0; i < csvHeader.length; i++) {
-      csvHeader[i] = csvHeader[i].replaceAll('"', '');
-    }
 
-    setCsvHeader(csvHeader);
-    const csvRows = string.slice(string.indexOf("\n") + 1).split("\n");
-
-    const array = csvRows.map(i => {
-
-      const values = i.split(",");
-      const obj = csvHeader.reduce((object: any, header, index) => {
-        object[header] = values[index].replaceAll('"', '');
-        return object;
-      }, {});
-      // manageCsvData(obj);
-      if (!Number.isNaN(Number(obj.lng))) manageAllData(obj);
-
-      return obj;
-    });
-    // setCsvData(array);
-
-    setArray(array);
-  };
 
 
   const clearPersonData = () => {
@@ -510,30 +467,9 @@ const SatelitteMap = (context: any) => {
 
   const headerKeys = Object.keys(Object.assign({}, ...array));
 
-  const handleLongtitude = (num: number) => {
-    // 👇️ take the parameter passed from the Child component
-    setLng(num.toString());
-  };
 
-  const handleLatitude = (num: number) => {
-    // 👇️ take the parameter passed from the Child component
-    setLat(num.toString());
-    setFlag(1);
-  };
 
-  const handleName = (name: string) => {
-    setName(name);
-  }
-  const handleDescription = (des: string) => {
-    setDescription(des);
-  }
 
-  const manageData = (data: Geo) => {
-    setData(data);
-  };
-  const manageAllData = (data: Geo) => {
-    setAllData(prevNames => [...prevNames, data])
-  };
   const manageCsvData = (data: any) => {
     setCsvData(prevNames => [...prevNames, data])
   }
@@ -555,17 +491,8 @@ const SatelitteMap = (context: any) => {
     setAllData(updatedList);
   }
 
-  const myMap = useMap(mapRef, name, description, lat, lng, addFlag, editFlag, dataLayerFlag, "mapbox://styles/mapbox/satellite-streets-v12", handleLongtitude, handleLatitude, handleName, handleDescription, deleteData, editData, updateCurrentLayerData, geoStyleName, layer, currentLayerName,currentMarkerData, array, geodata, allGeodata, drawMode, toggle, deleteFlag)
+  const myMap = useMap(mapRef, dataLayerFlag,  updateCurrentLayerData, geoStyleName, layer, currentLayerName,currentMarkerData, geodata, allGeodata, drawMode, toggle)
 
-  useEffect(() => {
-    if (flag == 1) {
-
-      // manageData({ name, lat, lng });
-      // manageAllData({ name, lat, lng })
-      setFlag(0);
-    }
-
-  }, [lat, lng])
   return (
     <>
 
@@ -721,54 +648,7 @@ const SatelitteMap = (context: any) => {
       </div>
 
       {/* ---------------------------Point Data layout ----------------------- */}
-      {/* <div style={{
-        position: "absolute",
-        right: "0px",
-        marginTop: "-1%",
-        marginRight: "50px", zIndex: "1"
-      }}>
-        <form style={dataVisible ? { display: "none" } : { display: "block" }}>
-          <div style={{
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: "space-evenly",
-            paddingTop: "25px"
-          }}>
-            <input type="text" placeholder="Name" value={name} onChange={(e) => { setName(e.target.value) }} />
-            <input type="date" placeholder="Date" />
-          </div>
-          <div style={{
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: "space-evenly"
-          }}>
-            <input type="text" placeholder="Longtitude" value={lng.toString()} onChange={(e) => { setLng(e.target.value) }} />
-            <input type="text" placeholder="Latitude" value={lat.toString()} onChange={(e) => { setLat(e.target.value) }} />
-          </div>
-          <textarea placeholder="Description" value={description} onChange={(e) => { setDescription(e.target.value) }}></textarea>
-          <div style={{
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: "space-evenly",
-            paddingTop: "5px"
-          }}>
-            <input type="button" value={"Add"} onClick={() => {
-              setAddFlag(!addFlag);
-              // manageData({ description, name, lat, lng });
-              manageAllData({ description, name, lat, lng });
-              console.log(data);
-            }} />
-            <input type="button" value={"Edit"} onClick={() => {
-              setEditFlag(!editFlag);
 
-            }} />
-            <input type="button" value={"Delete"} onClick={() => {
-              setDeleteFlag(!deleteFlag);
-            }} />
-          </div>
-
-        </form>
-      </div> */}
 
       <div style={{
         position: "fixed",

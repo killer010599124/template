@@ -24,11 +24,10 @@ import { store } from '../../redux/store';
 import { render } from '@testing-library/react';
 
 
-export const useMap = (container: React.RefObject<HTMLDivElement>, name: string, description: string, latitude: string,
-    longtitude: string, addFlag: boolean, editFlag: boolean, dataLayerFlag: boolean, mapStyle: string, handleLongtitude: (num: number) => void,
-    handleLatitude: (num: number) => void, handleName: (name: string) => void, handleDescription: (des: string) => void, deleteData: (pointName: string) => void,
-    editData: (pointName: string, data: any) => void,updateCurrentLayerData:(updateData:any) => void, geoStyleName: string, layerName: string, currentLayerName: string,currentMarkerData:any, array: any, geodata: any, allGeodata: any, drawMode: string, toggle: boolean,
-    deleteFlag: boolean) => {
+export const useMap = (container: React.RefObject<HTMLDivElement>,  dataLayerFlag: boolean,  
+     updateCurrentLayerData:(updateData:any) => void, geoStyleName: string, layerName: string, 
+     currentLayerName: string,currentMarkerData:any, geodata: any, allGeodata: any, drawMode: string, toggle: boolean,
+    ) => {
 
 
     const mapInitRef = useRef<Map | null>(null);
@@ -69,7 +68,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
             mapInitRef.current = initMap(
                 container.current,
                 [-100.2419063199852, 25.17901932031443],
-                mapStyle
+                "mapbox://styles/mapbox/satellite-streets-v12"
             );
             mapInitRef.current.addControl(Geocoder);
 
@@ -177,39 +176,10 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
 
     const makeMarker = async (lngLat :any) => {
       
-        // console.log(currentLayerGeoData)
-        // markersArray[markersArray.length-1].remove();
-
         generateOneMarker(currentLayerGeoData, mapInitRef.current!, handleLayerMarker, updateMarkerCoordinates, lngLat.lngLat);
     }
    
-   
 
-    useEffect(() => {
-        if (container.current) {
-            if (markersArray.length > 1) {
-                const marker = markersArray[markersArray.length - 2];
-                marker.remove()
-            }
-        }
-    }, [currentMarker]);
-
-    useEffect(() => {
-        if (container.current) {
-            if (currentBlueMaker) {
-                handleLongtitude(currentBlueMaker?.getLngLat().lng);
-                handleLatitude(currentBlueMaker?.getLngLat().lat);
-                handleName(currentMakerName as string);
-                handleDescription(currentMakerDescription as string);
-            }
-        }
-    }, [currentBlueMaker]);
-
-    useEffect(() => {
-        if (container.current) {
-        }
-
-    }, [lnglat]);
 
     useEffect(() => {
 
@@ -277,67 +247,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, name: string,
         }
     }, [toggle]);
 
-    useEffect(() => {
-        if (container.current) {
-
-            const v = new LngLat(Number(longtitude), Number(latitude))
-            generateNewMarker({
-                name: name,
-                description: description,
-                map: mapInitRef.current!,
-                ...v,
-                color: "rgb(70, 104, 242)",
-                draggable: false,
-                setBlueMaker: handleBlueMaker
-            });
-        }
-    }, [addFlag]);
-
-    useEffect(() => {
-        if (container.current) {
-
-            // currentBlueMaker?.setLngLat([Number(longtitude), Number(latitude)]);
-            currentBlueMaker?.remove()
-            const v = new LngLat(Number(longtitude), Number(latitude))
-            generateNewMarker({
-                name: name,
-                description: description,
-                map: mapInitRef.current!,
-                ...v,
-                color: "rgb(70, 104, 242)",
-                draggable: false,
-                setBlueMaker: handleBlueMaker
-            });
-            editData(currentMakerName as string, { description, name, latitude, longtitude })
-            setCurrentMakerName(name);
-        }
-    }, [editFlag]);
-
-    useEffect(() => {
-        if (container.current) {
-            currentMarker?.remove();
-            currentBlueMaker?.remove();
-            deleteData(currentMakerName as string);
-        }
-    }, [deleteFlag]);
-    useEffect(() => {
-        if (container.current) {
-            for (let i = 0; i < array.length; i++) {
-
-                const v = new LngLat(Number(array[i]?.lng), Number(array[i]?.lat))
-                const marker = generateNewMarker({
-                    name: array[i]?.name,
-                    description: array[i]?.description,
-                    map: mapInitRef.current!,
-                    ...v,
-                    color: "rgb(70, 104, 242)",
-                    draggable: false,
-                    setBlueMaker: handleBlueMaker
-                });
-                // setMarkersArray(prevNames => [...prevNames, marker])
-            }
-        }
-    }, [array]);
+  
 
     useEffect(() => {
 
