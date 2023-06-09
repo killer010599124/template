@@ -65,6 +65,7 @@ export const addMarkers = (geodata: any, map: Map, handleLayerMarker: (marker: M
                 valuelist[cheader.length + 1] = (document.getElementsByClassName('longtitude')[0] as HTMLInputElement).getAttribute('value') as string;
 
             });
+            
             popUp.on('close', () => {
                 console.log('close')
                 setTimeout(() => {
@@ -74,6 +75,7 @@ export const addMarkers = (geodata: any, map: Map, handleLayerMarker: (marker: M
                     }
                 }, 10);     
             });
+
             const marker = new Marker({ color: layerImage[randomNum], scale: 0.8 })
                 .setDraggable(false)
                 .setLngLat(i.geometry.coordinates)
@@ -96,18 +98,20 @@ export const addMarkers = (geodata: any, map: Map, handleLayerMarker: (marker: M
                     }, 10)
                 }
             })
+
             marker.getElement().addEventListener('mousedown', (e) => {
                 if (document.getElementsByClassName('mapboxgl-popup')[0]) {
                     marker.setDraggable(true);
                 }
             })
+
             marker.getElement().addEventListener('click', (e) => {
                 {
                    
                     handleLayerMarker(marker);
                     map.flyTo({
                         center: marker.getLngLat(),
-                        zoom: 18
+                        zoom: 24
                     });
 
                     // (document.getElementsByClassName('lattitude')[0] as HTMLInputElement).setAttribute('value', marker.getLngLat().lat.toString());

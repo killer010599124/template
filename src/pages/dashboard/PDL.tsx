@@ -35,14 +35,14 @@ export default PDLJSClient;
 //   console.log(error);
 // });
 
-PDLJSClient.person.search.sql({
-  searchQuery: "SELECT * FROM person WHERE first_name = 'mattehew'  ;",
-  size: 10,
-}).then((data) => {
-  console.log(data);
-}).catch((error) => {
-  console.log(error);
-});
+// PDLJSClient.person.search.sql({
+//   searchQuery: "SELECT * FROM person WHERE first_name = 'mattehew'  ;",
+//   size: 10,
+// }).then((data) => {
+//   console.log(data);
+// }).catch((error) => {
+//   console.log(error);
+// });
 
 // PDLJSClient.company.search.sql({
 //   searchQuery: "SELECT * FROM company WHERE name = 'kellogg company' AND ticker = 'K' AND website = 'kelloggcompany.com'   ",

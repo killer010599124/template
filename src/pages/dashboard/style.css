@@ -398,7 +398,13 @@ ul li:hover {
 .list-item.active {
   background-color: steelblue;
 }
-
+.markerTable.active{
+  background-color: steelblue;
+}
+tbody tr:hover {
+  background: slategray;
+  color: white;
+}
 .mapboxgl-popup-content {
   background: transparent !important;
   box-shadow: 0px 0px 0px 0px !important;

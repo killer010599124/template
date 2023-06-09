@@ -18,7 +18,6 @@ export const generateNewMarker = ({name, description, lat, lng, map, color, drag
         popUp.setHTML(`
         <div class="popup">${name} <br/>${description}<br/>[${marker.getLngLat().lng},  ${marker.getLngLat().lat}]</div>
         `)
-        
     }}, false);
     return marker;
     // 

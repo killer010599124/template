@@ -27,6 +27,7 @@ import ListItemAvatar from '@mui/material/ListItemAvatar';
 import Avatar from '@mui/material/Avatar';
 import Typography from '@mui/material/Typography';
 import listItemClasses from '@mui/material/ListItem';
+import { IndexKind } from 'typescript';
 
 
 interface TabPanelProps {
@@ -218,6 +219,9 @@ const SatelitteMap = (context: any) => {
   const [currentLayerName, setCurrentLayerName] = useState('');
   const [currentLayerData, setCurrentLayerData] = useState<any[]>([]);
   const [currentLayerDataHeader, setCurrentLayerDataHeader] = useState<string[]>([]);
+  const [currentMarkerData, setCurrentMarkerData] = useState<{data:any, id:number}>();
+  
+  
 
   const [dataLayers, setDataLayers] = useState<string[]>([]);
 
@@ -325,7 +329,6 @@ const SatelitteMap = (context: any) => {
               return obj;
             });
 
-
           }
         }
       );
@@ -360,6 +363,8 @@ const SatelitteMap = (context: any) => {
               return object;
             }, {});
 
+          
+
             setCurrentLayerData(prevNames => [...prevNames, obj])
           });
         }
@@ -368,6 +373,19 @@ const SatelitteMap = (context: any) => {
     }
   }, [currentLayerName]);
 
+  const updateCurrentLayerData = (uData : any) => {
+    const newState = currentLayerData.map((obj, index) => {
+      // 👇️ if id equals 2, update country property
+      if (index === uData.id) {
+        return uData.data;
+      }
+
+      // 👇️ otherwise return the object as is
+      return obj;
+    });
+
+    setCurrentLayerData(newState);
+  }
 
   const csvFileToArray = (string: string) => {
     const csvHeader = string.slice(0, string.indexOf("\n") - 1).split(",");
@@ -537,7 +555,7 @@ const SatelitteMap = (context: any) => {
     setAllData(updatedList);
   }
 
-  const myMap = useMap(mapRef, name, description, lat, lng, addFlag, editFlag, dataLayerFlag, "mapbox://styles/mapbox/satellite-streets-v12", handleLongtitude, handleLatitude, handleName, handleDescription, deleteData, editData, geoStyleName, layer, currentLayerName, array, geodata, allGeodata, drawMode, toggle, deleteFlag)
+  const myMap = useMap(mapRef, name, description, lat, lng, addFlag, editFlag, dataLayerFlag, "mapbox://styles/mapbox/satellite-streets-v12", handleLongtitude, handleLatitude, handleName, handleDescription, deleteData, editData, updateCurrentLayerData, geoStyleName, layer, currentLayerName,currentMarkerData, array, geodata, allGeodata, drawMode, toggle, deleteFlag)
 
   useEffect(() => {
     if (flag == 1) {
@@ -804,7 +822,6 @@ const SatelitteMap = (context: any) => {
                     <ListItemText
                       style={{ marginLeft: '15px' }}
                       primary={data}
-
                     />
                   </ListItem>
                 );
@@ -850,7 +867,9 @@ const SatelitteMap = (context: any) => {
                   <tbody>
                     {currentLayerData.map((data, index) => {
                       return (
-                        <tr style={{}}>
+                        <tr style={{}}  
+                        onClick={() => {setCurrentMarkerData({data : data , id : index})}}
+                        className={`markerTable ${currentMarkerData?.data == data && "active"}`}>
                           {currentLayerDataHeader.map((header, index) => {
                             return (
                               <td style={{ textAlign: 'center', padding: '10px' }}>{data[header]}</td>
