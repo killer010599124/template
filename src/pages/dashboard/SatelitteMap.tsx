@@ -117,12 +117,7 @@ function TabPanel_DV(props: TabPanelProps) {
   );
 }
 
-function makePersonQuery(first_name: string, last_name: string, address: string, email: string, phone: string) {
-  return `SELECT * FROM person WHERE first_name = '${first_name}' AND last_name ='${last_name}' AND personal_emails ='${email}' AND phone_numbers = '${phone}' ;`
-}
-function makeCompanyQuery(name: string, ticker: string, website: string) {
-  return `SELECT * FROM company WHERE name = '${name}' AND ticker ='${ticker}' AND website ='${website}';`
-}
+
 
 
 
@@ -196,7 +191,7 @@ const SatelitteMap = (context: any) => {
   const csv2geojson = require('csv2geojson');
   const readFile = require('./readCsvFile');
 
-  
+
   const [allData, setAllData] = useState<Geo[]>([]);
   const [array, setArray] = useState<Geo[]>([]);
 
@@ -204,18 +199,21 @@ const SatelitteMap = (context: any) => {
   const [csvHeader, setCsvHeader] = useState<string[]>([]);
 
 
-
+  //------------------  Data Manager --------//
   const [geodata, setGeodata] = useState<any>()
   const [allGeodata, setAllGeodata] = useState<any[]>([]);
   const [layer, setLayer] = useState('');
   const [currentLayerName, setCurrentLayerName] = useState('');
   const [currentLayerData, setCurrentLayerData] = useState<any[]>([]);
   const [currentLayerDataHeader, setCurrentLayerDataHeader] = useState<string[]>([]);
-  const [currentMarkerData, setCurrentMarkerData] = useState<{data:any, id:number}>();
-  
-  
+  const [currentMarkerData, setCurrentMarkerData] = useState<{ data: any, id: number }>();
+
+
+  //-------------- Manage Layers---------------//
 
   const [dataLayers, setDataLayers] = useState<string[]>([]);
+  const [mCurrentLayer, setMCurrentLayer] = useState<string>();
+  const [mDataField, setMDataField] = useState<any[]>([]);
 
 
   const fileReader = new FileReader();
@@ -228,6 +226,8 @@ const SatelitteMap = (context: any) => {
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [content, setContent] = useState('');
+  const [pSearchCount, setPSearchCount] = useState(0);
+  const [searchPeopleData, setSearchPeopleData] = useState<any[]>([])
 
   const [pid, setPid] = useState('');
   const [pname, setPName] = useState('');
@@ -254,7 +254,8 @@ const SatelitteMap = (context: any) => {
   const [cName, setCName] = useState('');
   const [cWebsite, setCWebsite] = useState('');
   const [cticker, setCticker] = useState('');
-
+  const [cSearchCount, setCSearchCount] = useState(0);
+  const [searchCompanyData, setSearchCompanyData] = useState<any[]>([])
 
 
   const [bid, setBid] = useState('');
@@ -320,6 +321,8 @@ const SatelitteMap = (context: any) => {
 
   const addDataLayer = () => {
     setDataLayers(layers => [...layers, layer])
+    const mDataField = { data: csvHeader, layername: layer }
+    setMDataField(prevNames => [...prevNames, mDataField]);
     setDataLayerFlag(!dataLayerFlag);
     if (geodata) {
       const temp = { name: layer, data: geodata };
@@ -344,7 +347,7 @@ const SatelitteMap = (context: any) => {
               return object;
             }, {});
 
-          
+
 
             setCurrentLayerData(prevNames => [...prevNames, obj])
           });
@@ -354,8 +357,8 @@ const SatelitteMap = (context: any) => {
     }
   }, [currentLayerName]);
 
-  const updateCurrentLayerData = (uData : any) => {
-  
+  const updateCurrentLayerData = (uData: any) => {
+
     setCurrentMarkerData(uData);
 
     const newState = currentLayerData.map((obj, index) => {
@@ -366,12 +369,69 @@ const SatelitteMap = (context: any) => {
       // 👇️ otherwise return the object as is
       return obj;
     });
-   
+
     setCurrentLayerData(newState);
   }
 
 
+  function makePersonQuery(first_name: string, last_name: string, address: string, email: string, phone: string) {
+    var query = 'SELECT * FROM person WHERE ';
+    if (first_name == '') {
+      query += ''
+    } else {
+      query += `first_name = '${first_name}' `
+    }
 
+    if (last_name == '') {
+      query += ''
+    } else {
+      query += `AND last_name = '${last_name}' `
+    }
+
+    if (email == '') {
+      query += ''
+    } else {
+      query += `AND personal_emails = '${email}' `
+    }
+
+    if (phone == '') {
+      query += ''
+    } else {
+      query += `AND phone_numbers = '${phone}' `
+    }
+
+    if (address == '') {
+      query += ''
+    } else {
+      query += `AND location_street_address = '${address}' `
+    }
+    query = query.replace('WHERE AND', 'WHERE');
+    return query
+  }
+  function makeCompanyQuery(name: string, ticker: string, website: string) {
+
+    var query = 'SELECT * FROM company WHERE ';
+
+    if (name == '') {
+      query += ''
+    } else {
+      query += `name = '${name}' `
+    }
+
+    if (ticker == '') {
+      query += ''
+    } else {
+      query += `AND ticker = '${ticker}' `
+    }
+
+    if (website == '') {
+      query += ''
+    } else {
+      query += `AND website = '${website}' `
+    }
+    query = query.replace('WHERE AND', 'WHERE');
+    return query;
+  }
 
   const clearPersonData = () => {
     setPid("");
@@ -393,34 +453,43 @@ const SatelitteMap = (context: any) => {
   const getPersonData = () => {
     clearPersonData();
     const query = makePersonQuery(firstName, lastName, address, email, phoneNumber);
+    console.log(query);
     PDLJSClient.person.search.sql({
       searchQuery: query,
-      size: 10,
+      size: 100,
     }).then((data) => {
+      console.log(data)
+      setPSearchCount(data['total']);
+      setSearchPeopleData([]);
+      setSearchPeopleData(data['data']);
 
-      setPid("" + data['data'][0]['id']);
-      setPName("" + data['data'][0]['full_name']);
-      setPaddress("" + data['data'][0]['location_street_address']);
-      setPemail("" + data['data'][0]['personal_emails']);
-      setPphone("" + data['data'][0]['phone_numbers']);
-      setPfacebook_id("" + data['data'][0]['facebook_id']);
-      setPfacebook_url("" + data['data'][0]['facebook_url']);
-      setPfacebook_un("" + data['data'][0]['facebook_username']);
 
-      setPlinkdin_id("" + data['data'][0]['linkedin_id']);
-      setPlinkdin_url("" + data['data'][0]['linkedin_url']);
-      setPlinkdin_un("" + data['data'][0]['linkedin_username']);
-
-      setPtwitter_url("" + data['data'][0]['twitter_url']);
-      setPtwitter_un("" + data['data'][0]['twitter_username']);
-
-      setIsSearchResult(true);
 
     }).catch((error) => {
-      setContent('No Search Result');
-      setIsSearchResult(false)
+      setPSearchCount(0);
+      setSearchPeopleData([]);
+      clearPersonData();
       console.log(error);
     });
+  }
+  const displayPeopleData = (data: any) => {
+    setPid("" + data['id']);
+    setPName("" + data['full_name']);
+    setPaddress("" + data['location_street_address']);
+    setPemail("" + data['personal_emails']);
+    setPphone("" + data['phone_numbers']);
+    setPfacebook_id("" + data['facebook_id']);
+    setPfacebook_url("" + data['facebook_url']);
+    setPfacebook_un("" + data['facebook_username']);
+
+    setPlinkdin_id("" + data['linkedin_id']);
+    setPlinkdin_url("" + data['linkedin_url']);
+    setPlinkdin_un("" + data['linkedin_username']);
+
+    setPtwitter_url("" + data['twitter_url']);
+    setPtwitter_un("" + data['twitter_username']);
+
+    // setIsSearchResult(true);
   }
   const clearCompanyData = () => {
     setBid('');
@@ -439,61 +508,42 @@ const SatelitteMap = (context: any) => {
 
     clearCompanyData();
     const query = makeCompanyQuery(name, ticker, website);
-
+    console.log(query)
     PDLJSClient.company.search.sql({
       searchQuery: query,
       size: 10,
     }).then((data) => {
-      setBid(data['data'][0].id as string);
-      setBname(data['data'][0].name as string);
-      setBfounded(data['data'][0].founded as number);
-      setBindustry(data['data'][0].industry as string);
-      setBwebsite(data['data'][0].website as string);
-      setBsummary(data['data'][0].summary as string);
+      // console.log(data)
+      setCSearchCount(data['total']);
+      setSearchCompanyData(data.data)
 
-      setBlinkdin(data['data'][0].linkedin_url as string);
-      setBfacebook(data['data'][0].facebook_url as string);
-      setBtwitter(data['data'][0].twitter_url as string);
-      setCrunchbase((data['data'][0].profiles)?.at(4) as string);
-
-      setIsSearchResult(true);
 
     }).catch((error) => {
-      setContent('No Search Result');
-      setIsSearchResult(false);
+      setCSearchCount(0);
+      clearCompanyData()
       console.log(error);
     });
-
-
   }
+  const displayCompanyData = (data: any) => {
+    setBid(data.id as string);
+    setBname(data.name as string);
+    setBfounded(data.founded as number);
+    setBindustry(data.industry as string);
+    setBwebsite(data.website as string);
+    setBsummary(data.summary as string);
 
-  const headerKeys = Object.keys(Object.assign({}, ...array));
-
-
-
+    setBlinkdin(data.linkedin_url as string);
+    setBfacebook(data.facebook_url as string);
+    setBtwitter(data.twitter_url as string);
+    setCrunchbase((data.profiles)?.at(4) as string);
+  }
 
   const manageCsvData = (data: any) => {
     setCsvData(prevNames => [...prevNames, data])
   }
-  const deleteData = (pointName: string) => {
-    setAllData(allData.filter(item => item.name !== pointName));
-    // alert('deleted')
-  }
-  const editData = (pointName: string, data: any) => {
 
 
-
-    let updatedList = allData.map(item => {
-      if (item.name == pointName) {
-        return { ...item, name: data.name, description: data.description, lat: data.latitude, lng: data.longtitude }; //gets everything that was already in item, and updates "done"
-      }
-      return item; // else return unmodified item 
-    });
-
-    setAllData(updatedList);
-  }
-
-  const myMap = useMap(mapRef, dataLayerFlag,  updateCurrentLayerData, geoStyleName, layer, currentLayerName,currentMarkerData, geodata, allGeodata, drawMode, toggle)
+  const myMap = useMap(mapRef, dataLayerFlag, updateCurrentLayerData, geoStyleName, layer, currentLayerName, currentMarkerData, geodata, allGeodata, drawMode, toggle)
 
   return (
     <>
@@ -661,7 +711,7 @@ const SatelitteMap = (context: any) => {
         opacity: 0.75,
         background: 'black'
       }}>
-        
+
         <div>
           <button style={{
             position: 'absolute',
@@ -749,9 +799,9 @@ const SatelitteMap = (context: any) => {
                   <tbody>
                     {currentLayerData.map((data, index) => {
                       return (
-                        <tr style={{}}  
-                        onClick={() => {setCurrentMarkerData({data : data , id : index})}}
-                        className={`markerTable ${currentMarkerData?.data == data && "active"}`}>
+                        <tr style={{}}
+                          onClick={() => { setCurrentMarkerData({ data: data, id: index }) }}
+                          className={`markerTable ${currentMarkerData?.data == data && "active"}`}>
                           {currentLayerDataHeader.map((header, index) => {
                             return (
                               <td style={{ textAlign: 'center', padding: '10px' }}>{data[header]}</td>
@@ -827,7 +877,24 @@ const SatelitteMap = (context: any) => {
                 <div style={{ display: "flex" }}>
                   <input type="text" placeholder='Phone' value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} style={{ width: '100%', borderColor: "white" }} />
                 </div>
-
+                <div style={{ textAlign: 'center', color: 'white' }}>
+                  Search Result : {pSearchCount}
+                </div>
+                <div className='large-2' style={{ width: '100%', height: '300px', border: '0.01em solid white', borderRadius: '5px', overflowY: 'scroll' }}>
+                  <ul style={{ width: '100%', height: '100%' }}>
+                    {searchPeopleData.map((data, index) => {
+                      return (
+                        <li style={{ padding: '10px', borderRadius: '10px' }}
+                          onClick={() => {
+                            displayPeopleData(data)
+                          }}
+                        >
+                          {data['first_name'] +' ' + data['last_name'] + ' '  + data['birth_date']}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
               </div>
             </TabPanel_PB>
             <TabPanel_PB value={value_tab_pb} index={1}>
@@ -845,6 +912,24 @@ const SatelitteMap = (context: any) => {
                 </div>
                 <div style={{ display: "flex" }}>
                   <input type="text" placeholder='Website' value={cWebsite} onChange={(e) => { setCWebsite(e.target.value) }} style={{ width: '100%', borderColor: "white" }} />
+                </div>
+                <div style={{ textAlign: 'center', color: 'white' }}>
+                  Search Result : {pSearchCount}
+                </div>
+                <div className='large-2' style={{ width: '100%', height: '300px', border: '0.01em solid white', borderRadius: '5px', overflowY: 'scroll' }}>
+                  <ul style={{ width: '100%', height: '100%' }}>
+                    {searchPeopleData.map((data, index) => {
+                      return (
+                        <li style={{ padding: '10px', borderRadius: '10px' }}
+                          onClick={() => {
+                            displayCompanyData(data)
+                          }}
+                        >
+                          {data['id']}
+                        </li>
+                      );
+                    })}
+                  </ul>
                 </div>
               </div>
 
@@ -865,18 +950,7 @@ const SatelitteMap = (context: any) => {
               }}
             >Download</button>
           </Box>
-          <div style={{ textAlign: 'center', marginTop: '170px', color: 'white' }}>
-            {isSearchResult ? (
-              <div>
 
-              </div>
-            ) :
-              (<div>
-                {content}
-              </div>)
-            }
-
-          </div>
         </div>
         <div style={{ width: '70%', height: '100%', borderTopRightRadius: '10px', borderBottomRightRadius: '10px' }}>
           <div className='PBData' style={{ color: 'white', height: '100%' }}>
@@ -898,12 +972,12 @@ const SatelitteMap = (context: any) => {
                     <div style={{ width: '10%', marginLeft: '3%' }}>
                       ID:<br />Name:<br />Address:<br />Emails:<br />Phone:
                     </div>
-                    <div style={{ marginLeft: '25px' }}>
+                    <div style={{width:'85%', marginLeft: '25px' }}>
                       <div>{pid}</div>
                       <div>{pname}</div>
                       <div>{paddress}</div>
-                      <div>{pemail}</div>
-                      <div>{pphone}</div>
+                      <div style={{width:'100%', overflowX:'hidden'}}>{pemail}</div>
+                      <div style={{width:'100%', overflowX:'hidden'}}>{pphone}</div>
                     </div>
                   </div>
 
@@ -1009,7 +1083,7 @@ const SatelitteMap = (context: any) => {
 
 
       {/* ------------------------- Geo Point Table layout-------------------- */}
-      
+
 
       {/* -----------------------------import various csv , Data layer  */}
       <div className='' style={dataVisible ? { display: "none" } :
@@ -1034,26 +1108,22 @@ const SatelitteMap = (context: any) => {
           <div className='PBData' style={{ color: 'white', height: '100%' }}>
             <div>
               <div style={{ fontSize: '24px', lineHeight: '45px', width: '100%', height: '50px', textAlign: 'center', paddingTop: '10px' }}>
-                Options
+                Layers
               </div>
               <div className='drawTab'>
 
-                <div style={{ display: "flex", marginTop: '35px' }}>
-                  <input type="text" placeholder='Enter a layer name' value={layer} onChange={(e) => { setLayer(e.target.value) }} style={{ width: '100%', borderColor: "white" }} />
-                </div>
-                <div style={{ fontSize: '16px', lineHeight: '45px', width: '100%', height: '50px', textAlign: 'center', paddingTop: '10px' }}>
-                  Layers
-                </div>
                 <div style={{
                   width: '100%',
-                  height: '300px',
+                  height: '450px',
                   border: '0.1rem solid white',
                   borderRadius: '10px'
                 }}>
                   <ul style={{ width: '100%', height: '100%' }}>
                     {dataLayers.map((data, index) => {
                       return (
-                        <li style={{ padding: '10px', borderRadius: '10px' }}>
+                        <li style={{ padding: '10px', borderRadius: '10px' }}
+                          onClick={() => setMCurrentLayer(data)}
+                          className={`list-item ${mCurrentLayer == data && "active"}`}>
                           {data}
                         </li>
                       );
@@ -1074,17 +1144,17 @@ const SatelitteMap = (context: any) => {
                     bottom: "0"
                     // overflowY: 'scroll'
                   }}>
-                  <label className='csv'>
-                    <input id="Image" type="file" onChange={readCSVFile} />
-                    Import CSV
-                  </label>
-                  {/* <label className='csv'>
-            Export CSV
-          </label> */}
+
+
                   <label className='csv' onClick={() => {
                     addDataLayer()
                   }}>
                     Add layer
+                  </label>
+                  <label className='csv' onClick={() => {
+
+                  }}>
+                    Remove layer
                   </label>
                 </div>
               </div>
@@ -1094,7 +1164,7 @@ const SatelitteMap = (context: any) => {
         </div>
         <div style={{ width: '70%', height: '100%', borderTopRightRadius: '10px', borderBottomRightRadius: '10px' }}>
           <div className='PBData' style={{ color: 'white', height: '100%' }}>
-            <div style={{ width: '100%', height: '100%' }}>
+            <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
 
               <div style={{ fontSize: '24px', lineHeight: '45px', width: '100%', height: '50px', textAlign: 'center', paddingTop: '10px' }}>
                 Preview CSV Data
@@ -1104,7 +1174,9 @@ const SatelitteMap = (context: any) => {
                 width: "100%",
                 height: '25%',
                 display: 'table-cell',
-                overflow: 'scroll'
+                overflow: 'scroll',
+                marginBottom: '0px',
+                borderBottom: '0.01em solid white'
                 // height: "100%"
               }}>
                 <thead style={{ background: 'gray', position: 'sticky', top: '0' }}>
@@ -1130,18 +1202,98 @@ const SatelitteMap = (context: any) => {
                   })}
                 </tbody>
               </table>
+              <div style={{ fontSize: '20px', lineHeight: '45px', width: '100%', height: '50px', textAlign: 'center', paddingTop: '10px' }}>
+                Options
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'row', height: '60%', padding: '10px', justifyContent: 'space-around' }}>
+                <div style={{ width: '48%', border: '0.01em solid white' }}>
+                  <div style={{ fontSize: '16px', lineHeight: '45px', width: '100%', height: '50px', textAlign: 'center', padding: '5px', borderBottom: '0.01em solid white' }}>
+                    Creat Data Field
+                  </div>
+                  <div style={{ display: "flex", marginTop: '20px', width: '90%', transform: 'translateX(5%)' }}>
+                    <input type="text" placeholder='Enter a new field name' style={{ width: '100%', borderColor: "white" }} />
+                  </div>
+                  <div style={{
+                    display: "flex",
+                    height: '56%',
+                    width: '90%',
+                    transform: 'translateX(5%)',
+                    marginBottom: '10px',
+                    borderRadius: '10px',
+                    border: '0.01em solid white',
+                    flexDirection: 'column',
+                    padding: '27px'
+                  }}>
+                    {mDataField.map((data, index) => {
+                      if (data.layername == mCurrentLayer) {
+                        {
+                          return (
+                            data.data.map((field: any) => {
+                              return (
+                                <>
+                                  <div style={{ width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                                    <div>{field}</div>
+                                    <div style={{ display: 'flex' }}>
+                                      <button style={{ width: '100%' }}>E</button>
+                                      <button style={{ width: '100%' }}>D</button>
+                                    </div>
+                                  </div>
+                                </>
+                              );
+                            })
+                          )
+                        }
+                      }
+                    })}
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-evenly' }}>
+                    <label className='csv'>
+                      <input id="Image" type="file" onChange={readCSVFile} />
+                      From CSV
+                    </label>
+
+                    <label className='csv'>
+
+                      New Field
+                    </label>
+                  </div>
+                </div>
+                <div style={{ width: '48%', border: '0.01em solid white' }}>
+                  <div style={{ fontSize: '16px', lineHeight: '45px', width: '100%', height: '50px', textAlign: 'center', padding: '5px', borderBottom: '0.01em solid white' }}>
+                    Properties
+                  </div>
+                  <div style={{ display: "flex", marginTop: '20px', width: '90%', transform: 'translateX(5%)' }}>
+                    <input type="text" placeholder='Enter a layer name' value={layer} onChange={(e) => { setLayer(e.target.value) }} style={{ width: '100%', borderColor: "white" }} />
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-evenly' }}>
+                    <label className='csv'>
+                      <input id="markerImage" type="file" />
+                      Marker Image
+                    </label>
+
+                    <label className='csv'>
+                      <input id="layerImage" type="file" />
+                      Layer Image
+                    </label>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-evenly', height: '30%' }}>
+                    <label className='csv'>
+
+                    </label>
+
+                    <label className='csv'>
+
+                    </label>
+                  </div>
+                </div>
+              </div>
             </div>
 
           </div>
         </div>
       </div>
-
-
       <div ref={mapRef} className='map' style={{ padding: "0px !important", height: "94%", width: "100%" }} />
-
     </>
-
-
   )
 };
 

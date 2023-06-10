@@ -37,7 +37,7 @@ export default PDLJSClient;
 
 // PDLJSClient.person.search.sql({
 //   searchQuery: "SELECT * FROM person WHERE first_name = 'mattehew'  ;",
-//   size: 10,
+//   size:100
 // }).then((data) => {
 //   console.log(data);
 // }).catch((error) => {

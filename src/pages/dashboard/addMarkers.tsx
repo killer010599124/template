@@ -59,7 +59,9 @@ export const addMarkers = (geodata: any, map: Map, handleLayerMarker: (marker: M
                     }
                 }, 10);     
             });
-
+            // const el = document.createElement('div');
+            // el.className = 'marker';
+            
             const marker = new Marker({ color: layerImage[randomNum], scale: 0.8 })
                 .setDraggable(false)
                 .setLngLat(i.geometry.coordinates)
