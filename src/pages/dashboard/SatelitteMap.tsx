@@ -355,16 +355,18 @@ const SatelitteMap = (context: any) => {
   }, [currentLayerName]);
 
   const updateCurrentLayerData = (uData : any) => {
+  
+    setCurrentMarkerData(uData);
+
     const newState = currentLayerData.map((obj, index) => {
       // 👇️ if id equals 2, update country property
       if (index === uData.id) {
         return uData.data;
       }
-
       // 👇️ otherwise return the object as is
       return obj;
     });
-
+   
     setCurrentLayerData(newState);
   }
 
@@ -1007,73 +1009,7 @@ const SatelitteMap = (context: any) => {
 
 
       {/* ------------------------- Geo Point Table layout-------------------- */}
-      {/* <div style={dataVisible ? { display: "none" } : {
-        display: "block",
-        position: "absolute",
-        right: "0px",
-        marginTop: "280px",
-        marginRight: "75px", zIndex: "1",
-        background: "black",
-        opacity: "0.75",
-        color: "white",
-        width: "345px",
-        height: "55%",
-        padding: "5px",
-        borderRadius: "10px",
-        // overflowY: 'scroll'
-      }
-
-      }>
-        <table style={{
-          textAlign: "center",
-          width: "100%",
-          // height: "100%"
-        }}>
-          <thead>
-            <tr style={{}}>
-              <th>Mark</th>
-              <th>Name</th>
-              <th>Lng</th>
-              <th>Lat</th>
-            </tr>
-          </thead>
-          <tbody>
-            {allData.map((data, index) => {
-              return (
-                <tr>
-                  <td><img src={assets.images.geoMark} style={{ width: "20px", height: "20px" }} /></td>
-                  <td>{data?.name}</td>
-                  <td>{(Number(data?.lng).toFixed(3)).toString()}</td>
-                  <td>{(Number(data?.lat).toFixed(3)).toString()}</td>
-                </tr>
-              );
-            })}
-
-          </tbody>
-        </table>
-        <div
-          style={{
-            // display: "block",
-            position: "absolute",
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: "space-evenly",
-            paddingTop: "5px",
-            zIndex: '1',
-            width: "250px",
-            right: "50px",
-            marginBottom: "4%",
-            bottom: "0"
-            // overflowY: 'scroll'
-          }}>
-          <label className='csv'>
-            <input id="Image" type="file" onChange={OpenCSVFile} />
-            Import CSV
-          </label>
-          
-          <CSVLink data={allData} style={{ width: '40%' }}><button className='csv' style={{ height: '33px', fontSize: '15px', width: '100%' }}>Export CSV</button></CSVLink>
-        </div>
-      </div> */}
+      
 
       {/* -----------------------------import various csv , Data layer  */}
       <div className='' style={dataVisible ? { display: "none" } :
@@ -1166,7 +1102,7 @@ const SatelitteMap = (context: any) => {
               <table className='large-2' style={{
                 // textAlign: "center",
                 width: "100%",
-                height: '92.5%',
+                height: '25%',
                 display: 'table-cell',
                 overflow: 'scroll'
                 // height: "100%"
