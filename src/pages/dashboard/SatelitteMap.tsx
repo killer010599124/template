@@ -136,6 +136,7 @@ const SatelitteMap = (context: any) => {
   const [value_tab_draw, setValue_tab_draw] = React.useState(0);
   const [value_tab_pb, setValue_tab_pb] = React.useState(0);
   const [value_tab_dv, setValue_tab_dv] = React.useState(0);
+  const [value_tab_layer, setValue_tab_layer] = React.useState(0);
 
 
   const [drawMode, setDrawMode] = useState('');
@@ -150,6 +151,9 @@ const SatelitteMap = (context: any) => {
   };
   const handleTabDVChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue_tab_dv(newValue);
+  };
+  const handleTabLayerChange = (event: React.SyntheticEvent, newValue: number) => {
+    setValue_tab_layer(newValue);
   };
 
   const handleToggle = () => {
@@ -214,7 +218,19 @@ const SatelitteMap = (context: any) => {
   const [dataLayers, setDataLayers] = useState<string[]>([]);
   const [mCurrentLayer, setMCurrentLayer] = useState<string>();
   const [mDataField, setMDataField] = useState<any[]>([]);
+  const [mNewFieldData, setMNewFieldData] = useState<string[]>([]);
 
+  const [fieldName, setFieldName] = useState<string>();
+  const handlFieldName = (str: string) => {
+    setFieldName(str);
+  };
+  const addFieldName = () => {
+    if (fieldName) {
+      setMNewFieldData(prevNames => [...prevNames, fieldName]);
+    }
+  }
+
+  const [inputMode, setInputMode] = useState<string>('')
 
   const fileReader = new FileReader();
 
@@ -889,7 +905,7 @@ const SatelitteMap = (context: any) => {
                             displayPeopleData(data)
                           }}
                         >
-                          {data['first_name'] +' ' + data['last_name'] + ' '  + data['birth_date']}
+                          {data['first_name'] + ' ' + data['last_name'] + ' ' + data['birth_date']}
                         </li>
                       );
                     })}
@@ -972,12 +988,12 @@ const SatelitteMap = (context: any) => {
                     <div style={{ width: '10%', marginLeft: '3%' }}>
                       ID:<br />Name:<br />Address:<br />Emails:<br />Phone:
                     </div>
-                    <div style={{width:'85%', marginLeft: '25px' }}>
+                    <div style={{ width: '85%', marginLeft: '25px' }}>
                       <div>{pid}</div>
                       <div>{pname}</div>
                       <div>{paddress}</div>
-                      <div style={{width:'100%', overflowX:'hidden'}}>{pemail}</div>
-                      <div style={{width:'100%', overflowX:'hidden'}}>{pphone}</div>
+                      <div style={{ width: '100%', overflowX: 'hidden' }}>{pemail}</div>
+                      <div style={{ width: '100%', overflowX: 'hidden' }}>{pphone}</div>
                     </div>
                   </div>
 
@@ -1210,53 +1226,100 @@ const SatelitteMap = (context: any) => {
                   <div style={{ fontSize: '16px', lineHeight: '45px', width: '100%', height: '50px', textAlign: 'center', padding: '5px', borderBottom: '0.01em solid white' }}>
                     Creat Data Field
                   </div>
-                  <div style={{ display: "flex", marginTop: '20px', width: '90%', transform: 'translateX(5%)' }}>
-                    <input type="text" placeholder='Enter a new field name' style={{ width: '100%', borderColor: "white" }} />
-                  </div>
-                  <div style={{
-                    display: "flex",
-                    height: '56%',
-                    width: '90%',
-                    transform: 'translateX(5%)',
-                    marginBottom: '10px',
-                    borderRadius: '10px',
-                    border: '0.01em solid white',
-                    flexDirection: 'column',
-                    padding: '27px'
-                  }}>
-                    {mDataField.map((data, index) => {
-                      if (data.layername == mCurrentLayer) {
-                        {
-                          return (
-                            data.data.map((field: any) => {
-                              return (
-                                <>
-                                  <div style={{ width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-                                    <div>{field}</div>
-                                    <div style={{ display: 'flex' }}>
-                                      <button style={{ width: '100%' }}>E</button>
-                                      <button style={{ width: '100%' }}>D</button>
-                                    </div>
+
+                  <Box sx={{ width: '100%' }} style={{ height: '86%' }}>
+                    <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                      <Tabs value={value_tab_layer} onChange={handleTabLayerChange} aria-label="basic tabs example">
+                        <Tab label="From CSV" {...a11yProps_PB(0)} style={{ color: "white", width: '50%' }} onClick={() => {setInputMode('csv')}}/>
+                        <Tab label="Manual" {...a11yProps_PB(1)} style={{ color: "white", width: '50%' }}  onClick={() => {setInputMode('manual')}}/>
+                      </Tabs>
+                    </Box>
+                    <TabPanel_PB value={value_tab_layer} index={0} >
+
+                      <div className='drawTab' style={{ height: '395px', padding: '10px' }}>
+                        <div style={{
+                          display: "flex",
+                          height: '56%',
+                          width: '90%',
+                          transform: 'translateX(5%)',
+                          marginBottom: '10px',
+                          borderRadius: '10px',
+                          border: '0.01em solid white',
+                          flexDirection: 'column',
+                          padding: '27px'
+                        }}>
+                          {csvHeader.map((data, index) => {
+                            return (
+
+                              <>
+                                <div style={{ width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                                  <div>{data}</div>
+                                  {/* <div style={{ display: 'flex' }}>
+                                            <button style={{ width: '100%' }}>E</button>
+                                            <button style={{ width: '100%' }}>D</button>
+                                          </div> */}
+                                </div>
+                              </>
+                            );
+                          })}
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-evenly' }}>
+                          <label className='csv'>
+                            <input id="Image" type="file" onChange={readCSVFile} />
+                            From CSV
+                          </label>
+                        </div>
+
+                      </div>
+                    </TabPanel_PB>
+                    <TabPanel_PB value={value_tab_layer} index={1}>
+                      <div className='drawTab' style={{ height: '395px', padding: '10px' }}>
+                        <div style={{ display: "flex", width: '90%', transform: 'translateX(5%)' }}>
+                          <input type="text" value={fieldName} onChange={(e) => { handlFieldName(e.target.value) }} placeholder='Enter a new field name' style={{ width: '100%', borderColor: "white" }} />
+                        </div>
+                        <div style={{
+                          display: "flex",
+                          height: '45%',
+                          width: '90%',
+                          transform: 'translateX(5%)',
+                          marginBottom: '10px',
+                          borderRadius: '10px',
+                          border: '0.01em solid white',
+                          flexDirection: 'column',
+                          padding: '27px'
+                        }}>
+                          {mNewFieldData.map((data, index) => {
+
+                            return (
+                              <>
+                                <div style={{ width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                                  <div>{data}</div>
+                                  <div style={{ display: 'flex' }}>
+                                    <button style={{ width: '100%' }}>E</button>
+                                    <button style={{ width: '100%' }}>D</button>
                                   </div>
-                                </>
-                              );
-                            })
-                          )
+                                </div>
+                              </>
+                            );
+                          })
                         }
-                      }
-                    })}
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-evenly' }}>
-                    <label className='csv'>
-                      <input id="Image" type="file" onChange={readCSVFile} />
-                      From CSV
-                    </label>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-evenly' }}>
+                          <label className='csv' onClick={addFieldName}>
+                            Add Field
+                          </label>
+                          <label className='csv' onClick={() =>{setMNewFieldData([])}}>
+                            Clear Field
+                          </label>
+                        </div>
+                        
+                      </div>
+                    </TabPanel_PB>
+                  </Box>
 
-                    <label className='csv'>
 
-                      New Field
-                    </label>
-                  </div>
+
+
                 </div>
                 <div style={{ width: '48%', border: '0.01em solid white' }}>
                   <div style={{ fontSize: '16px', lineHeight: '45px', width: '100%', height: '50px', textAlign: 'center', padding: '5px', borderBottom: '0.01em solid white' }}>
