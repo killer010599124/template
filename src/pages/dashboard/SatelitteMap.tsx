@@ -1,5 +1,5 @@
 import React from 'react';
-import { useRef, useState, } from 'react';
+import { useRef, useState, ChangeEvent } from 'react';
 import { useEffect, } from 'react';
 import { initMap } from './initMap';
 import { useMap } from './useMap';
@@ -221,9 +221,11 @@ const SatelitteMap = (context: any) => {
   const [mNewFieldData, setMNewFieldData] = useState<string[]>([]);
 
   const [fieldName, setFieldName] = useState<string>();
+
   const handlFieldName = (str: string) => {
     setFieldName(str);
   };
+
   const addFieldName = () => {
     if (fieldName) {
       setMNewFieldData(prevNames => [...prevNames, fieldName]);
@@ -232,7 +234,38 @@ const SatelitteMap = (context: any) => {
 
   const [inputMode, setInputMode] = useState<string>('csv')
 
-  const fileReader = new FileReader();
+  const [selectedLayerImageFile, setSelectedLayerImageFile] = useState<string | null>(null);
+  const [layerImageFiles, setLayerImageFiles] = useState<any[]>([]);
+
+  const [selectedMarkerImageFile, setSelectedMarkerImageFile] = useState<string | null>(null);
+  const [markerImageFiles, setMarkerImageFiles] = useState<any[]>([]);
+
+  const handleLayerImageFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const fileList = event.target.files;
+    if (fileList && fileList.length > 0) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setSelectedLayerImageFile(reader.result as string);
+      };
+      reader.readAsDataURL(fileList[0]);
+    }
+  };
+  const handleMarkerImageFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const fileList = event.target.files;
+    if (fileList && fileList.length > 0) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setSelectedMarkerImageFile(reader.result as string);
+      };
+      reader.readAsDataURL(fileList[0]);
+    }
+  };
+
+
+
+
+
+
 
   //--------   Person search engine-----------//
 
@@ -357,11 +390,28 @@ const SatelitteMap = (context: any) => {
     setGeodata([]);
     setGeodata(geojson);
 
+    setCsvData([]);
+
+    const cheader = Object.keys(geojson.features[0].properties);
+    setCsvHeader(cheader);
+
+    const array = geojson.features.map((i: any) => {
+
+      const values = i.properties;
+      const obj = cheader.reduce((object: any, header, index) => {
+
+        object[header] = values[header];
+        return object;
+      }, {});
+      manageCsvData(obj);
+      return obj;
+    });
 
   }
 
   const addDataLayer = () => {
-
+    setLayerImageFiles(prevNames => [...prevNames, selectedLayerImageFile]);
+    setMarkerImageFiles(prevNames => [...prevNames, selectedMarkerImageFile]);
     if (inputMode === 'csv') {
       setDataLayers(layers => [...layers, layer]);
       // const mDataField = { data: csvHeader, layername: layer }
@@ -373,7 +423,7 @@ const SatelitteMap = (context: any) => {
 
       }
     }
-    
+
     else if (inputMode === 'manual') {
       setDataLayers(layers => [...layers, layer]);
       setDataLayerFlag(!dataLayerFlag);
@@ -597,7 +647,7 @@ const SatelitteMap = (context: any) => {
   }
 
 
-  const myMap = useMap(mapRef, dataLayerFlag, updateCurrentLayerData, geoStyleName, layer, currentLayerName, currentMarkerData, geodata, allGeodata, drawMode, toggle)
+  const myMap = useMap(mapRef, dataLayerFlag, updateCurrentLayerData, geoStyleName, layer, currentLayerName, currentMarkerData, geodata, allGeodata, drawMode, toggle, selectedMarkerImageFile)
 
   return (
     <>
@@ -803,7 +853,7 @@ const SatelitteMap = (context: any) => {
                     className={`list-item ${currentLayerName == data && "active"}`}
                     style={{ textAlign: 'center', alignItems: 'center', color: 'white' }}>
                     <ListItemAvatar>
-                      <Avatar style={{ width: '100%', height: '120px', borderRadius: '10px' }} alt="Remy Sharp" src={assets.images.logo} />
+                      {selectedLayerImageFile && <Avatar style={{ width: '100%', height: '120px', borderRadius: '10px' }} alt="Remy Sharp" src={layerImageFiles[index]} />}
                     </ListItemAvatar>
                     <ListItemText
                       style={{ marginLeft: '15px' }}
@@ -1371,22 +1421,22 @@ const SatelitteMap = (context: any) => {
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-evenly' }}>
                     <label className='csv'>
-                      <input id="markerImage" type="file" />
-                      Marker Image
-                    </label>
-
-                    <label className='csv'>
-                      <input id="layerImage" type="file" />
+                      <input type="file" onChange={handleLayerImageFileChange} />
                       Layer Image
+                    </label>
+                    <label className='csv'>
+                      <input type="file" onChange={handleMarkerImageFileChange} />
+
+                      Marker Image
                     </label>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-evenly', height: '30%' }}>
                     <label className='csv'>
-
+                      {selectedLayerImageFile && <img src={selectedLayerImageFile} alt="Selected file" style={{ height: '100%', width: '100%' }} />}
                     </label>
 
                     <label className='csv'>
-
+                      {selectedMarkerImageFile && <img src={selectedMarkerImageFile} alt="Selected file" style={{ height: '100%', width: '100%' }} />}
                     </label>
                   </div>
                 </div>

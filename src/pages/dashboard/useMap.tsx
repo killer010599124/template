@@ -27,6 +27,7 @@ import { render } from '@testing-library/react';
 export const useMap = (container: React.RefObject<HTMLDivElement>, dataLayerFlag: boolean,
     updateCurrentLayerData: (updateData: any) => void, geoStyleName: string, layerName: string,
     currentLayerName: string, currentMarkerData: any, geodata: any, allGeodata: any, drawMode: string, toggle: boolean,
+    selectedMarkerImageFile : any
 ) => {
 
 
@@ -243,7 +244,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, dataLayerFlag
         if (geodata) {
 
             setCurrentLayerGeoData(geodata);
-            addMarkers(geodata, mapInitRef.current!, handleLayerMarker, updateMarkerCoordinates, returnMarkerData);
+            addMarkers(geodata, mapInitRef.current!, handleLayerMarker, updateMarkerCoordinates, returnMarkerData,selectedMarkerImageFile);
             mapInitRef.current?.flyTo({
                 center: geodata.features[0].geometry.coordinates,
                 zoom: 20
@@ -331,7 +332,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, dataLayerFlag
             console.log(currentMarkerData.id);
             // console.log(currentLayerGeoData);
             currentLayerGeoData.features.map((data: any, index: any) => {
-                if (data.properties.id === currentMarkerData.id) {
+                if (data.id === currentMarkerData.id) {
 
 
 
@@ -381,7 +382,6 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, dataLayerFlag
                     });
                 }
             });
-
         }
     }, [currentMarkerData])
 
@@ -402,7 +402,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, dataLayerFlag
 
     function buildLocationList(stores: any) {
         const array = stores.features.map((i: any, index: number) => {
-            i.properties.id = index;
+            i.id = index;
         });
     }
 
@@ -436,7 +436,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, dataLayerFlag
         const lat = Number((document.getElementsByClassName('latitude')[0] as HTMLInputElement).getAttribute('value'));
   
         currentLayerGeoData.features.map((data: any, index: any) => {
-            if (data.properties.id === currentMarkerData.id) {
+            if (data.id === currentMarkerData.id) {
                 data.geometry.coordinates = [lng, lat];
                 console.log(data.geometry.coordinates)
                 // mapInitRef.current?.flyTo({
