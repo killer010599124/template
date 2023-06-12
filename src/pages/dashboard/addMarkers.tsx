@@ -42,14 +42,15 @@ export const addMarkers = (geodata: any, map: Map, handleLayerMarker: (marker: M
                 .setHTML(html);
             let valuelist: string[] = [];
 
+
             popUp.on('open', () => {
                 for (let i = 0; i < cheader.length; i++) {
                     valuelist[i] = (document.getElementsByClassName(cheader[i])[0] as HTMLInputElement).getAttribute('value') as string;
                 }
                 valuelist[cheader.length] = (document.getElementsByClassName('latitude')[0] as HTMLInputElement).getAttribute('value') as string;
                 valuelist[cheader.length + 1] = (document.getElementsByClassName('longtitude')[0] as HTMLInputElement).getAttribute('value') as string;
-
             });
+
 
             popUp.on('close', () => {
                 setTimeout(() => {
@@ -59,6 +60,7 @@ export const addMarkers = (geodata: any, map: Map, handleLayerMarker: (marker: M
                     }
                 }, 10);     
             });
+            
             // const el = document.createElement('div');
             // el.className = 'marker';
             
@@ -96,6 +98,7 @@ export const addMarkers = (geodata: any, map: Map, handleLayerMarker: (marker: M
                    
                     handleLayerMarker(marker);
                     returnMarkerData({data:obj , id : index});
+                    console.log(marker.getLngLat())
                     map.flyTo({
                         center: marker.getLngLat(),
                         zoom: 24

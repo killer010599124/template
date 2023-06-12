@@ -316,8 +316,10 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, dataLayerFlag
 
                     document.getElementsByClassName('savemarker')[0].addEventListener('click', editMarker);
                     document.getElementsByClassName('cancelmarker')[0].addEventListener('click', cancelMarker);
+
+
                 }, 100)
-                
+
                 // document.getElementsByClassName('deletemarker')[0].addEventListener('click', (e) => { alert('hello') })
             }
         }
@@ -334,7 +336,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, dataLayerFlag
 
 
                     count.current = count.current + 1;
-                    
+
                     if (mapInitRef.current?.getLayer('circles1')) mapInitRef.current?.removeLayer('circles1');
 
                     mapInitRef.current?.addSource(`markers ${count.current}`, {
@@ -379,7 +381,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, dataLayerFlag
                     });
                 }
             });
-          
+
         }
     }, [currentMarkerData])
 
@@ -425,16 +427,31 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, dataLayerFlag
             (document.getElementsByClassName(cheader[i])[0] as HTMLInputElement).setAttribute('value', (document.getElementsByClassName(cheader[i])[0] as HTMLInputElement).value)
             currentData.data[cheader[i]] = (document.getElementsByClassName(cheader[i])[0] as HTMLInputElement).value;
         }
-        
+
         updateCurrentLayerData(currentData);
 
         (document.getElementsByClassName('latitude')[0] as HTMLInputElement).setAttribute('value', (document.getElementsByClassName('latitude')[0] as HTMLInputElement).value);
         (document.getElementsByClassName('longtitude')[0] as HTMLInputElement).setAttribute('value', (document.getElementsByClassName('longtitude')[0] as HTMLInputElement).value);
         const lng = Number((document.getElementsByClassName('longtitude')[0] as HTMLInputElement).getAttribute('value'));
         const lat = Number((document.getElementsByClassName('latitude')[0] as HTMLInputElement).getAttribute('value'));
-
+  
+        currentLayerGeoData.features.map((data: any, index: any) => {
+            if (data.properties.id === currentMarkerData.id) {
+                data.geometry.coordinates = [lng, lat];
+                console.log(data.geometry.coordinates)
+                // mapInitRef.current?.flyTo({
+                //     center: data.geometry.coordinates,
+                //     zoom: 24
+                // });
+            }
+        });
+      
         setTimeout(() => {
-            currentLayerMarker?.setLngLat([lng, lat])
+            currentLayerMarker?.setLngLat([lng, lat]);
+            mapInitRef.current?.flyTo({
+                center: currentLayerMarker?.getLngLat(),
+                zoom: 24
+            });
             console.log(currentData)
         }, 30);
         currentLayerMarker?.getPopup().remove()

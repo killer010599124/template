@@ -230,7 +230,7 @@ const SatelitteMap = (context: any) => {
     }
   }
 
-  const [inputMode, setInputMode] = useState<string>('')
+  const [inputMode, setInputMode] = useState<string>('csv')
 
   const fileReader = new FileReader();
 
@@ -273,7 +273,6 @@ const SatelitteMap = (context: any) => {
   const [cSearchCount, setCSearchCount] = useState(0);
   const [searchCompanyData, setSearchCompanyData] = useState<any[]>([])
 
-
   const [bid, setBid] = useState('');
   const [bname, setBname] = useState('');
   const [bfounded, setBfounded] = useState<number>();
@@ -287,10 +286,7 @@ const SatelitteMap = (context: any) => {
   const [btwitter, setBtwitter] = useState('');
   const [bcrunchbase, setCrunchbase] = useState('');
 
-
   const doc = new jsPDF('l', 'pt', 'a4');
-
-
 
   const readCSVFile = (e: any,) => {
     const file = e.target.files[0];
@@ -333,18 +329,60 @@ const SatelitteMap = (context: any) => {
     });
   }
 
+  const acceptDataField = () => {
+    interface MyObject {
+      [key: string]: string;
+    }
+    const myObject: MyObject = {};
+    mNewFieldData.forEach((str) => {
+      const [key, value] = str.split(':');
+      myObject[key] = 'Empty';
+    });
 
+    const features = [
+      {
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [45, 45],
+        },
+        properties: myObject,
+      },
+      // Add more features as needed
+    ];
+    const geojson = {
+      type: 'FeatureCollection',
+      features: features,
+    };
+    setGeodata([]);
+    setGeodata(geojson);
+
+
+  }
 
   const addDataLayer = () => {
-    setDataLayers(layers => [...layers, layer])
-    const mDataField = { data: csvHeader, layername: layer }
-    setMDataField(prevNames => [...prevNames, mDataField]);
-    setDataLayerFlag(!dataLayerFlag);
-    if (geodata) {
-      const temp = { name: layer, data: geodata };
-      setAllGeodata(prevNames => [...prevNames, temp]);
 
+    if (inputMode === 'csv') {
+      setDataLayers(layers => [...layers, layer]);
+      // const mDataField = { data: csvHeader, layername: layer }
+      // setMDataField(prevNames => [...prevNames, mDataField]);
+      setDataLayerFlag(!dataLayerFlag);
+      if (geodata) {
+        const temp = { name: layer, data: geodata };
+        setAllGeodata(prevNames => [...prevNames, temp]);
+
+      }
     }
+    
+    else if (inputMode === 'manual') {
+      setDataLayers(layers => [...layers, layer]);
+      setDataLayerFlag(!dataLayerFlag);
+      if (geodata) {
+        const temp = { name: layer, data: geodata };
+        setAllGeodata(prevNames => [...prevNames, temp]);
+      }
+    }
+
   }
 
   useEffect(() => {
@@ -1183,7 +1221,7 @@ const SatelitteMap = (context: any) => {
             <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
 
               <div style={{ fontSize: '24px', lineHeight: '45px', width: '100%', height: '50px', textAlign: 'center', paddingTop: '10px' }}>
-                Preview CSV Data
+                Preview  Data
               </div>
               <table className='large-2' style={{
                 // textAlign: "center",
@@ -1230,8 +1268,8 @@ const SatelitteMap = (context: any) => {
                   <Box sx={{ width: '100%' }} style={{ height: '86%' }}>
                     <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                       <Tabs value={value_tab_layer} onChange={handleTabLayerChange} aria-label="basic tabs example">
-                        <Tab label="From CSV" {...a11yProps_PB(0)} style={{ color: "white", width: '50%' }} onClick={() => {setInputMode('csv')}}/>
-                        <Tab label="Manual" {...a11yProps_PB(1)} style={{ color: "white", width: '50%' }}  onClick={() => {setInputMode('manual')}}/>
+                        <Tab label="From CSV" {...a11yProps_PB(0)} style={{ color: "white", width: '50%' }} onClick={() => { setInputMode('csv') }} />
+                        <Tab label="Manual" {...a11yProps_PB(1)} style={{ color: "white", width: '50%' }} onClick={() => { setInputMode('manual') }} />
                       </Tabs>
                     </Box>
                     <TabPanel_PB value={value_tab_layer} index={0} >
@@ -1302,17 +1340,20 @@ const SatelitteMap = (context: any) => {
                               </>
                             );
                           })
-                        }
+                          }
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-evenly' }}>
-                          <label className='csv' onClick={addFieldName}>
-                            Add Field
+                          <label className='csv' style={{ width: '30%' }} onClick={addFieldName}>
+                            Add
                           </label>
-                          <label className='csv' onClick={() =>{setMNewFieldData([])}}>
-                            Clear Field
+                          <label className='csv' style={{ width: '30%' }} onClick={() => { setMNewFieldData([]) }}>
+                            Clear
+                          </label>
+                          <label className='csv' style={{ width: '30%' }} onClick={() => { acceptDataField() }}>
+                            Accept
                           </label>
                         </div>
-                        
+
                       </div>
                     </TabPanel_PB>
                   </Box>
