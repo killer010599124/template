@@ -423,7 +423,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, dataLayerFlag
 
         console.log(currentData);
 
-        for (let i = 0; i < cheader.length - 1; i++) {
+        for (let i = 0; i < cheader.length ; i++) {
             (document.getElementsByClassName(cheader[i])[0] as HTMLInputElement).setAttribute('value', (document.getElementsByClassName(cheader[i])[0] as HTMLInputElement).value)
             currentData.data[cheader[i]] = (document.getElementsByClassName(cheader[i])[0] as HTMLInputElement).value;
         }
