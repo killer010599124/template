@@ -322,17 +322,17 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, dataLayerFlag
 
                 if (mapInitRef.current?.getLayer('circles1')) mapInitRef.current?.removeLayer('circles1');
 
-                // setTimeout(() => {
+                setTimeout(() => {
 
-                //     const cheader = Object.keys(currentLayerGeoData.features[0].properties);
+                    const cheader = Object.keys(currentLayerGeoData.features[0].properties);
 
-                //     document.getElementsByClassName('deletemarker')[0].addEventListener('click', deleteMarker);
+                    document.getElementsByClassName('deletemarker')[0].addEventListener('click', deleteMarker);
 
-                //     document.getElementsByClassName('savemarker')[0].addEventListener('click', editMarker);
-                //     document.getElementsByClassName('cancelmarker')[0].addEventListener('click', cancelMarker);
+                    document.getElementsByClassName('savemarker')[0].addEventListener('click', editMarker);
+                    document.getElementsByClassName('cancelmarker')[0].addEventListener('click', cancelMarker);
 
 
-                // }, 100)
+                }, 100)
 
                 // document.getElementsByClassName('deletemarker')[0].addEventListener('click', (e) => { alert('hello') })
             }
@@ -397,17 +397,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, dataLayerFlag
     useEffect(() => {
         if (currentData) {
             updateCurrentLayerData(currentData)
-            setTimeout(() => {
-
-                const cheader = Object.keys(currentLayerGeoData.features[0].properties);
-
-                document.getElementsByClassName('deletemarker')[0].addEventListener('click', deleteMarker);
-
-                document.getElementsByClassName('savemarker')[0].addEventListener('click', editMarker);
-                document.getElementsByClassName('cancelmarker')[0].addEventListener('click', cancelMarker);
-
-
-            }, 100)
+            
             // console.log(currentData)
         }
 
@@ -432,6 +422,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, dataLayerFlag
 
     function returnMarkerData(data: any) {
         setCurrentData(data);
+        console.log(data)
     }
 
     function deleteMarker() {

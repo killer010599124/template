@@ -93,10 +93,13 @@ updateMarkerCoordinates: (coord: any) => void,returnMarkerData :(data:any) =>voi
                     marker.setDraggable(true);
                 }
             })
+
+            const index = currentGeodata.features.length;
+
             marker.getElement().addEventListener('click', (e) => {
                 {
                     handleLayerMarker(marker);
-                    returnMarkerData({data:obj , id : currentGeodata.features.length-1});
+                    returnMarkerData({data:obj , id : index});
                     map.flyTo({
                         center: marker.getLngLat(),
                         zoom: 24
@@ -107,7 +110,7 @@ updateMarkerCoordinates: (coord: any) => void,returnMarkerData :(data:any) =>voi
                 }
             }, false);
            
-            return {properties:obj , geometry: {type:'Point',coordinates:[lnglat.lng, lnglat.lat]}, id : currentGeodata.features.length as number}
+            return {properties:obj , geometry: {type:'Point',coordinates:[lnglat.lng, lnglat.lat]}, id : index}
         }
 
     
