@@ -1,7 +1,7 @@
 import { Popup, Marker, Map } from 'mapbox-gl';
 
 export const generateOneMarker = (currentGeodata: any, map: Map, handleLayerMarker: (marker: Marker) => void, 
-updateMarkerCoordinates: (coord: any) => void,returnMarkerData :(data:any) =>void, lnglat : any) => {
+updateMarkerCoordinates: (coord: any) => void,returnMarkerData :(data:any) =>void, currentMarkerImage: any,lnglat : any) => {
 
     
     
@@ -62,7 +62,11 @@ updateMarkerCoordinates: (coord: any) => void,returnMarkerData :(data:any) =>voi
             });
 
 
-            const marker = new Marker({ color: 'red', scale: 0.8 })
+            const el = document.createElement('img');
+            el.setAttribute('src', currentMarkerImage);
+            el.setAttribute('style', 'width:30px; height:30px; border-radius:5px')
+
+            const marker = new Marker(el, { scale: 0.5 })
                 .setDraggable(false)
                 .setLngLat(lnglat)
                 .setPopup(popUp)

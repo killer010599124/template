@@ -239,6 +239,7 @@ const SatelitteMap = (context: any) => {
 
   const [selectedMarkerImageFile, setSelectedMarkerImageFile] = useState<string | null>(null);
   const [markerImageFiles, setMarkerImageFiles] = useState<any[]>([]);
+  const [currentMarkerImage, setCurrentMarkerImage] = useState<any>();
 
   const handleLayerImageFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const fileList = event.target.files;
@@ -256,6 +257,7 @@ const SatelitteMap = (context: any) => {
       const reader = new FileReader();
       reader.onload = () => {
         setSelectedMarkerImageFile(reader.result as string);
+        
       };
       reader.readAsDataURL(fileList[0]);
     }
@@ -411,7 +413,9 @@ const SatelitteMap = (context: any) => {
 
   const addDataLayer = () => {
     setLayerImageFiles(prevNames => [...prevNames, selectedLayerImageFile]);
-    setMarkerImageFiles(prevNames => [...prevNames, selectedMarkerImageFile]);
+    setMarkerImageFiles(prevNames => [...prevNames, {data:selectedMarkerImageFile, layername : layer}]);
+    // setCurrentMarkerImage({ data:selectedMarkerImageFile, layername:layer});
+
     if (inputMode === 'csv') {
       setDataLayers(layers => [...layers, layer]);
       // const mDataField = { data: csvHeader, layername: layer }
@@ -438,6 +442,11 @@ const SatelitteMap = (context: any) => {
 
   useEffect(() => {
     if (currentLayerName) {
+      
+      markerImageFiles.map((data, index) => {
+        if(data.layername == currentLayerName) setCurrentMarkerImage(data.data);
+      })
+
       allGeodata.map((data, index) => {
         if (data.name === currentLayerName) {
           const cheader = Object.keys(data.data.features[0].properties);
@@ -677,7 +686,7 @@ const SatelitteMap = (context: any) => {
   }
 
 
-  const myMap = useMap(mapRef, dataLayerFlag, addCurrentLayerData, updateCurrentLayerData,deleteCurrentLayerData, geoStyleName, layer, currentLayerName, currentMarkerData, geodata, allGeodata, drawMode, toggle, selectedMarkerImageFile)
+  const myMap = useMap(mapRef, dataLayerFlag, addCurrentLayerData, updateCurrentLayerData,deleteCurrentLayerData, geoStyleName, layer, currentLayerName, currentMarkerData, geodata, allGeodata, drawMode, toggle, selectedMarkerImageFile, currentMarkerImage)
 
   return (
     <>

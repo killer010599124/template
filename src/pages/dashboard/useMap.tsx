@@ -25,9 +25,9 @@ import { render } from '@testing-library/react';
 
 
 export const useMap = (container: React.RefObject<HTMLDivElement>, dataLayerFlag: boolean, addCurrentLayerData: (aData: any) => void,
-    updateCurrentLayerData: (updateData: any) => void,deleteCurrentLayerData:(index:number) => void, geoStyleName: string, layerName: string,
+    updateCurrentLayerData: (updateData: any) => void, deleteCurrentLayerData: (index: number) => void, geoStyleName: string, layerName: string,
     currentLayerName: string, currentMarkerData: any, geodata: any, allGeodata: any, drawMode: string, toggle: boolean,
-    selectedMarkerImageFile: any
+    selectedMarkerImageFile: any, currentMarkerImage : any
 ) => {
 
 
@@ -165,7 +165,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, dataLayerFlag
 
     const makeMarker = async (lngLat: any) => {
 
-        const data: any = generateOneMarker(currentLayerGeoData, mapInitRef.current!, handleLayerMarker, updateMarkerCoordinates, returnMarkerData, lngLat.lngLat);
+        const data: any = generateOneMarker(currentLayerGeoData, mapInitRef.current!, handleLayerMarker, updateMarkerCoordinates, returnMarkerData,currentMarkerImage, lngLat.lngLat);
         const feature =
         {
             type: 'Feature',
@@ -175,9 +175,9 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, dataLayerFlag
 
 
         currentLayerGeoData.features.push(feature)
-        
+
         buildLocationList(currentLayerGeoData);
-      
+
         addCurrentLayerData(data);
     }
 
@@ -257,7 +257,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, dataLayerFlag
         if (geodata) {
 
             setCurrentLayerGeoData(geodata);
-            addMarkers(geodata, mapInitRef.current!, handleLayerMarker, updateMarkerCoordinates, returnMarkerData, selectedMarkerImageFile);
+            addMarkers(geodata, mapInitRef.current!, handleLayerMarker, updateMarkerCoordinates, returnMarkerData, selectedMarkerImageFile );
             mapInitRef.current?.flyTo({
                 center: geodata.features[0].geometry.coordinates,
                 zoom: 20
@@ -303,7 +303,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, dataLayerFlag
         if (container.current) {
             allGeodata.map((data: any, index: any) => {
                 if (data.name === currentLayerName) {
-           
+
                     buildLocationList(data.data);
                     setCurrentLayerGeoData(data.data);
                     mapInitRef.current!.flyTo({
@@ -322,17 +322,17 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, dataLayerFlag
 
                 if (mapInitRef.current?.getLayer('circles1')) mapInitRef.current?.removeLayer('circles1');
 
-                setTimeout(() => {
-                 
-                    const cheader = Object.keys(currentLayerGeoData.features[0].properties);
+                // setTimeout(() => {
 
-                    document.getElementsByClassName('deletemarker')[0].addEventListener('click', deleteMarker);
+                //     const cheader = Object.keys(currentLayerGeoData.features[0].properties);
 
-                    document.getElementsByClassName('savemarker')[0].addEventListener('click', editMarker);
-                    document.getElementsByClassName('cancelmarker')[0].addEventListener('click', cancelMarker);
+                //     document.getElementsByClassName('deletemarker')[0].addEventListener('click', deleteMarker);
+
+                //     document.getElementsByClassName('savemarker')[0].addEventListener('click', editMarker);
+                //     document.getElementsByClassName('cancelmarker')[0].addEventListener('click', cancelMarker);
 
 
-                }, 100)
+                // }, 100)
 
                 // document.getElementsByClassName('deletemarker')[0].addEventListener('click', (e) => { alert('hello') })
             }
@@ -342,7 +342,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, dataLayerFlag
     var p = 0;
     useEffect(() => {
         if (currentMarkerData) {
-           
+
             currentLayerGeoData.features.map((data: any, index: any) => {
                 if (data.id === currentMarkerData.id) {
                     count.current = count.current + 1;
@@ -397,6 +397,17 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, dataLayerFlag
     useEffect(() => {
         if (currentData) {
             updateCurrentLayerData(currentData)
+            setTimeout(() => {
+
+                const cheader = Object.keys(currentLayerGeoData.features[0].properties);
+
+                document.getElementsByClassName('deletemarker')[0].addEventListener('click', deleteMarker);
+
+                document.getElementsByClassName('savemarker')[0].addEventListener('click', editMarker);
+                document.getElementsByClassName('cancelmarker')[0].addEventListener('click', cancelMarker);
+
+
+            }, 100)
             // console.log(currentData)
         }
 
@@ -425,17 +436,17 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, dataLayerFlag
 
     function deleteMarker() {
         currentLayerMarker?.remove();
-        const index : number =
-        currentLayerGeoData.features.map((data: any, index: any) => {
-            if (data.id === currentData.id) {
-                index = currentData.id;
-                      
-            }
-        });
+        const index: number =
+            currentLayerGeoData.features.map((data: any, index: any) => {
+                if (data.id === currentData.id) {
+                    index = currentData.id;
+
+                }
+            });
         deleteCurrentLayerData(index);
-        currentLayerGeoData.features.splice(index,1);      
+        currentLayerGeoData.features.splice(index, 1);
         buildLocationList(currentLayerGeoData);
-   
+
     }
 
     function editMarker() {
@@ -457,11 +468,11 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, dataLayerFlag
         currentLayerGeoData.features.map((data: any, index: any) => {
             if (data.id === currentData.id) {
                 data.geometry.coordinates = [lng, lat];
-                
-                mapInitRef.current?.flyTo({
-                    center: data.geometry.coordinates,
-                    zoom: 24
-                });
+
+                // mapInitRef.current?.flyTo({
+                //     center: data.geometry.coordinates,
+                //     zoom: 24
+                // });
             }
         });
 

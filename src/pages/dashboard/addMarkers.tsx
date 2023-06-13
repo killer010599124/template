@@ -1,7 +1,7 @@
 import { Popup, Marker, Map } from 'mapbox-gl';
 
 export const addMarkers = (geodata: any, map: Map, handleLayerMarker: (marker: Marker) => void,
- updateMarkerCoordinates: (coord: any) => void, returnMarkerData :(data:any) =>void, selectedMarkerImageFile : any) => {
+    updateMarkerCoordinates: (coord: any) => void, returnMarkerData: (data: any) => void, selectedMarkerImageFile: any) => {
 
     const layerImage = ['gray', 'red', 'blue', 'green', 'black', 'yello', 'pink', 'purple']
     const randomNum = Math.floor(Math.random() * 7);
@@ -13,7 +13,7 @@ export const addMarkers = (geodata: any, map: Map, handleLayerMarker: (marker: M
             const cheader = Object.keys(i.properties);
             let html = '';
             const values = i.properties;
-           
+
             html += `<div style="background:black; color : white; opacity : 0.75; padding: 10px; border-radius: 10px;">`;
             const obj = cheader.reduce((object: any, header, index) => {
                 html += `<div style="width:100%; display:flex">
@@ -21,8 +21,8 @@ export const addMarkers = (geodata: any, map: Map, handleLayerMarker: (marker: M
                          <input type="text" value = "${values[header]}" style="width:60%; border: 0.01em solid white;" class = "${header}">
                      </div>
                      `
-                     object[header] = values[header];
-                     return object;
+                object[header] = values[header];
+                return object;
             }, {});
             html += `<div style="width:100%; display:flex">
                          <label for="name" style="width:40%; text-align:right; padding-right: 5px;" >Latitude :</label>
@@ -54,21 +54,21 @@ export const addMarkers = (geodata: any, map: Map, handleLayerMarker: (marker: M
 
             popUp.on('close', () => {
                 setTimeout(() => {
-                    if(!document.getElementsByClassName('mapboxgl-popup')[0]){
-                  
-                        marker.setLngLat([Number(valuelist[cheader.length+1]),Number(valuelist[cheader.length])])
+                    if (!document.getElementsByClassName('mapboxgl-popup')[0]) {
+
+                        marker.setLngLat([Number(valuelist[cheader.length + 1]), Number(valuelist[cheader.length])])
                     }
-                }, 10);     
+                }, 10);
             });
 
             const el = document.createElement('img');
             el.setAttribute('src', selectedMarkerImageFile);
             el.setAttribute('style', 'width:30px; height:30px; border-radius:5px')
             // el.className = '    ';
-            
-           
-            const marker = new Marker(el, {scale:0.5})
-            
+
+
+            const marker = new Marker(el, { scale: 0.5 })
+
                 .setDraggable(false)
                 .setLngLat(i.geometry.coordinates)
                 .setPopup(popUp)
@@ -86,7 +86,7 @@ export const addMarkers = (geodata: any, map: Map, handleLayerMarker: (marker: M
                             (document.getElementsByClassName(cheader[i])[0] as HTMLInputElement).value = valuelist[i]
                         }
                         (document.getElementsByClassName('latitude')[0] as HTMLInputElement).value = valuelist[cheader.length];
-                        (document.getElementsByClassName('longtitude')[0] as HTMLInputElement).value = valuelist[cheader.length + 1];       
+                        (document.getElementsByClassName('longtitude')[0] as HTMLInputElement).value = valuelist[cheader.length + 1];
                     }, 10)
                 }
             })
@@ -99,23 +99,19 @@ export const addMarkers = (geodata: any, map: Map, handleLayerMarker: (marker: M
 
             marker.getElement().addEventListener('click', (e) => {
                 {
-                   console.log(geodata);
-                   console.log({data:obj , id : index});
+                    console.log(geodata);
+                    console.log({ data: obj, id: index });
                     handleLayerMarker(marker);
-                    
-                    returnMarkerData({data:obj , id : index});
-                    console.log(marker.getLngLat())
+
+                    returnMarkerData({ data: obj, id: index });
+
                     map.flyTo({
                         center: marker.getLngLat(),
                         zoom: 24
                     });
 
-                    // (document.getElementsByClassName('lattitude')[0] as HTMLInputElement).setAttribute('value', marker.getLngLat().lat.toString());
-                    // (document.getElementsByClassName('longtitude')[0] as HTMLInputElement).setAttribute('value', marker.getLngLat().lng.toString());
                 }
             }, false);
-           
-
         }
 
     }
