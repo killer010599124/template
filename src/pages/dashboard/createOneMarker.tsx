@@ -1,6 +1,7 @@
 import { Popup, Marker, Map } from 'mapbox-gl';
 
-export const generateOneMarker = (currentGeodata: any, map: Map, handleLayerMarker: (marker: Marker) => void, updateMarkerCoordinates: (coord: any) => void, lnglat : any) => {
+export const generateOneMarker = (currentGeodata: any, map: Map, handleLayerMarker: (marker: Marker) => void, 
+updateMarkerCoordinates: (coord: any) => void,returnMarkerData :(data:any) =>void, lnglat : any) => {
 
     
     
@@ -20,8 +21,8 @@ export const generateOneMarker = (currentGeodata: any, map: Map, handleLayerMark
                      </div>
                      `
                 // html += `<div class = "${header}">${header} : ${values[header]}</div>`
-                // object[header] = values[header];
-                // return object;
+                object[header] = 'empty';
+                return object;
             }, {});
             html += `<div style="width:100%; display:flex">
                          <label for="name" style="width:40%; text-align:right; padding-right: 5px;" >Latitude :</label>
@@ -37,6 +38,7 @@ export const generateOneMarker = (currentGeodata: any, map: Map, handleLayerMark
             <button class='cancelmarker' > cancel </button>
           </div>`;
 
+
             const popUp = new Popup({ closeButton: false, anchor: 'left' })
                 .setHTML(html);
             let valuelist: string[] = [];
@@ -50,14 +52,16 @@ export const generateOneMarker = (currentGeodata: any, map: Map, handleLayerMark
 
             });
             popUp.on('close', () => {
-                console.log('close')
+               
                 setTimeout(() => {
                     if(!document.getElementsByClassName('mapboxgl-popup')[0]){
-                        console.log('closed')
+                      
                         marker.setLngLat([Number(valuelist[cheader.length+1]),Number(valuelist[cheader.length])])
                     }
                 }, 10);     
             });
+
+
             const marker = new Marker({ color: 'red', scale: 0.8 })
                 .setDraggable(false)
                 .setLngLat(lnglat)
@@ -87,11 +91,11 @@ export const generateOneMarker = (currentGeodata: any, map: Map, handleLayerMark
             })
             marker.getElement().addEventListener('click', (e) => {
                 {
-                   
                     handleLayerMarker(marker);
+                    returnMarkerData({data:obj , id : currentGeodata.features.length-1});
                     map.flyTo({
                         center: marker.getLngLat(),
-                        zoom: 18
+                        zoom: 24
                     });
 
                     // (document.getElementsByClassName('lattitude')[0] as HTMLInputElement).setAttribute('value', marker.getLngLat().lat.toString());
@@ -99,7 +103,7 @@ export const generateOneMarker = (currentGeodata: any, map: Map, handleLayerMark
                 }
             }, false);
            
-
+            return {properties:obj , geometry: {type:'Point',coordinates:[lnglat.lng, lnglat.lat]}, id : currentGeodata.features.length as number}
         }
 
     

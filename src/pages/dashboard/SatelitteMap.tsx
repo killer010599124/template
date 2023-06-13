@@ -416,6 +416,7 @@ const SatelitteMap = (context: any) => {
       setDataLayers(layers => [...layers, layer]);
       // const mDataField = { data: csvHeader, layername: layer }
       // setMDataField(prevNames => [...prevNames, mDataField]);
+      setCurrentLayerName(layer);
       setDataLayerFlag(!dataLayerFlag);
       if (geodata) {
         const temp = { name: layer, data: geodata };
@@ -461,6 +462,36 @@ const SatelitteMap = (context: any) => {
     }
   }, [currentLayerName]);
 
+  const addCurrentLayerData = (aData: any) => {
+
+
+   
+    const feature = 
+      {
+        type: 'Feature',
+        geometry:aData.geometry,
+        properties: aData.properties,
+      };
+
+      allGeodata.map((data, index) => {
+      
+        // console.log(currentLayerName);
+        if (data.name === currentLayerName) {
+          
+          // data.data.features.push(feature)
+          // console.log(data);
+        }
+      });  
+      
+    setCurrentLayerData(prevNames => [...prevNames, aData.properties])
+  }
+
+  const deleteCurrentLayerData = (index:number) =>{
+    const temp = [...currentLayerData];
+    temp.splice(index,1);
+    setCurrentLayerData(temp);
+  } 
+
   const updateCurrentLayerData = (uData: any) => {
 
     setCurrentMarkerData(uData);
@@ -476,7 +507,6 @@ const SatelitteMap = (context: any) => {
 
     setCurrentLayerData(newState);
   }
-
 
   function makePersonQuery(first_name: string, last_name: string, address: string, email: string, phone: string) {
     var query = 'SELECT * FROM person WHERE ';
@@ -647,7 +677,7 @@ const SatelitteMap = (context: any) => {
   }
 
 
-  const myMap = useMap(mapRef, dataLayerFlag, updateCurrentLayerData, geoStyleName, layer, currentLayerName, currentMarkerData, geodata, allGeodata, drawMode, toggle, selectedMarkerImageFile)
+  const myMap = useMap(mapRef, dataLayerFlag, addCurrentLayerData, updateCurrentLayerData,deleteCurrentLayerData, geoStyleName, layer, currentLayerName, currentMarkerData, geodata, allGeodata, drawMode, toggle, selectedMarkerImageFile)
 
   return (
     <>

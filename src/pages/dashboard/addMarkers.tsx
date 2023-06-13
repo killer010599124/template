@@ -62,7 +62,8 @@ export const addMarkers = (geodata: any, map: Map, handleLayerMarker: (marker: M
             });
 
             const el = document.createElement('img');
-            el.setAttribute('src', selectedMarkerImageFile)
+            el.setAttribute('src', selectedMarkerImageFile);
+            el.setAttribute('style', 'width:30px; height:30px; border-radius:5px')
             // el.className = '    ';
             
            
@@ -98,8 +99,10 @@ export const addMarkers = (geodata: any, map: Map, handleLayerMarker: (marker: M
 
             marker.getElement().addEventListener('click', (e) => {
                 {
-                   
+                   console.log(geodata);
+                   console.log({data:obj , id : index});
                     handleLayerMarker(marker);
+                    
                     returnMarkerData({data:obj , id : index});
                     console.log(marker.getLngLat())
                     map.flyTo({
@@ -111,7 +114,7 @@ export const addMarkers = (geodata: any, map: Map, handleLayerMarker: (marker: M
                     // (document.getElementsByClassName('longtitude')[0] as HTMLInputElement).setAttribute('value', marker.getLngLat().lng.toString());
                 }
             }, false);
-          
+           
 
         }
 
