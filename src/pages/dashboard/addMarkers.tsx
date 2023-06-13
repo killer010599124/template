@@ -1,11 +1,12 @@
 import { Popup, Marker, Map } from 'mapbox-gl';
 
 export const addMarkers = (geodata: any, map: Map, handleLayerMarker: (marker: Marker) => void,
-    updateMarkerCoordinates: (coord: any) => void, returnMarkerData: (data: any) => void, selectedMarkerImageFile: any) => {
+    updateMarkerCoordinates: (coord: any) => void, returnMarkerData: (data: any) => void, selectedMarkerImageFile: any,
+    currentLayerName : string) => {
 
     const layerImage = ['gray', 'red', 'blue', 'green', 'black', 'yello', 'pink', 'purple']
     const randomNum = Math.floor(Math.random() * 7);
-    flyToStore(geodata.features[0]);
+    // flyToStore(geodata.features[0]);
     const array = geodata.features.map((i: any, index: number) => {
 
         // let marker = new Marker;
@@ -63,7 +64,9 @@ export const addMarkers = (geodata: any, map: Map, handleLayerMarker: (marker: M
 
             const el = document.createElement('img');
             el.setAttribute('src', selectedMarkerImageFile);
-            el.setAttribute('style', 'width:30px; height:30px; border-radius:5px')
+            el.setAttribute('style', 'width:30px; height:30px; border-radius:5px');
+            
+            el.setAttribute('class' , `${currentLayerName}qwer`);
             // el.className = '    ';
 
 

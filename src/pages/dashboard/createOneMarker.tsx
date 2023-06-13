@@ -1,7 +1,8 @@
 import { Popup, Marker, Map } from 'mapbox-gl';
 
 export const generateOneMarker = (currentGeodata: any, map: Map, handleLayerMarker: (marker: Marker) => void, 
-updateMarkerCoordinates: (coord: any) => void,returnMarkerData :(data:any) =>void, currentMarkerImage: any,lnglat : any) => {
+updateMarkerCoordinates: (coord: any) => void,returnMarkerData :(data:any) =>void, currentMarkerImage: any,
+lnglat : any, currentLayerName : string) => {
 
     
     
@@ -65,6 +66,8 @@ updateMarkerCoordinates: (coord: any) => void,returnMarkerData :(data:any) =>voi
             const el = document.createElement('img');
             el.setAttribute('src', currentMarkerImage);
             el.setAttribute('style', 'width:30px; height:30px; border-radius:5px')
+            el.setAttribute('class' , `${currentLayerName}qwer`);
+
 
             const marker = new Marker(el, { scale: 0.5 })
                 .setDraggable(false)
@@ -98,6 +101,7 @@ updateMarkerCoordinates: (coord: any) => void,returnMarkerData :(data:any) =>voi
 
             marker.getElement().addEventListener('click', (e) => {
                 {
+                    console.log(marker.getElement())
                     handleLayerMarker(marker);
                     returnMarkerData({data:obj , id : index});
                     map.flyTo({

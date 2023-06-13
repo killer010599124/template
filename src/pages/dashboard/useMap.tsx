@@ -27,7 +27,7 @@ import { render } from '@testing-library/react';
 export const useMap = (container: React.RefObject<HTMLDivElement>, dataLayerFlag: boolean, addCurrentLayerData: (aData: any) => void,
     updateCurrentLayerData: (updateData: any) => void, deleteCurrentLayerData: (index: number) => void, geoStyleName: string, layerName: string,
     currentLayerName: string, currentMarkerData: any, geodata: any, allGeodata: any, drawMode: string, toggle: boolean,
-    selectedMarkerImageFile: any, currentMarkerImage : any
+    selectedMarkerImageFile: any, currentMarkerImage: any
 ) => {
 
 
@@ -165,7 +165,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, dataLayerFlag
 
     const makeMarker = async (lngLat: any) => {
 
-        const data: any = generateOneMarker(currentLayerGeoData, mapInitRef.current!, handleLayerMarker, updateMarkerCoordinates, returnMarkerData,currentMarkerImage, lngLat.lngLat);
+        const data: any = generateOneMarker(currentLayerGeoData, mapInitRef.current!, handleLayerMarker, updateMarkerCoordinates, returnMarkerData, currentMarkerImage, lngLat.lngLat, currentLayerName);
         const feature =
         {
             type: 'Feature',
@@ -257,7 +257,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, dataLayerFlag
         if (geodata) {
 
             setCurrentLayerGeoData(geodata);
-            addMarkers(geodata, mapInitRef.current!, handleLayerMarker, updateMarkerCoordinates, returnMarkerData, selectedMarkerImageFile );
+            addMarkers(geodata, mapInitRef.current!, handleLayerMarker, updateMarkerCoordinates, returnMarkerData, selectedMarkerImageFile, currentLayerName);
             mapInitRef.current?.flyTo({
                 center: geodata.features[0].geometry.coordinates,
                 zoom: 20
@@ -397,7 +397,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, dataLayerFlag
     useEffect(() => {
         if (currentData) {
             updateCurrentLayerData(currentData)
-            
+
             // console.log(currentData)
         }
 
@@ -422,22 +422,37 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, dataLayerFlag
 
     function returnMarkerData(data: any) {
         setCurrentData(data);
-        console.log(data)
+       
     }
 
     function deleteMarker() {
         currentLayerMarker?.remove();
-        const index: number =
-            currentLayerGeoData.features.map((data: any, index: any) => {
-                if (data.id === currentData.id) {
-                    index = currentData.id;
+        let num: number = 0;
+        console.log(currentData)
+        console.log(currentLayerGeoData);
+        currentLayerGeoData.features.map((data: any, index: any) => {
+            console.log(data.id +":" + currentData.id)
+            if (data.id === currentData.id) {
+                num = currentData.id;
+            }
+        });
+       
+        deleteCurrentLayerData(num);
+        currentLayerGeoData.features.splice(num, 1);
 
-                }
-            });
-        deleteCurrentLayerData(index);
-        currentLayerGeoData.features.splice(index, 1);
+        deleteElementsByClassName(`${currentLayerName}qwer`);
+
+        addMarkers(currentLayerGeoData, mapInitRef.current!, handleLayerMarker, updateMarkerCoordinates, returnMarkerData, selectedMarkerImageFile, currentLayerName);
+
+
         buildLocationList(currentLayerGeoData);
 
+    }
+    function deleteElementsByClassName(className: string) {
+        const elements = document.querySelectorAll(`.${className}`);
+        elements.forEach((element) => {
+            element.remove();
+        });
     }
 
     function editMarker() {
@@ -473,7 +488,6 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, dataLayerFlag
                 center: currentLayerMarker?.getLngLat(),
                 zoom: 24
             });
-            console.log(currentData)
         }, 30);
         currentLayerMarker?.getPopup().remove()
     }

@@ -1,24 +1,26 @@
 {
   "files": {
-    "main.css": "/static/css/main.611ac130.css",
-    "main.js": "/static/js/main.0e4e37ed.js",
+    "main.css": "/static/css/main.6e873be7.css",
+    "main.js": "/static/js/main.77a1fe48.js",
     "static/js/498.22274e37.chunk.js": "/static/js/498.22274e37.chunk.js",
     "static/js/703.d1419998.chunk.js": "/static/js/703.d1419998.chunk.js",
     "static/js/198.b9ec1377.chunk.js": "/static/js/198.b9ec1377.chunk.js",
     "static/js/787.5de8dc57.chunk.js": "/static/js/787.5de8dc57.chunk.js",
     "static/media/geoMark.png": "/static/media/geoMark.713af9a0674e3796042f.png",
+    "static/media/maxresdefault.jpg": "/static/media/maxresdefault.87971e585d2e54e6cec6.jpg",
+    "static/media/logo.png": "/static/media/logo.5a33c1fe9f70086e75ce.png",
     "static/media/data.png": "/static/media/data.745ffc55015eb27f7c6c.png",
-    "static/media/geofence.png": "/static/media/geofence.020e30711cec7c38952d.png",
+    "static/media/togeojson.cjs": "/static/media/togeojson.f344f8cfee7f33ed6983.cjs",
     "index.html": "/index.html",
-    "main.611ac130.css.map": "/static/css/main.611ac130.css.map",
-    "main.0e4e37ed.js.map": "/static/js/main.0e4e37ed.js.map",
+    "main.6e873be7.css.map": "/static/css/main.6e873be7.css.map",
+    "main.77a1fe48.js.map": "/static/js/main.77a1fe48.js.map",
     "498.22274e37.chunk.js.map": "/static/js/498.22274e37.chunk.js.map",
     "703.d1419998.chunk.js.map": "/static/js/703.d1419998.chunk.js.map",
     "198.b9ec1377.chunk.js.map": "/static/js/198.b9ec1377.chunk.js.map",
     "787.5de8dc57.chunk.js.map": "/static/js/787.5de8dc57.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.611ac130.css",
-    "static/js/main.0e4e37ed.js"
+    "static/css/main.6e873be7.css",
+    "static/js/main.77a1fe48.js"
   ]
 }
