@@ -1,30 +1,27 @@
 import { Popup, Marker, Map } from 'mapbox-gl';
 
-export const generateOneMarker = (currentGeodata: any, map: Map, handleLayerMarker: (marker: Marker) => void, 
-updateMarkerCoordinates: (coord: any) => void,returnMarkerData :(data:any) =>void, currentMarkerImage: any,
-lnglat : any, currentLayerName : string) => {
+export const generateOneMarker = (currentGeodata: any, map: Map, handleLayerMarker: (marker: Marker) => void,
+    updateMarkerCoordinates: (coord: any) => void, returnMarkerData: (data: any) => void, currentMarkerImage: any,
+    lnglat: any, currentLayerName: string) => {
 
-    
-    
+    // let marker = new Marker;
+    if (currentGeodata) {
+        const i = currentGeodata.features[0];
+        const cheader = Object.keys(i.properties);
+        let html = '';
+        const values = i.properties;
 
-        // let marker = new Marker;
-        if (currentGeodata) {
-            const i = currentGeodata.features[0];
-            const cheader = Object.keys(i.properties);
-            let html = '';
-            const values = i.properties;
-    
-            html += `<div style="background:black; color : white; opacity : 0.75; padding: 10px; border-radius: 10px;">`;
-            const obj = cheader.reduce((object: any, header, index) => {
-                html += `<div style="width:100%; display:flex">
+        html += `<div style="background:black; color : white; opacity : 0.75; padding: 10px; border-radius: 10px;">`;
+        const obj = cheader.reduce((object: any, header, index) => {
+            html += `<div style="width:100%; display:flex">
                          <label for="name" style="width:40%; text-align:right; padding-right: 5px;" >${header} :</label>
                          <input type="text" value = "" style="width:60%; border: 0.01em solid white;" class = "${header}">
                      </div>
                      `
-                // html += `<div class = "${header}">${header} : ${values[header]}</div>`
-                object[header] = 'empty';
-                return object;
-            }, {});
+            // html += `<div class = "${header}">${header} : ${values[header]}</div>`
+            object[header] = '';
+            return object;
+        }, {});
             html += `<div style="width:100%; display:flex">
                          <label for="name" style="width:40%; text-align:right; padding-right: 5px;" >Latitude :</label>
                          <input type="text" value = "${lnglat.lat}" style="width:60%; border: 0.01em solid white;" class = "latitude">
@@ -53,10 +50,10 @@ lnglat : any, currentLayerName : string) => {
 
             });
             popUp.on('close', () => {
-               
+
                 setTimeout(() => {
                     if(!document.getElementsByClassName('mapboxgl-popup')[0]){
-                      
+
                         marker.setLngLat([Number(valuelist[cheader.length+1]),Number(valuelist[cheader.length])])
                     }
                 }, 10);     
@@ -101,7 +98,7 @@ lnglat : any, currentLayerName : string) => {
 
             marker.getElement().addEventListener('click', (e) => {
                 {
-                    console.log(marker.getElement())
+
                     handleLayerMarker(marker);
                     returnMarkerData({data:obj , id : index});
                     map.flyTo({
@@ -113,12 +110,12 @@ lnglat : any, currentLayerName : string) => {
                     // (document.getElementsByClassName('longtitude')[0] as HTMLInputElement).setAttribute('value', marker.getLngLat().lng.toString());
                 }
             }, false);
-           
-            return {properties:obj , geometry: {type:'Point',coordinates:[lnglat.lng, lnglat.lat]}, id : index}
-        }
+     
+        return { properties: obj, geometry: { type: 'Point', coordinates: [lnglat.lng, lnglat.lat] }, id: index }
+    }
 
-    
 
-    
-    
+
+
+
 }

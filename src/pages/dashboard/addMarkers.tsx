@@ -102,8 +102,7 @@ export const addMarkers = (geodata: any, map: Map, handleLayerMarker: (marker: M
 
             marker.getElement().addEventListener('click', (e) => {
                 {
-                    console.log(geodata);
-                    console.log({ data: obj, id: index });
+                    
                     handleLayerMarker(marker);
 
                     returnMarkerData({ data: obj, id: index });

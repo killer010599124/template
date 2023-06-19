@@ -12,7 +12,7 @@ const assets = {
     purpleMarker: require("./images/mapbox-marker-icon-20px-purple.png"),
     redMarker: require("./images/mapbox-marker-icon-20px-red.png"),
     yellowMarker: require("./images/mapbox-marker-icon-20px-yellow.png"),
-
+    loading : require("./loading.gif")
   }
 };
 

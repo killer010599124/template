@@ -22,7 +22,7 @@ import assets from '../../assets';
 import { randomInt } from 'crypto';
 import { store } from '../../redux/store';
 import { render } from '@testing-library/react';
-
+import Draggable, { DraggableData, DraggableEvent } from 'react-draggable';
 
 export const useMap = (container: React.RefObject<HTMLDivElement>, dataLayerFlag: boolean, addCurrentLayerData: (aData: any) => void,
     updateCurrentLayerData: (updateData: any) => void, deleteCurrentLayerData: (index: number) => void, geoStyleName: string, layerName: string,
@@ -99,6 +99,11 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, dataLayerFlag
 
             //         // create popup nod
             //         const popupNode = document.createElement("div")
+
+
+
+
+            
             //         ReactDOM.render(
             //             <>
             //                 <div>{feature?.properties?.ID}</div>
@@ -164,7 +169,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, dataLayerFlag
     }, [mapInitRef.current, currentLayerGeoData])
 
     const makeMarker = async (lngLat: any) => {
-
+        
         const data: any = generateOneMarker(currentLayerGeoData, mapInitRef.current!, handleLayerMarker, updateMarkerCoordinates, returnMarkerData, currentMarkerImage, lngLat.lngLat, currentLayerName);
         const feature =
         {
@@ -175,13 +180,13 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, dataLayerFlag
 
 
         currentLayerGeoData.features.push(feature)
+        // addMarkers(currentLayerGeoData, mapInitRef.current!, handleLayerMarker, updateMarkerCoordinates, returnMarkerData, currentMarkerImage, currentLayerName);
+
+        // currentLayerGeoData.features.push(feature)
 
         buildLocationList(currentLayerGeoData);
-
         addCurrentLayerData(data);
     }
-
-
 
     useEffect(() => {
 
@@ -253,11 +258,10 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, dataLayerFlag
 
     useEffect(() => {
 
-
         if (geodata) {
 
             setCurrentLayerGeoData(geodata);
-            addMarkers(geodata, mapInitRef.current!, handleLayerMarker, updateMarkerCoordinates, returnMarkerData, selectedMarkerImageFile, currentLayerName);
+            // addMarkers(geodata, mapInitRef.current!, handleLayerMarker, updateMarkerCoordinates, returnMarkerData, selectedMarkerImageFile, currentLayerName);
             mapInitRef.current?.flyTo({
                 center: geodata.features[0].geometry.coordinates,
                 zoom: 20
@@ -282,7 +286,7 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, dataLayerFlag
                         'type': 'symbol',
                         'source': layerName,
                         'layout': {
-                            'icon-image': '',
+                            'icon-image': layerName,
                             // get the title name from the source's "title" property
                             // 'text-field': ['get', 'name'],
                             'text-font': [
@@ -422,28 +426,32 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, dataLayerFlag
 
     function returnMarkerData(data: any) {
         setCurrentData(data);
-       
+
     }
 
     function deleteMarker() {
-        currentLayerMarker?.remove();
-        let num: number = 0;
-        console.log(currentData)
-        console.log(currentLayerGeoData);
-        currentLayerGeoData.features.map((data: any, index: any) => {
-            console.log(data.id +":" + currentData.id)
-            if (data.id === currentData.id) {
-                num = currentData.id;
-            }
-        });
-       
-        deleteCurrentLayerData(num);
-        currentLayerGeoData.features.splice(num, 1);
+        // currentLayerMarker?.remove();
 
         deleteElementsByClassName(`${currentLayerName}qwer`);
 
-        addMarkers(currentLayerGeoData, mapInitRef.current!, handleLayerMarker, updateMarkerCoordinates, returnMarkerData, selectedMarkerImageFile, currentLayerName);
+        let num: number = 0;
 
+        console.log(currentLayerGeoData);
+
+        currentLayerGeoData.features.map((data: any, index: any) => {
+            console.log(data.id + ":" + currentData.id)
+            if (data.id === currentData.id) {
+                num = data.id;
+            }
+        });
+
+        deleteCurrentLayerData(num);
+
+        currentLayerGeoData.features.splice(num, 1);
+
+        console.log(currentLayerGeoData)
+
+        addMarkers(currentLayerGeoData, mapInitRef.current!, handleLayerMarker, updateMarkerCoordinates, returnMarkerData, currentMarkerImage, currentLayerName);
 
         buildLocationList(currentLayerGeoData);
 
@@ -463,6 +471,14 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, dataLayerFlag
             (document.getElementsByClassName(cheader[i])[0] as HTMLInputElement).setAttribute('value', (document.getElementsByClassName(cheader[i])[0] as HTMLInputElement).value)
             currentData.data[cheader[i]] = (document.getElementsByClassName(cheader[i])[0] as HTMLInputElement).value;
         }
+        //---------------In Here save---------------//
+        // const feature =
+        // {
+        //     type: 'Feature',
+        //     geometry: data.geometry,
+        //     properties: data.properties,
+        // };
+        // setCurrentLayerGeoData
 
         updateCurrentLayerData(currentData);
 
@@ -474,7 +490,8 @@ export const useMap = (container: React.RefObject<HTMLDivElement>, dataLayerFlag
         currentLayerGeoData.features.map((data: any, index: any) => {
             if (data.id === currentData.id) {
                 data.geometry.coordinates = [lng, lat];
-
+                data.properties = currentData.data;
+                console.log(data);
                 // mapInitRef.current?.flyTo({
                 //     center: data.geometry.coordinates,
                 //     zoom: 24

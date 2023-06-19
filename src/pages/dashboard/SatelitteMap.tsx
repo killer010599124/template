@@ -171,6 +171,7 @@ const SatelitteMap = (context: any) => {
     const input = document.getElementsByClassName('PBData')[0];
     const el1: HTMLElement = input as HTMLElement;
     el1.style.color = 'black';
+
     doc.html(el1, {
       async callback(doc) {
         doc.save('report.pdf');
@@ -194,6 +195,9 @@ const SatelitteMap = (context: any) => {
 
   const csv2geojson = require('csv2geojson');
   const readFile = require('./readCsvFile');
+  const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  // let progress = 0;
 
 
   const [allData, setAllData] = useState<Geo[]>([]);
@@ -257,7 +261,7 @@ const SatelitteMap = (context: any) => {
       const reader = new FileReader();
       reader.onload = () => {
         setSelectedMarkerImageFile(reader.result as string);
-        
+
       };
       reader.readAsDataURL(fileList[0]);
     }
@@ -325,6 +329,7 @@ const SatelitteMap = (context: any) => {
 
   const readCSVFile = (e: any,) => {
     const file = e.target.files[0];
+    setLoading(true);
 
     readFile.readAsText(file, (err: any, text: any) => {
 
@@ -333,11 +338,12 @@ const SatelitteMap = (context: any) => {
         {
           delimiter: 'auto'
         },
+        // {ProgressEvent : (progress:number) => setProgress(progress)},
         (err: any, result: any) => {
           if (err) {
-
+            setLoading(false)
           } else {
-
+            
             setGeodata([]);
             setGeodata(result);
 
@@ -346,7 +352,7 @@ const SatelitteMap = (context: any) => {
             const cheader = Object.keys(result.features[0].properties);
             setCsvHeader(cheader);
 
-            const array = result.features.map((i: any) => {
+            const array = result.features.map((i: any , index:number) => {
 
               const values = i.properties;
               const obj = cheader.reduce((object: any, header, index) => {
@@ -354,10 +360,13 @@ const SatelitteMap = (context: any) => {
                 object[header] = values[header];
                 return object;
               }, {});
-              manageCsvData(obj);
-              return obj;
+              // manageCsvData(obj);
+              setProgress(index *100 /result.features.length)
+             
+              
+              
             });
-
+            setLoading(false)
           }
         }
       );
@@ -412,8 +421,9 @@ const SatelitteMap = (context: any) => {
   }
 
   const addDataLayer = () => {
+    setLoading(true);
     setLayerImageFiles(prevNames => [...prevNames, selectedLayerImageFile]);
-    setMarkerImageFiles(prevNames => [...prevNames, {data:selectedMarkerImageFile, layername : layer}]);
+    setMarkerImageFiles(prevNames => [...prevNames, { data: selectedMarkerImageFile, layername: layer }]);
     // setCurrentMarkerImage({ data:selectedMarkerImageFile, layername:layer});
 
     if (inputMode === 'csv') {
@@ -426,15 +436,17 @@ const SatelitteMap = (context: any) => {
         const temp = { name: layer, data: geodata };
         setAllGeodata(prevNames => [...prevNames, temp]);
 
+        // setLoading(false)
       }
     }
 
     else if (inputMode === 'manual') {
       setDataLayers(layers => [...layers, layer]);
+      setCurrentLayerName(layer);
       setDataLayerFlag(!dataLayerFlag);
       if (geodata) {
         const temp = { name: layer, data: geodata };
-        setAllGeodata(prevNames => [...prevNames, temp]);
+        // setAllGeodata(prevNames => [...prevNames, temp]);
       }
     }
 
@@ -444,7 +456,7 @@ const SatelitteMap = (context: any) => {
     if (currentLayerName) {
       
       markerImageFiles.map((data, index) => {
-        if(data.layername == currentLayerName) setCurrentMarkerImage(data.data);
+        if (data.layername == currentLayerName) setCurrentMarkerImage(data.data);
       })
 
       allGeodata.map((data, index) => {
@@ -452,20 +464,22 @@ const SatelitteMap = (context: any) => {
           const cheader = Object.keys(data.data.features[0].properties);
           setCurrentLayerDataHeader(cheader);
           setCurrentLayerData([]);
-          const array = data.data.features.map((i: any) => {
+          // const array = data.data.features.map((i: any) => {
 
-            const values = i.properties;
-            const obj = cheader.reduce((object: any, header, index) => {
+          //   const values = i.properties;
+          //   const obj = cheader.reduce((object: any, header, index) => {
 
-              object[header] = values[header];
-              return object;
-            }, {});
+          //     object[header] = values[header];
+          //     return object;
+          //   }, {});
 
 
 
-            setCurrentLayerData(prevNames => [...prevNames, obj])
-          });
+          //   setCurrentLayerData(prevNames => [...prevNames, obj])
+          // });
+          setLoading(false)
         }
+        
       });
 
     }
@@ -474,32 +488,32 @@ const SatelitteMap = (context: any) => {
   const addCurrentLayerData = (aData: any) => {
 
 
-   
-    const feature = 
-      {
-        type: 'Feature',
-        geometry:aData.geometry,
-        properties: aData.properties,
-      };
 
-      allGeodata.map((data, index) => {
-      
-        // console.log(currentLayerName);
-        if (data.name === currentLayerName) {
-          
-          // data.data.features.push(feature)
-          // console.log(data);
-        }
-      });  
-      
+    const feature =
+    {
+      type: 'Feature',
+      geometry: aData.geometry,
+      properties: aData.properties,
+    };
+
+    allGeodata.map((data, index) => {
+
+      // console.log(currentLayerName);
+      if (data.name === currentLayerName) {
+
+        // data.data.features.push(feature)
+        // console.log(data);
+      }
+    });
+
     setCurrentLayerData(prevNames => [...prevNames, aData.properties])
   }
 
-  const deleteCurrentLayerData = (index:number) =>{
+  const deleteCurrentLayerData = (index: number) => {
     const temp = [...currentLayerData];
-    temp.splice(index,1);
+    temp.splice(index, 1);
     setCurrentLayerData(temp);
-  } 
+  }
 
   const updateCurrentLayerData = (uData: any) => {
 
@@ -599,7 +613,7 @@ const SatelitteMap = (context: any) => {
     console.log(query);
     PDLJSClient.person.search.sql({
       searchQuery: query,
-      size: 100,
+      size: 5,
     }).then((data) => {
       console.log(data)
       setPSearchCount(data['total']);
@@ -654,7 +668,7 @@ const SatelitteMap = (context: any) => {
     console.log(query)
     PDLJSClient.company.search.sql({
       searchQuery: query,
-      size: 10,
+      size: 5,
     }).then((data) => {
       // console.log(data)
       setCSearchCount(data['total']);
@@ -683,10 +697,11 @@ const SatelitteMap = (context: any) => {
 
   const manageCsvData = (data: any) => {
     setCsvData(prevNames => [...prevNames, data])
+    console.log(progress);
   }
 
 
-  const myMap = useMap(mapRef, dataLayerFlag, addCurrentLayerData, updateCurrentLayerData,deleteCurrentLayerData, geoStyleName, layer, currentLayerName, currentMarkerData, geodata, allGeodata, drawMode, toggle, selectedMarkerImageFile, currentMarkerImage)
+  const myMap = useMap(mapRef, dataLayerFlag, addCurrentLayerData, updateCurrentLayerData, deleteCurrentLayerData, geoStyleName, layer, currentLayerName, currentMarkerData, geodata, allGeodata, drawMode, toggle, selectedMarkerImageFile, currentMarkerImage)
 
   return (
     <>
@@ -1226,7 +1241,18 @@ const SatelitteMap = (context: any) => {
 
 
       {/* ------------------------- Geo Point Table layout-------------------- */}
-
+      <div style={loading ? {position:'absolute', zIndex:'10', textAlign:'center', width:'100%', height:'90%', display:'block'} : {display:'none'}}>
+        <img  src={assets.images.loading} style={{marginTop:'10%'}} />
+  
+      </div>
+      
+        
+       {/*       
+        <div>
+          <p>Loading: {progress}%</p>
+        </div>
+     */}
+      
 
       {/* -----------------------------import various csv , Data layer  */}
       <div className='' style={dataVisible ? { display: "none" } :
@@ -1234,7 +1260,7 @@ const SatelitteMap = (context: any) => {
           position: "absolute",
           right: "25%",
           marginTop: "7%",
-          zIndex: "2",
+          zIndex: "2",  
           width: "50%",
           height: "650px",
           display: 'flex',
@@ -1292,13 +1318,13 @@ const SatelitteMap = (context: any) => {
                   <label className='csv' onClick={() => {
                     addDataLayer()
                   }}>
-                    Add layer
+                    Add Layer
                   </label>
-                  <label className='csv' onClick={() => {
+                  {/* <label className='csv' onClick={() => {
 
                   }}>
                     Remove layer
-                  </label>
+                  </label> */}
                 </div>
               </div>
             </div>
