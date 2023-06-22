@@ -29,7 +29,7 @@ import assets from "../../assets";
 import { randomInt } from "crypto";
 import { store } from "../../redux/store";
 import { render } from "@testing-library/react";
-
+import { Popup } from "mapbox-gl";
 export const useMap = (
   container: React.RefObject<HTMLDivElement>,
   dataLayerFlag: boolean,
@@ -158,7 +158,7 @@ export const useMap = (
     return () => mapInitRef.current?.remove();
   }, []);
 
-  var temp = new Date().getTime();
+  const popUp = new Popup({ closeButton: false, anchor: "left" });
 
   useEffect(() => {
     mapInitRef.current?.on("dblclick", makeMarker);
@@ -311,40 +311,7 @@ export const useMap = (
       });
     }
   }, [dataLayerFlag]);
-  mapInitRef.current?.on("style.load", () => {
-    console.log("map style changed");
-    console.log(geodata)
-    if (layerName) {
-      mapInitRef.current?.addSource(layerName, {
-        type: "geojson",
-        data: geodata,
-      });
-      // Add a symbol layer
 
-      mapInitRef.current?.addLayer({
-        id: layerName,
-        type: "circle",
-        source: layerName,
-        paint: {
-          "circle-radius": 5,
-          "circle-stroke-width": 2,
-          "circle-color": "red",
-          "circle-stroke-color": "white",
-        },
-        layout: {
-          visibility: "visible",
-          // 'icon-image': layerName,
-
-          // 'text-font': [
-          //     'Open Sans Semibold',
-          //     'Arial Unicode MS Bold'
-          // ],
-          // 'text-offset': [0, 1.25],
-          // 'text-anchor': 'top'
-        },
-      });
-    }
-  });
   useEffect(() => {
     if (container.current) {
       allGeodata.map((data: any, index: any) => {
@@ -357,9 +324,92 @@ export const useMap = (
           });
         }
       });
+
+      mapInitRef.current?.on("mouseenter", currentLayerName, (e: any) => {
+        // Change the cursor style as a UI indicator.
+        if (mapInitRef.current)
+          mapInitRef.current.getCanvas().style.cursor = "pointer";
+
+        // Copy coordinates array.
+        const coordinates = e.features[0].geometry.coordinates.slice();
+        const values = e.features[0].properties;
+        const cheader = Object.keys(values);
+        let html = "";
+        // const values = i.properties;
+
+        html += `<div style="background:black; color : white; opacity : 0.75; padding: 10px; border-radius: 10px;">`;
+        const obj = cheader.reduce((object: any, header, index) => {
+          html += `<div style="width:100%; display:flex">
+                             <label for="name" style="width:40%; text-align:right; padding-right: 5px;" >${header} :</label>
+                             <input type="text" value = "${values[header]}" style="width:60%; border: 0.01em solid white;" class = "${header}">
+                         </div>
+                         `;
+          object[header] = values[header];
+          return object;
+        }, {});
+        html += `<div style="width:100%; display:flex">
+                             <label for="name" style="width:40%; text-align:right; padding-right: 5px;" >Latitude :</label>
+                             <input type="text" value = "${coordinates[1]}" style="width:60%; border: 0.01em solid white;" class = "latitude">
+                         </div>`;
+        html += `<div style="width:100%; display:flex">
+                         <label for="name" style="width:40%; text-align:right; padding-right: 5px;" >Longtitude :</label>
+                         <input type="text" value = "${coordinates[0]}" style="width:60%; border: 0.01em solid white;" class = "longtitude">
+                     </div>`;
+        // Ensure that if the map is zoomed out such that multiple
+        // copies of the feature are visible, the popup appears
+        // over the copy being pointed to.
+        while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+          coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+        }
+
+        // Populate the popup and set its coordinates
+        // based on the feature found.
+        popUp.setLngLat(coordinates).setHTML(html).addTo(mapInitRef.current!);
+      });
+
+      mapInitRef.current?.on("mouseleave", currentLayerName, () => {
+        if (mapInitRef.current)
+          mapInitRef.current.getCanvas().style.cursor = "";
+        popUp.remove();
+      });
     }
   }, [currentLayerName]);
+  useEffect(() => {
+    mapInitRef.current?.on("style.load", () => {
+      console.log("map style changed");
+      console.log(currentLayerGeoData);
+      if (currentLayerGeoData) {
+        mapInitRef.current?.addSource(currentLayerName, {
+          type: "geojson",
+          data: currentLayerGeoData,
+        });
+        // Add a symbol layer
 
+        mapInitRef.current?.addLayer({
+          id: currentLayerName,
+          type: "circle",
+          source: currentLayerName,
+          paint: {
+            "circle-radius": 5,
+            "circle-stroke-width": 2,
+            "circle-color": "red",
+            "circle-stroke-color": "white",
+          },
+          layout: {
+            visibility: "visible",
+            // 'icon-image': layerName,
+
+            // 'text-font': [
+            //     'Open Sans Semibold',
+            //     'Arial Unicode MS Bold'
+            // ],
+            // 'text-offset': [0, 1.25],
+            // 'text-anchor': 'top'
+          },
+        });
+      }
+    });
+  }, [currentLayerGeoData]);
   useEffect(() => {
     if (container.current) {
       if (currentLayerMarker) {
@@ -388,7 +438,6 @@ export const useMap = (
     }
   }, [currentLayerMarker]);
 
-  var p = 0;
   useEffect(() => {
     if (currentMarkerData) {
       currentLayerGeoData.features.map((data: any, index: any) => {
@@ -456,12 +505,6 @@ export const useMap = (
     if (container.current) {
       console.log(layerName);
       mapInitRef.current?.setStyle(geoStyleName);
-      if (mapInitRef.current?.getLayer(layerName))
-        mapInitRef.current?.setLayoutProperty(
-          layerName,
-          "visibility",
-          "visible"
-        );
     }
   }, [geoStyleName]);
 
