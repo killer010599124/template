@@ -251,7 +251,7 @@ const SatelitteMap = (context: any) => {
     }
   };
 
-  const [position, setPosition] = useState({ x: 0, y: 64 });
+  const [position, setPosition] = useState({ x: 0, y: 84 });
   const handleDrag = (event: DraggableEvent, data: DraggableData) => {
     setPosition({ x: data.x, y: data.y });
   };

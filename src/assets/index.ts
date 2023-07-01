@@ -3,7 +3,7 @@ const assets = {
     logo: require("./images/maxresdefault.jpg"),
     data : require("./images/data.png"),
     geoMark : require("./images/geoMark.png"),
-    marker: require("./images/marker.png"),
+    logout: require("./images/logout.png"),
     blueMarker: require("./images/mapbox-marker-icon-20px-blue.png"),
     grayMarker: require("./images/mapbox-marker-icon-20px-gray.png"),
     greenMarker: require("./images/mapbox-marker-icon-20px-green.png"),
@@ -12,7 +12,8 @@ const assets = {
     purpleMarker: require("./images/mapbox-marker-icon-20px-purple.png"),
     redMarker: require("./images/mapbox-marker-icon-20px-red.png"),
     yellowMarker: require("./images/mapbox-marker-icon-20px-yellow.png"),
-    loading : require("./loading.gif")
+    loading: require("./loading.gif"),
+    avatar : require("./images/avatar.png")
   }
 };
 
