@@ -68,9 +68,10 @@ body {
   background: black;
   border-color: white;
   width: 75px;
-  height: 30px;
+  height: 25px;
+  padding: 0px;
   border-radius: 20px;
-  border-width: 2px;
+  border-width: 1px;
   /* padding-right: 10px; */
   color: white;
 }
@@ -157,6 +158,9 @@ form {
   color: white;
 
 }
+.csv:hover{
+  background-color: darkgrey;
+}
 
 .mapboxgl-ctrl-geocoder--icon {
   display: none;
@@ -233,7 +237,7 @@ ul {
 .mapboxgl-ctrl-top-right {
   margin-left: 50%;
   right: auto !important;
-  margin-top: 1%;
+  margin-top: 5%;
   transform: translateX(-75%);
 }
 

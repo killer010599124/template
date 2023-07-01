@@ -29,6 +29,7 @@ import Typography from "@mui/material/Typography";
 import listItemClasses from "@mui/material/ListItem";
 import { IndexKind } from "typescript";
 import Draggable, { DraggableData, DraggableEvent } from "react-draggable";
+import { current } from "@reduxjs/toolkit";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -36,6 +37,7 @@ interface TabPanelProps {
   value: number;
 }
 
+//---------------------------- Tab Control--------------------------//
 function TabPanel_Draw(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
 
@@ -197,16 +199,152 @@ const SatelitteMap = (context: any) => {
   const [currentLayerDataHeader, setCurrentLayerDataHeader] = useState<
     string[]
   >([]);
+  const [allTableData, setAllTableData] = useState<any[]>([]);
+
   const [currentMarkerData, setCurrentMarkerData] = useState<{
     data: any;
     id: number;
   }>();
 
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+  //------------------------- Data Table --------------------//
 
+  const [boxWidth, setBoxWidth] = useState(400);
+  const [boxHeight, setBoxHeight] = useState(800);
+  const [isResizing, setIsResizing] = useState(false);
+  const [draggable, setDraggable] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [startY, setStartY] = useState(0);
+
+  const handleMouseDown = (event: any) => {
+    const cornerWidth = 20; // set the width of the corner area
+    const cornerHeight = 20; // set the height of the corner area
+    console.log(event.clientX + ":" + event.clientY);
+
+    const isCornerClicked =
+      event.clientX > boxWidth - cornerWidth &&
+      event.clientY > boxHeight - cornerHeight;
+    if (isCornerClicked) {
+      setIsResizing(true);
+      setDraggable(true);
+      setStartX(event.clientX);
+      setStartY(event.clientY);
+    } else {
+      setIsResizing(false);
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsResizing(false);
+    setDraggable(false);
+  };
+
+  const handleMouseMove = (event: any) => {
+    if (isResizing) {
+      setDraggable(true);
+      console.log(draggable);
+      const newWidth = Math.max(50, boxWidth + event.clientX - startX);
+      const newHeight = Math.max(50, boxHeight + event.clientY - startY);
+      setBoxWidth(newWidth);
+      setBoxHeight(newHeight);
+      setStartX(event.clientX);
+      setStartY(event.clientY);
+    }
+  };
+
+  const [position, setPosition] = useState({ x: 0, y: 64 });
   const handleDrag = (event: DraggableEvent, data: DraggableData) => {
     setPosition({ x: data.x, y: data.y });
   };
+  const [isMinimized, setIsMinimized] = useState(false);
+
+  const toggleMinimized = () => {
+    setIsMinimized(!isMinimized);
+  };
+
+  const rowsPerPage = 15;
+  const [currentPage, setCurrentPage] = useState(1);
+  // let currentPage = 1;
+
+  function getNumPages(rows: any[]): number {
+    // Calculate the total number of pages based on the total number of rows and the rows per page
+    return Math.ceil(rows.length / rowsPerPage);
+  }
+
+  function showPage(rows: any[], pageNum: number) {
+    // Calculate the starting and ending indices of the rows to display based on the page number and the rows per page
+    const startIndex = (pageNum - 1) * rowsPerPage;
+    const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
+
+    // Retrieve the relevant rows from the data source
+    const pageRows = rows.slice(startIndex, endIndex);
+
+    // Update the current page number
+    // setCurrentPage(pageNum)
+    // currentPage = pageNum;
+
+    // Render the rows on the page
+    const render = renderRows(pageRows);
+
+    return render;
+    // Update the pagination buttons
+  }
+
+  function renderRows(rows: any[]) {
+    // Render the rows on the page
+    // In this example, we'll just log the rows to the console
+    return rows.map((data, index) => {
+      return (
+        <tr
+          style={{}}
+          onClick={() => {
+            setCurrentMarkerData({ data: data, id: index });
+          }}
+          className={`markerTable ${
+            currentMarkerData?.data == data && "active"
+          }`}
+        >
+          {currentLayerDataHeader.map((header, index) => {
+            return (
+              <td
+                style={{
+                  textAlign: "center",
+                  padding: "10px",
+                }}
+              >
+                {data[header]}
+              </td>
+            );
+          })}
+        </tr>
+      );
+    });
+  }
+
+  // function updatePaginationButtons(): void {
+  //   // Update the state of the pagination buttons based on the current page number
+  //   const prevButton = document.getElementById("prev-button");
+  //   const nextButton = document.getElementById("next-button");
+  //   if(prevButton)prevButton.addEventListener("click", prevPage);
+  //   if (nextButton)nextButton.addEventListener("click", nextPage);
+  // }
+  function nextPage(): void {
+    // Show the next page of data
+    console.log(currentPage);
+    if (currentPage < getNumPages(currentLayerData)) {
+      // showPage(currentLayerData, currentPage + 1);
+      setCurrentPage(currentPage + 1);
+      // currentPage += 1;
+    }
+  }
+
+  function prevPage(): void {
+    // Show the previous page of data
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+      // currentPage -= 1;
+      // showPage(currentLayerData, currentPage - 1);
+    }
+  }
 
   //-------------- Manage Layers---------------//
 
@@ -413,7 +551,7 @@ const SatelitteMap = (context: any) => {
       setDataLayers((layers) => [...layers, layer]);
       // const mDataField = { data: csvHeader, layername: layer }
       // setMDataField(prevNames => [...prevNames, mDataField]);
-      setCurrentLayerName(layer);
+
       setDataLayerFlag(!dataLayerFlag);
       if (geodata) {
         const temp = { name: layer, data: geodata };
@@ -421,6 +559,7 @@ const SatelitteMap = (context: any) => {
 
         // setLoading(false)
       }
+      setCurrentLayerName(layer);
     } else if (inputMode === "manual") {
       setDataLayers((layers) => [...layers, layer]);
       setCurrentLayerName(layer);
@@ -432,35 +571,80 @@ const SatelitteMap = (context: any) => {
     }
   };
 
+  function checkNewTableData(data: any, name: string) {
+    if (data.length != 0) {
+      let cnt = 0;
+      data.map((d: any, index: number) => {
+        if (d.name === name) {
+          console.log("welcome");
+          cnt++;
+
+          // setLoading(false);
+        }
+      });
+      console.log(cnt);
+      if (cnt == 0) {
+        return false;
+      } else {
+        return true;
+      }
+      // return false;
+    } else {
+      return false;
+    }
+  }
   useEffect(() => {
     if (currentLayerName) {
       markerImageFiles.map((data, index) => {
-        if (data.layername == currentLayerName)
+        if (data.layername === currentLayerName)
           setCurrentMarkerImage(data.data);
       });
 
-      allGeodata.map((data, index) => {
-        if (data.name === currentLayerName) {
-          const cheader = Object.keys(data.data.features[0].properties);
-          setCurrentLayerDataHeader(cheader);
-          setCurrentLayerData([]);
-          // const array = data.data.features.map((i: any) => {
+      setCurrentPage(1);
+      // console.log(checkNewTableData(allTableData,currentLayerName))
+      if (checkNewTableData(allTableData, currentLayerName)) {
+        console.log("hello");
 
-          //   const values = i.properties;
-          //   const obj = cheader.reduce((object: any, header, index) => {
+        allTableData.map((data: any, index: number) => {
+          if (data.name === currentLayerName) {
+            console.log(data.data);
+            setCurrentLayerData(data.data);
+            // setLoading(false);
+          }
+        });
+      } else {
+        allGeodata.map((data, index) => {
+          if (data.name === currentLayerName) {
+            const cheader = Object.keys(data.data.features[0].properties);
+            setCurrentLayerDataHeader(cheader);
+            setCurrentLayerData([]);
+            // setCurrentLayerData(geoJsonFeatureToTableRows(data.data.features));
+            const array = data.data.features.map((i: any, index: number) => {
+              const values = i.properties;
+              const obj = cheader.reduce((object: any, header, index) => {
+                object[header] = values[header];
+                return object;
+              }, {});
 
-          //     object[header] = values[header];
-          //     return object;
-          //   }, {});
-
-          //   setCurrentLayerData(prevNames => [...prevNames, obj])
-          // });
-          setLoading(false);
-        }
-      });
+              setCurrentLayerData((prevNames) => [...prevNames, obj]);
+              // console.log(index*100/data.data.features.length)
+            });
+            setLoading(false);
+          }
+        });
+      }
     }
   }, [currentLayerName]);
 
+  useEffect(() => {
+    if (loading == false) {
+      console.log(allTableData);
+      setAllTableData((prevNames) => [
+        ...prevNames,
+        { data: currentLayerData, name: currentLayerName },
+      ]);
+    }
+  }, [loading]);
   const addCurrentLayerData = (aData: any) => {
     const feature = {
       type: "Feature",
@@ -704,7 +888,7 @@ const SatelitteMap = (context: any) => {
       <div
         style={{
           position: "absolute",
-          marginTop: "4%",
+          marginTop: "6%",
           marginLeft: "2%",
           zIndex: "1",
           display: "flex",
@@ -759,7 +943,7 @@ const SatelitteMap = (context: any) => {
             ? { display: "none" }
             : {
                 position: "absolute",
-                marginTop: "5%",
+                marginTop: "7.5%",
                 marginLeft: "5%",
                 zIndex: "2",
                 opacity: "0.75",
@@ -931,16 +1115,19 @@ const SatelitteMap = (context: any) => {
       </div>
 
       {/* ---------------------------Point Data layout ----------------------- */}
-      <Draggable position={position} onDrag={handleDrag}>
+      <Draggable position={position} onDrag={handleDrag} disabled={draggable}>
         <div
           style={{
             position: "fixed",
             right: "0%",
+            // top: "0%",
             zIndex: "1",
-            width: "20%",
-            height: "64%",
+            width: boxWidth,
+            height: isMinimized ? 0 : boxHeight,
+            // height: "64%",
             opacity: 0.75,
             background: "black",
+            transition: "height 0.5s ease",
           }}
         >
           <div>
@@ -955,11 +1142,21 @@ const SatelitteMap = (context: any) => {
                 opacity: "0.75",
                 color: "white",
               }}
+              onClick={toggleMinimized}
             >
-              H/V
+              {isMinimized ? "show" : "hide"}
             </button>
           </div>
-          <Box sx={{ width: "100%" }}>
+          <Box
+            sx={{ width: "100%" }}
+            style={{
+              display: isMinimized ? "none" : "block",
+              height: isMinimized ? 0 : boxHeight,
+            }}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+          >
             <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
               <Tabs
                 value={value_tab_dv}
@@ -991,7 +1188,11 @@ const SatelitteMap = (context: any) => {
                   maxWidth: 360,
                   bgcolor: "background.paper",
                 }}
-                style={{ background: "black", padding: "7%", maxWidth: "100%" }}
+                style={{
+                  background: "black",
+                  padding: "7%",
+                  maxWidth: "100%",
+                }}
               >
                 {dataLayers.map((data, index) => {
                   return (
@@ -1038,7 +1239,7 @@ const SatelitteMap = (context: any) => {
                     padding: "20px",
                   }}
                 >
-                  Data Table
+                  Data Table{}
                 </div>
                 <div
                   className=""
@@ -1049,7 +1250,7 @@ const SatelitteMap = (context: any) => {
                     background: "black",
                     opacity: "0.75",
                     color: "white",
-                    height: "83%",
+                    height: boxHeight * 0.85 - 50,
                     padding: "5px",
                     width: "100%",
                   }}
@@ -1061,7 +1262,8 @@ const SatelitteMap = (context: any) => {
                       width: "100%",
                       overflowY: "scroll",
                       display: "block",
-                      height: "100%",
+                      height: "88%",
+                      borderBottom: "0.01em solid white",
                     }}
                   >
                     <thead
@@ -1080,7 +1282,7 @@ const SatelitteMap = (context: any) => {
                       </tr>
                     </thead>
                     <tbody>
-                      {currentLayerData.map((data, index) => {
+                      {/* {currentLayerData.map((data, index) => {
                         return (
                           <tr
                             style={{}}
@@ -1105,12 +1307,52 @@ const SatelitteMap = (context: any) => {
                             })}
                           </tr>
                         );
-                      })}
+                      })} */}
+                      {showPage(currentLayerData, currentPage)}
                     </tbody>
                   </table>
+                  <div>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-evenly",
+                        position: "absolute",
+                        bottom: "0",
+                        marginLeft: "35%",
+                        width: "30%",
+                      }}
+                    >
+                      <label
+                        className="csv"
+                        id="prev-button"
+                        onClick={prevPage}
+                      >
+                        prev
+                      </label>
+                      <label className="csv">{currentPage}</label>
+                      <label
+                        className="csv"
+                        id="next-button"
+                        onClick={nextPage}
+                      >
+                        next
+                      </label>
+                    </div>
+                  </div>
                 </div>
               </div>
             </TabPanel_DV>
+            <div
+              style={{
+                width: 20,
+                height: 20,
+                background: "white",
+                position: "absolute",
+                bottom: "0",
+                right: "0",
+                zIndex: "10",
+              }}
+            ></div>
           </Box>
         </div>
       </Draggable>
@@ -2109,7 +2351,14 @@ const SatelitteMap = (context: any) => {
       <div
         ref={mapRef}
         className="map"
-        style={{ padding: "0px !important", height: "94%", width: "100%" }}
+        style={{
+          padding: "0px !important",
+          height: "100%",
+          width: "100%",
+          // marginTop: "64px",
+        }}
+        onMouseUp={handleMouseUp}
+        onMouseMove={handleMouseMove}
       />
     </>
   );

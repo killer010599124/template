@@ -8,11 +8,11 @@ import DarkMap from "../pages/dashboard/DarkMap";
 import StreetMap from "../pages/dashboard/StreetMap";
 import SatelitteMap from "../pages/dashboard/SatelitteMap";
 import ComponentPageLayout from "../pages/component/ComponentPageLayout";
-import DashboardOutlinedIcon from '@mui/icons-material/DashboardOutlined';
-import AppsOutlinedIcon from '@mui/icons-material/AppsOutlined';
-import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined';
-import FormatListBulletedOutlinedIcon from '@mui/icons-material/FormatListBulletedOutlined';
-import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
+import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
+import AppsOutlinedIcon from "@mui/icons-material/AppsOutlined";
+import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
+import FormatListBulletedOutlinedIcon from "@mui/icons-material/FormatListBulletedOutlined";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import AlertPage from "../pages/component/AlertPage";
 import ButtonPage from "../pages/component/ButtonPage";
 import InstallationPage from "../pages/installation/InstallationPage";
@@ -22,7 +22,7 @@ const appRoutes: RouteType[] = [
   {
     index: true,
     element: <SatelitteMap />,
-    state: "home"
+    state: "home",
   },
   // {
   //   path: "/installation",
@@ -39,48 +39,47 @@ const appRoutes: RouteType[] = [
     state: "dashboard",
     sidebarProps: {
       displayText: "Map Layers",
-      icon: <DashboardOutlinedIcon />
+      icon: <DashboardOutlinedIcon />,
     },
     child: [
       {
         index: true,
         element: <DashboardIndex />,
-        state: "dashboard.index"
+        state: "dashboard.index",
       },
       {
         path: "/dashboard/light",
         element: <LightMap />,
         state: "dashboard.light",
         sidebarProps: {
-          displayText: "Light"
+          displayText: "Light",
         },
-        
       },
       {
         path: "/dashboard/dark",
         element: <DarkMap />,
         state: "dashboard.dark",
         sidebarProps: {
-          displayText: "Dark"
-        }
+          displayText: "Dark",
+        },
       },
       {
         path: "/dashboard/street",
         element: <StreetMap />,
         state: "dashboard.street",
         sidebarProps: {
-          displayText: "Street"
-        }
+          displayText: "Street",
+        },
       },
       {
         path: "/dashboard/satelitte",
         element: <SatelitteMap />,
         state: "dashboard.satelitte",
         sidebarProps: {
-          displayText: "Satelitte Streets"
-        }
-      }
-    ]
+          displayText: "Satelitte Streets",
+        },
+      },
+    ],
   },
   {
     path: "/documentation",
@@ -88,9 +87,8 @@ const appRoutes: RouteType[] = [
     state: "documentation",
     sidebarProps: {
       displayText: "Data Layers",
-      icon: <ArticleOutlinedIcon />
+      icon: <ArticleOutlinedIcon />,
     },
-   
   },
   {
     path: "/component",
@@ -98,7 +96,7 @@ const appRoutes: RouteType[] = [
     state: "component",
     sidebarProps: {
       displayText: "Tools",
-      icon: <AppsOutlinedIcon />
+      icon: <AppsOutlinedIcon />,
     },
     child: [
       {
@@ -106,7 +104,7 @@ const appRoutes: RouteType[] = [
         element: <AlertPage />,
         state: "component.alert",
         sidebarProps: {
-          displayText: "Draw Geofences"
+          displayText: "Draw Geofences",
         },
       },
       {
@@ -114,12 +112,12 @@ const appRoutes: RouteType[] = [
         element: <ButtonPage />,
         state: "component.button",
         sidebarProps: {
-          displayText: "Extract Data"
-        }
-      }
-    ]
+          displayText: "Extract Data",
+        },
+      },
+    ],
   },
-  
+
   // {
   //   path: "/changelog",
   //   element: <ChangelogPage />,

@@ -1,29 +1,35 @@
 import { AppBar, Toolbar, Typography } from "@mui/material";
 import colorConfigs from "../../configs/colorConfigs";
 import sizeConfigs from "../../configs/sizeConfigs";
-import "./index.css"
+import "./index.css";
 const Topbar = () => {
   return (
     <AppBar
-      position="fixed"
-      style={{background: "black"}}
+      style={{ background: "transparent" }}
       sx={{
-        width: `calc(100% - ${sizeConfigs.sidebar.width})`,
-        ml: sizeConfigs.sidebar.width,
+        width: `calc(100%)`,
+
         boxShadow: "unset",
-        backgroundColor : "black",
+        backgroundColor: "black",
         // backgroundColor: colorConfigs.topbar.bg,
         // color: colorConfigs.topbar.color,
-        color : "white",
-        minHeight : "0px"
+        color: "white",
+        minHeight: "0px",
       }}
     >
-      <Toolbar >
-        <Typography variant="h6" style={{background : "black"}}>
-            Geospatial Mapping Software
-        </Typography>
-        
-      </Toolbar>
+      <Toolbar style={{ background: "black", opacity: "0.7" }}></Toolbar>
+      <Typography
+        variant="h6"
+        style={{
+          color: "white",
+          position: "absolute",
+          marginTop: "10px",
+          marginLeft: "100px",
+          fontSize: "30px",
+        }}
+      >
+        Geospatial Mapping Software
+      </Typography>
     </AppBar>
   );
 };

@@ -7,8 +7,8 @@ import Topbar from "../common/Topbar";
 
 const MainLayout = () => {
   return (
-    <Box sx={{ display: "flex" }} >
-      <Topbar  />
+    <Box sx={{ display: "flex" }}>
+      <Topbar />
       {/* <Box
         component="nav"
         sx={{
@@ -20,16 +20,15 @@ const MainLayout = () => {
       </Box> */}
       <Box
         component="main"
-        style = {{padding : "0px"}}
+        style={{ padding: "0px" }}
         sx={{
           flexGrow: 1,
           p: 3,
           width: `calc(100% - ${sizeConfigs.sidebar.width})`,
           minHeight: "100vh",
-          backgroundColor: colorConfigs.mainBg
+          backgroundColor: colorConfigs.mainBg,
         }}
       >
-        <Toolbar style={{background : "black"}} />
         <Outlet />
       </Box>
     </Box>
