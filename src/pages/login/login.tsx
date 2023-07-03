@@ -1,7 +1,11 @@
 import { useState } from "react";
 import "./style.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+} from "firebase/auth";
 import { Navigate, useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
@@ -21,6 +25,16 @@ const LoginPage = () => {
         const errorCode = error.code;
         const errorMessage = error.message;
         console.log("Incorrect credential");
+      });
+  }
+  function forgotPassword(auth: any, email: any) {
+    sendPasswordResetEmail(auth, email)
+      .then(() => {
+        alert("Password reset email sent!");
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
       });
   }
 
@@ -99,6 +113,9 @@ const LoginPage = () => {
                     className=" nav-link"
                     href="#!"
                     style={{ color: "white", border: "none" }}
+                    onClick={() => {
+                      forgotPassword(auth, email);
+                    }}
                   >
                     Forgot password?
                   </a>
