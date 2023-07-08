@@ -16,16 +16,13 @@ function ProtectRoute({ component: Component, ...rest }: any) {
         // https://firebase.google.com/docs/reference/js/auth.user
         console.log(user);
         setAuthenticated(true);
-        console.log("hello");
       } else {
         setAuthenticated(false);
-        console.log("welcome");
       }
       setFlag(false);
     });
     return unsubscribe;
   }, []);
-  console.log(user);
   if (flag) {
     return <div></div>;
   } else return <>{authenticated ? <Outlet /> : <Navigate to="/signin" />}</>;
