@@ -1,11 +1,9 @@
-import React from 'react';
+import React from "react";
 
 type Props = {};
 
 const DashboardIndex = (props: Props) => {
-  return (
-    <div>DashboardIndex</div>
-  );
+  return <div></div>;
 };
 
 export default DashboardIndex;

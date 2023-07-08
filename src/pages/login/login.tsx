@@ -7,24 +7,35 @@ import {
   sendPasswordResetEmail,
 } from "firebase/auth";
 import { Navigate, useNavigate } from "react-router-dom";
-
+import AlertMessage from "../../components/common/alertMessage";
 const LoginPage = () => {
   const auth = getAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [alertContent, setAlertContent] = useState("");
+  const [alertColor, setAlertColor] = useState("");
+  const [alertVisible, setAlertVisible] = useState<boolean>(false);
 
+  function handleAlertClose() {
+    setAlertVisible(false);
+  }
   function login(auth: any, email: any, password: any) {
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         // Signed in
         // const user = userCredential.user;
+        // AlertMessage("hello");
+        setAlertVisible(true);
+        setAlertColor("#4CAF50");
         navigate("/");
       })
       .catch((error) => {
         const errorCode = error.code;
         const errorMessage = error.message;
-        console.log("Incorrect credential");
+        setAlertVisible(true);
+        setAlertColor("#f44336");
+        setAlertContent("Login Falid! Incorrect credential");
       });
   }
   function forgotPassword(auth: any, email: any) {
@@ -98,7 +109,6 @@ const LoginPage = () => {
                 <div className="pt-1 mb-4">
                   <button
                     className="btn btn-info btn-lg btn-block"
-                    type="submit"
                     style={{ color: "white", width: "100%" }}
                     onClick={() => {
                       login(auth, email, password);
@@ -133,7 +143,12 @@ const LoginPage = () => {
               </form>
             </div>
           </div>
-
+          <AlertMessage
+            message={alertContent}
+            visible={alertVisible}
+            color={alertColor}
+            onClose={handleAlertClose}
+          />
           <div
             className="col-sm-12 px-0 d-none d-sm-block"
             style={{ position: "absolute" }}

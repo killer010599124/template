@@ -1,18 +1,16 @@
 import { ReactNode } from "react";
 import { Route } from "react-router-dom";
 import PageWrapper from "../components/layout/PageWrapper";
-import appRoutes from "./appRoutes";
+import appRoutes from "./adminRoutes";
 import { RouteType } from "./config";
 
 const generateRoute = (routes: RouteType[]): ReactNode => {
-  return routes.map((route, index) => (
+  return routes.map((route, index) =>
     route.index ? (
       <Route
         index
         path={route.path}
-        element={<PageWrapper state={route.state}>
-          {route.element}
-        </PageWrapper>}
+        element={<PageWrapper state={route.state}>{route.element}</PageWrapper>}
         key={index}
       />
     ) : (
@@ -25,12 +23,10 @@ const generateRoute = (routes: RouteType[]): ReactNode => {
         }
         key={index}
       >
-        {route.child && (
-          generateRoute(route.child)
-        )}
+        {route.child && generateRoute(route.child)}
       </Route>
     )
-  ));
+  );
 };
 
 export const routes: ReactNode = generateRoute(appRoutes);

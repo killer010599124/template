@@ -1,6 +1,6 @@
 const assets = {
   images: {
-    logo: require("./images/maxresdefault.jpg"),
+    logo: require("./images/logo.png"),
     data : require("./images/data.png"),
     geoMark : require("./images/geoMark.png"),
     logout: require("./images/logout.png"),

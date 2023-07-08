@@ -6,39 +6,138 @@ import {
   createUserWithEmailAndPassword,
   updateProfile,
 } from "firebase/auth";
+import { Navigate, useNavigate } from "react-router-dom";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
+import AlertMessage from "../../components/common/alertMessage";
+interface FormState {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  password: string;
+  confirmPassword: string;
+}
 const SignUpPage = () => {
   const auth = getAuth();
   const db = getFirestore();
-  function registerUser(auth: any, email: any, password: any) {
-    createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        // Signed in
-        const user = userCredential.user;
+  const navigate = useNavigate();
+  const [validationErrors, setValidationErrors] = useState<FormState>({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    password: "",
+    confirmPassword: "",
+  });
 
-        console.log(user);
-        console.log(db);
-        updateProfile(user, { displayName: `${fristName} ${lastName}` })
-          .then(() => {
-            console.log("Profile updated");
-            // Profile updated!
-            // ...
-          })
-          .catch((error) => {
-            console.log("Profile update Error");
+  const [alertContent, setAlertContent] = useState("");
+  const [alertColor, setAlertColor] = useState("");
+  const [alertVisible, setAlertVisible] = useState<boolean>(false);
+
+  function handleAlertClose() {
+    setAlertVisible(false);
+  }
+  const validateForm = (): boolean => {
+    const errors: FormState = {
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      password: "",
+      confirmPassword: "",
+    };
+
+    let isValid = true;
+
+    // Validate first name field
+    if (!fristName.match(/^[a-zA-Z]+$/)) {
+      errors.firstName = "First name must contain only letters";
+      isValid = false;
+    }
+
+    // Validate last name field
+    if (!lastName.match(/^[a-zA-Z]+$/)) {
+      errors.lastName = "Last name must contain only letters";
+      isValid = false;
+    }
+
+    // Validate email field
+    if (!email.match(/^\S+@\S+\.\S+$/)) {
+      errors.email = "Please enter a valid email address";
+      isValid = false;
+    }
+
+    // Validate phone number field
+    if (!phone.match(/^[0-9]+$/)) {
+      errors.phone = "Phone number must contain only numbers";
+      isValid = false;
+    }
+
+    // Validate password field
+    if (password.length < 8) {
+      errors.password = "Password must be at least 8 characters long";
+      isValid = false;
+    } else if (
+      !password.match(
+        /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]+$/
+      )
+    ) {
+      errors.password =
+        "Password must contain at least one letter, one number, and one special character";
+      isValid = false;
+    }
+
+    // Validate confirm password field
+    if (password !== confirmPassword) {
+      errors.confirmPassword = "Passwords do not match";
+      isValid = false;
+    }
+
+    setValidationErrors(errors);
+    return isValid;
+  };
+  function registerUser(auth: any, email: any, password: any) {
+    if (validateForm()) {
+      createUserWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          // Signed in
+          const user = userCredential.user;
+
+          updateProfile(user, { displayName: `${fristName} ${lastName}` })
+            .then(() => {
+              console.log("Profile updated");
+              // Profile updated!
+              // ...
+            })
+            .catch((error) => {
+              console.log("Profile update Error");
+            });
+          setDoc(doc(db, "users", user.uid), {
+            fristName,
+            lastName,
+            email,
+            phone,
+            uid: user.uid,
           });
-        setDoc(doc(db, "users", user.uid), {
-          fristName,
-          lastName,
-          email,
-          phone,
+          navigate("/signin");
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          console.log(errorMessage);
+          setAlertVisible(true);
+          setAlertColor("#f44336");
+
+          if (error.code === "auth/email-already-in-use") {
+            setAlertContent(
+              "An account with this email already exists. Please sign in or use a different email address."
+            );
+          } else {
+            setAlertContent(error.message);
+          }
+          // ..
         });
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        // ..
-      });
+    }
   }
 
   const [fristName, setFristName] = useState("");
@@ -47,6 +146,7 @@ const SignUpPage = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [phone, setPhone] = useState("");
+  const [uid, setUid] = useState("");
 
   const handlefristNameChange = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -98,22 +198,32 @@ const SignUpPage = () => {
                 </h3>
 
                 <div className="form-outline mb-4 d-flex">
-                  <input
-                    type=""
-                    id="form2Example22"
-                    className="form-control form-control-lg mb-3 me-3 "
-                    placeholder="First Name"
-                    value={fristName}
-                    onChange={handlefristNameChange}
-                  />
-                  <input
-                    type=""
-                    id="form2Example23"
-                    className="form-control form-control-lg mb-3"
-                    placeholder="Last Name"
-                    value={lastName}
-                    onChange={handlelastNameChange}
-                  />
+                  <div className=" me-3">
+                    <input
+                      type=""
+                      id="form2Example22"
+                      className="form-control form-control-lg mb-3 "
+                      placeholder="First Name"
+                      value={fristName}
+                      onChange={handlefristNameChange}
+                    />
+                    {validationErrors.firstName && (
+                      <div className="error">{validationErrors.firstName}</div>
+                    )}
+                  </div>
+                  <div>
+                    <input
+                      type=""
+                      id="form2Example23"
+                      className="form-control form-control-lg mb-3"
+                      placeholder="Last Name"
+                      value={lastName}
+                      onChange={handlelastNameChange}
+                    />
+                    {validationErrors.lastName && (
+                      <div className="error">{validationErrors.lastName}</div>
+                    )}
+                  </div>
                 </div>
                 <div className="form-outline mb-4">
                   <input
@@ -124,6 +234,9 @@ const SignUpPage = () => {
                     value={email}
                     onChange={handleEmailChange}
                   />
+                  {validationErrors.email && (
+                    <div className="error">{validationErrors.email}</div>
+                  )}
                 </div>
                 <div className="form-outline mb-4">
                   <input
@@ -134,6 +247,9 @@ const SignUpPage = () => {
                     value={phone}
                     onChange={handlePhoneChange}
                   />
+                  {validationErrors.phone && (
+                    <div className="error">{validationErrors.phone}</div>
+                  )}
                 </div>
                 <div className="form-outline mb-4">
                   <input
@@ -144,6 +260,9 @@ const SignUpPage = () => {
                     value={password}
                     onChange={handlePasswordChange}
                   />
+                  {validationErrors.password && (
+                    <div className="error">{validationErrors.password}</div>
+                  )}
                 </div>
                 <div className="form-outline mb-4">
                   <input
@@ -154,12 +273,16 @@ const SignUpPage = () => {
                     value={confirmPassword}
                     onChange={handleConfirmPasswordChange}
                   />
+                  {validationErrors.confirmPassword && (
+                    <div className="error">
+                      {validationErrors.confirmPassword}
+                    </div>
+                  )}
                 </div>
 
                 <div className="pt-1 mb-4">
                   <button
                     className="btn btn-info btn-lg btn-block"
-                    type="submit"
                     style={{ color: "white", width: "100%" }}
                     onClick={() => {
                       registerUser(auth, email, password);
@@ -184,6 +307,12 @@ const SignUpPage = () => {
             />
           </div>
         </div>
+        <AlertMessage
+          message={alertContent}
+          visible={alertVisible}
+          color={alertColor}
+          onClose={handleAlertClose}
+        />
       </div>
     </div>
   );
