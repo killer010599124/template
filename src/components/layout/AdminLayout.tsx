@@ -3,12 +3,12 @@ import { Box, Toolbar } from "@mui/material";
 import colorConfigs from "../../configs/colorConfigs";
 import sizeConfigs from "../../configs/sizeConfigs";
 import Sidebar from "../common/Sidebar";
-import Topbar from "../common/Topbar";
+import AdminTopbar from "../common/adminTopBar";
 
 const AdminLayout = () => {
   return (
     <Box sx={{ display: "flex" }}>
-      {/* <Topbar /> */}
+      <AdminTopbar />
       <Box
         component="nav"
         sx={{

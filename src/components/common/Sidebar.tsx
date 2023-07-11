@@ -10,6 +10,7 @@ const Sidebar = () => {
   return (
     <Drawer
       variant="permanent"
+      style={{ borderRight: "0.01em solid white" }}
       sx={{
         width: sizeConfigs.sidebar.width,
         flexShrink: 0,
@@ -22,7 +23,7 @@ const Sidebar = () => {
         },
       }}
     >
-      <List disablePadding>
+      <List disablePadding style={{ borderRight: "0.01em solid white" }}>
         <Toolbar sx={{ marginBottom: "20px" }}>
           <Stack sx={{ width: "100%" }} direction="row" justifyContent="center">
             <Avatar

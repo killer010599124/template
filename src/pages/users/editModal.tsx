@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./style.css";
 type editData = {
   firstName: string;
@@ -9,12 +9,14 @@ type editData = {
 
 type EditDialogProps = {
   visible: boolean;
+  data: editData;
   onSave: (data: editData) => void;
   onCancel: () => void;
 };
 
 const EditDialog: React.FC<EditDialogProps> = ({
   visible,
+  data,
   onSave,
   onCancel,
 }) => {
@@ -36,6 +38,13 @@ const EditDialog: React.FC<EditDialogProps> = ({
     setEmail("");
     setPhone("");
   };
+  useEffect(() => {
+    console.log("wel");
+    setFirstName(data.firstName);
+    setLastName(data.lastName);
+    setEmail(data.email);
+    setPhone(data.phone);
+  }, [visible]);
 
   if (!visible) {
     return null;
@@ -45,7 +54,7 @@ const EditDialog: React.FC<EditDialogProps> = ({
     <div className="modal">
       <div className="modal-content">
         <h2 style={{ textAlign: "center" }}>Edit User</h2>
-        <form
+        <div
           style={{
             width: "100%",
             padding: "5%",
@@ -98,7 +107,7 @@ const EditDialog: React.FC<EditDialogProps> = ({
               Cancel
             </button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

@@ -17,12 +17,14 @@ import {
   collection,
   where,
   deleteDoc,
+  updateDoc,
 } from "firebase/firestore";
 import { getApp } from "firebase/app";
 import {
   getAuth,
   createUserWithEmailAndPassword,
   updateProfile,
+  sendEmailVerification,
 } from "firebase/auth";
 import {
   getFunctions,
@@ -39,8 +41,10 @@ import TablePagination from "@mui/material/TablePagination";
 import "./style.css";
 import * as functions from "firebase/functions";
 import AlertDialog from "../../components/common/alertDialog";
+import EditDialog from "./editModal";
 import NewUserDialog from "./addModal";
 import AlertMessage from "../../components/common/alertMessage";
+import { Edit } from "@mui/icons-material";
 
 interface User {
   id: number;
@@ -66,6 +70,10 @@ function UserTable() {
 
   connectFunctionsEmulator(functions, "127.0.0.1", 5001);
   const deleteUser = httpsCallable(functions, "deleteUser");
+  const updateUser = httpsCallable(functions, "updateUser");
+  const setAdmin = httpsCallable(functions, "setAdmin");
+  const sendMail = httpsCallable(functions, "sendMail");
+  // setAdmin();
   // const addNumbers = httpsCallable(functions, "addNumbers");
   // addNumbers({ firstNumber: 10, secondNumber: 20 }).then((result) => {
   //   console.log(result);
@@ -110,6 +118,22 @@ function UserTable() {
           phone: data.phone,
           uid: user.uid,
         });
+
+        sendEmailVerification(user).then(() => {
+          console.log("Verification Email sent");
+        });
+
+        sendMail({
+          email: data.email,
+          title: "Welcome to Argos Geospatial-Intelligence Tool",
+          content: `Dear ${data.firstName} ${data.lastName},
+
+We're delighted to welcome you to the Argos Geospatial-Intelligence Tool community! \n Your account has been successfully created and you now have full access to our wide range of powerful geospatial tools and capabilities. \n We value your trust and commitment and we're excited to support your work. Thank you for choosing Argos Geospatial-Intelligence Tool, and here's to making the world a more connected and understood place.
+
+Best regards,
+
+Argos Geospatial-Intelligence Team`,
+        }).then((result) => {});
       })
       .catch((error) => {
         const errorCode = error.code;
@@ -142,8 +166,9 @@ function UserTable() {
     phone: "",
   });
 
-  const handleEditDialogSave = (data: ContactData) => {
+  const handleEditDialogSave = async (data: ContactData) => {
     // Handle contact data here
+    updateUserData(data);
     setEditDialogVisible(false);
     refresh();
   };
@@ -185,6 +210,7 @@ function UserTable() {
       // setUsers((prevNames) => [...prevNames, doc.data()]);
     });
     setUsers(data);
+    console.log("???");
   };
   const deleteUserData = (docName: string) => {
     deleteDoc(doc(db, "users", docName));
@@ -192,6 +218,21 @@ function UserTable() {
       console.log("delete account successfully");
     });
     refresh();
+  };
+  const updateUserData = async (data: any) => {
+    const userRef = doc(db, "users", currentUser);
+
+    await updateDoc(userRef, {
+      email: data.email,
+      phone: data.phone,
+      fristName: data.firstName,
+      lastName: data.lastName,
+      uid: currentUser,
+    });
+
+    updateUser({ uid: currentUser, data: data }).then((result) => {
+      console.log(result);
+    });
   };
   const refresh = () => {
     fetchData();
@@ -239,18 +280,21 @@ function UserTable() {
         />
       </div>
       <div>
-        <NewUserDialog
+        <EditDialog
           visible={editDialogVisible}
+          data={currentUserData}
           onSave={handleEditDialogSave}
           onCancel={handleEditDialogCancel}
         />
       </div>
+
       <AlertMessage
         message={alertMessageContent}
         visible={alertMessageVisible}
         color={alertMessageColor}
         onClose={handleAlertMessageClose}
       />
+
       <Table>
         <TableHead style={{ background: "#233044" }}>
           <TableRow>
@@ -282,9 +326,9 @@ function UserTable() {
                       email: user.email,
                       phone: user.phone,
                     };
+                    setCurrentUser(user.uid);
                     setCurrentUserData(data);
-                    setDialogVisible(true);
-                    console.log(currentUserData);
+                    setEditDialogVisible(true);
                   }}
                 >
                   <EditIcon />

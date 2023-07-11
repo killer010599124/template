@@ -5,10 +5,17 @@ import {
   getAuth,
   createUserWithEmailAndPassword,
   updateProfile,
+  sendEmailVerification,
 } from "firebase/auth";
 import { Navigate, useNavigate } from "react-router-dom";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
 import AlertMessage from "../../components/common/alertMessage";
+import {
+  getFunctions,
+  connectFunctionsEmulator,
+  httpsCallable,
+} from "firebase/functions";
+import { getApp } from "firebase/app";
 interface FormState {
   firstName: string;
   lastName: string;
@@ -21,6 +28,12 @@ const SignUpPage = () => {
   const auth = getAuth();
   const db = getFirestore();
   const navigate = useNavigate();
+
+  const functions = getFunctions(getApp());
+  connectFunctionsEmulator(functions, "127.0.0.1", 5001);
+
+  const sendMail = httpsCallable(functions, "sendMail");
+
   const [validationErrors, setValidationErrors] = useState<FormState>({
     firstName: "",
     lastName: "",
@@ -96,10 +109,11 @@ const SignUpPage = () => {
     setValidationErrors(errors);
     return isValid;
   };
+
   function registerUser(auth: any, email: any, password: any) {
     if (validateForm()) {
       createUserWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
+        .then(async (userCredential) => {
           // Signed in
           const user = userCredential.user;
 
@@ -119,6 +133,21 @@ const SignUpPage = () => {
             phone,
             uid: user.uid,
           });
+
+          sendEmailVerification(user).then(() => {
+            console.log("Verification Email sent");
+          });
+          sendMail({
+            email: email,
+            title: "Welcome to Argos Geospatial-Intelligence Tool",
+            content: `Dear ${fristName} ${lastName},
+
+We're delighted to welcome you to the Argos Geospatial-Intelligence Tool community! \n Your account has been successfully created and you now have full access to our wide range of powerful geospatial tools and capabilities. \n We value your trust and commitment and we're excited to support your work. Thank you for choosing Argos Geospatial-Intelligence Tool, and here's to making the world a more connected and understood place.
+
+Best regards,
+
+Argos Geospatial-Intelligence Team`,
+          }).then((result) => {});
           navigate("/signin");
         })
         .catch((error) => {

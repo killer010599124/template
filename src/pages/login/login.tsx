@@ -5,7 +5,15 @@ import {
   getAuth,
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
+  getIdTokenResult,
 } from "firebase/auth";
+import {
+  getFunctions,
+  connectFunctionsEmulator,
+  httpsCallable,
+} from "firebase/functions";
+import { getApp } from "firebase/app";
+
 import { Navigate, useNavigate } from "react-router-dom";
 import AlertMessage from "../../components/common/alertMessage";
 const LoginPage = () => {
@@ -17,6 +25,12 @@ const LoginPage = () => {
   const [alertColor, setAlertColor] = useState("");
   const [alertVisible, setAlertVisible] = useState<boolean>(false);
 
+  const functions = getFunctions(getApp());
+
+  // connectFunctionsEmulator(functions, "127.0.0.1", 5001);
+  // const setAdmin = httpsCallable(functions, "setAdmin");
+  // setAdmin();
+
   function handleAlertClose() {
     setAlertVisible(false);
   }
@@ -24,11 +38,18 @@ const LoginPage = () => {
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         // Signed in
-        // const user = userCredential.user;
+        const user = userCredential.user;
+
+        getIdTokenResult(user).then((idTokenResult) => {
+          console.log(idTokenResult);
+          const isAdmin = idTokenResult.claims.admin;
+          if (isAdmin) navigate("/");
+          else navigate("/map");
+          // isAdmin will be true if the user is an admin, false otherwise
+        });
         // AlertMessage("hello");
         setAlertVisible(true);
         setAlertColor("#4CAF50");
-        navigate("/");
       })
       .catch((error) => {
         const errorCode = error.code;
