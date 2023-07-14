@@ -320,13 +320,6 @@ const SatelitteMap = (context: any) => {
     });
   }
 
-  // function updatePaginationButtons(): void {
-  //   // Update the state of the pagination buttons based on the current page number
-  //   const prevButton = document.getElementById("prev-button");
-  //   const nextButton = document.getElementById("next-button");
-  //   if(prevButton)prevButton.addEventListener("click", prevPage);
-  //   if (nextButton)nextButton.addEventListener("click", nextPage);
-  // }
   function nextPage(): void {
     // Show the next page of data
     console.log(currentPage);
@@ -645,6 +638,14 @@ const SatelitteMap = (context: any) => {
       ]);
     }
   }, [loading]);
+
+  useEffect(() => {
+    // set action to be performed when component unmounts
+    console.log("Component mounted");
+    return () => {
+      console.log("Component unmounted");
+    };
+  }, []);
   const addCurrentLayerData = (aData: any) => {
     const feature = {
       type: "Feature",
