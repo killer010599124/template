@@ -33,6 +33,7 @@ import { Popup } from "mapbox-gl";
 export const useMap = (
   container: React.RefObject<HTMLDivElement>,
   dataLayerFlag: boolean,
+  initFlag: boolean,
   addCurrentLayerData: (aData: any) => void,
   updateCurrentLayerData: (updateData: any) => void,
   deleteCurrentLayerData: (index: number) => void,
@@ -261,26 +262,7 @@ export const useMap = (
         center: geodata.features[0].geometry.coordinates,
         zoom: 20,
       });
-      const layerImage = [
-        assets.images.blueMarker,
-        assets.images.grayMarker,
-        assets.images.greenMarker,
-        assets.images.orangeMarker,
-        assets.images.pinkMarker,
-        assets.images.purpleMarker,
-        assets.images.redMarker,
-        assets.images.yellowMarker,
-      ];
-      const randomNum = Math.floor(Math.random() * 7);
-      // mapInitRef.current?.loadImage(
-      //     layerImage[randomNum],
-      //     (error: any, image: any) => {
-      //         if (error) throw error;
-      //         mapInitRef.current?.addImage(layerName, image);
-      //         // Add a GeoJSON source with 2 points
 
-      //     }
-      // );
       mapInitRef.current?.addSource(layerName, {
         type: "geojson",
         data: geodata,
@@ -312,6 +294,45 @@ export const useMap = (
     }
   }, [dataLayerFlag]);
 
+  useEffect(() => {
+    if (allGeodata.length != 0) {
+      console.log("init");
+      console.log(allGeodata);
+      setCurrentLayerGeoData(allGeodata[0].data);
+      allGeodata.map((data: any, index: any) => {
+        mapInitRef.current?.flyTo({
+          center: data.data.features[0].geometry.coordinates,
+          zoom: 20,
+        });
+        mapInitRef.current?.addSource(data.name, {
+          type: "geojson",
+          data: data.data,
+        });
+        // Add a symbol layer
+        mapInitRef.current?.addLayer({
+          id: data.name,
+          type: "circle",
+          source: data.name,
+          paint: {
+            "circle-radius": 5,
+            "circle-stroke-width": 2,
+            "circle-color": "red",
+            "circle-stroke-color": "white",
+          },
+          layout: {
+            visibility: "visible",
+            // 'icon-image': layerName,
+            // 'text-font': [
+            //     'Open Sans Semibold',
+            //     'Arial Unicode MS Bold'
+            // ],
+            // 'text-offset': [0, 1.25],
+            // 'text-anchor': 'top'
+          },
+        });
+      });
+    }
+  }, [initFlag]);
   useEffect(() => {
     if (container.current) {
       allGeodata.map((data: any, index: any) => {

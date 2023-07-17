@@ -39,9 +39,7 @@ const LoginPage = () => {
       .then((userCredential) => {
         // Signed in
         const user = userCredential.user;
-
         getIdTokenResult(user).then((idTokenResult) => {
-          console.log(idTokenResult);
           const isAdmin = idTokenResult.claims.admin;
           if (isAdmin) navigate("/");
           else navigate("/map");

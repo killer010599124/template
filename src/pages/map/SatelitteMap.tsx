@@ -30,7 +30,14 @@ import listItemClasses from "@mui/material/ListItem";
 import { IndexKind } from "typescript";
 import Draggable, { DraggableData, DraggableEvent } from "react-draggable";
 import { current } from "@reduxjs/toolkit";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  updateProfile,
+  sendEmailVerification,
+} from "firebase/auth";
 
+import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
@@ -109,6 +116,10 @@ function TabPanel_DV(props: TabPanelProps) {
 const SatelitteMap = (context: any) => {
   const mapRef = useRef<HTMLDivElement>(null);
 
+  const auth = getAuth();
+  const db = getFirestore();
+  const userId = auth.currentUser?.uid ?? "";
+
   const reportTemplateRef = useRef<HTMLDivElement>(null);
 
   const [dataVisible, setDataVisible] = useState(1);
@@ -149,18 +160,18 @@ const SatelitteMap = (context: any) => {
   };
 
   const handleGeneratePdf = () => {
-    const doc = new jsPDF("p", "mm", [1000, 750]);
+    const pdf = new jsPDF("p", "mm", [1000, 750]);
 
     // Adding the fonts.
-    doc.setFont("Inter-Regular", "normal");
+    pdf.setFont("Inter-Regular", "normal");
 
     const input = document.getElementsByClassName("PBData")[0];
     const el1: HTMLElement = input as HTMLElement;
     el1.style.color = "black";
 
-    doc.html(el1, {
-      async callback(doc) {
-        doc.save("report.pdf");
+    pdf.html(el1, {
+      async callback(pdf) {
+        pdf.save("report.pdf");
         el1.style.color = "white";
       },
     });
@@ -184,9 +195,6 @@ const SatelitteMap = (context: any) => {
   const [progress, setProgress] = useState(0);
   // let progress = 0;
 
-  const [allData, setAllData] = useState<Geo[]>([]);
-  const [array, setArray] = useState<Geo[]>([]);
-
   const [csvData, setCsvData] = useState<any[]>([]);
   const [csvHeader, setCsvHeader] = useState<string[]>([]);
 
@@ -206,6 +214,8 @@ const SatelitteMap = (context: any) => {
     id: number;
   }>();
 
+  const [initFlag, setInitFlag] = useState(false);
+
   //------------------------- Data Table --------------------//
 
   const [boxWidth, setBoxWidth] = useState(400);
@@ -218,7 +228,6 @@ const SatelitteMap = (context: any) => {
   const handleMouseDown = (event: any) => {
     const cornerWidth = 20; // set the width of the corner area
     const cornerHeight = 20; // set the height of the corner area
-    console.log(event.clientX + ":" + event.clientY);
 
     const isCornerClicked =
       event.clientX > boxWidth - cornerWidth &&
@@ -241,7 +250,6 @@ const SatelitteMap = (context: any) => {
   const handleMouseMove = (event: any) => {
     if (isResizing) {
       setDraggable(true);
-      console.log(draggable);
       const newWidth = Math.max(50, boxWidth + event.clientX - startX);
       const newHeight = Math.max(50, boxHeight + event.clientY - startY);
       setBoxWidth(newWidth);
@@ -446,7 +454,7 @@ const SatelitteMap = (context: any) => {
   const [btwitter, setBtwitter] = useState("");
   const [bcrunchbase, setCrunchbase] = useState("");
 
-  const doc = new jsPDF("l", "pt", "a4");
+  const pdf = new jsPDF("l", "pt", "a4");
 
   const readCSVFile = (e: any) => {
     const file = e.target.files[0];
@@ -559,7 +567,7 @@ const SatelitteMap = (context: any) => {
       setDataLayerFlag(!dataLayerFlag);
       if (geodata) {
         const temp = { name: layer, data: geodata };
-        // setAllGeodata(prevNames => [...prevNames, temp]);
+        setAllGeodata((prevNames) => [...prevNames, temp]);
       }
     }
   };
@@ -569,13 +577,10 @@ const SatelitteMap = (context: any) => {
       let cnt = 0;
       data.map((d: any, index: number) => {
         if (d.name === name) {
-          console.log("welcome");
           cnt++;
-
-          // setLoading(false);
         }
       });
-      console.log(cnt);
+
       if (cnt == 0) {
         return false;
       } else {
@@ -586,23 +591,34 @@ const SatelitteMap = (context: any) => {
       return false;
     }
   }
+  const setStorageLimit = (limit: number) => {
+    try {
+      localStorage.setItem("storage_limit", limit.toString());
+      const currentLimit = localStorage.getItem("storage_limit");
+      console.log(`Storage limit set to ${currentLimit} MB`);
+    } catch (e) {
+      console.error("Error setting storage limit:", e);
+    }
+  };
+
   useEffect(() => {
     if (currentLayerName) {
       markerImageFiles.map((data, index) => {
         if (data.layername === currentLayerName)
           setCurrentMarkerImage(data.data);
       });
+      // setStorageLimit(20);
+      localStorage.setItem("geoData", JSON.stringify(allGeodata));
+      localStorage.setItem("layerData", JSON.stringify(dataLayers));
 
       setCurrentPage(1);
       // console.log(checkNewTableData(allTableData,currentLayerName))
       if (checkNewTableData(allTableData, currentLayerName)) {
-        console.log("hello");
-
         allTableData.map((data: any, index: number) => {
           if (data.name === currentLayerName) {
-            console.log(data.data);
+            setCurrentLayerDataHeader(data.header);
             setCurrentLayerData(data.data);
-            // setLoading(false);
+            setLoading(false);
           }
         });
       } else {
@@ -631,21 +647,64 @@ const SatelitteMap = (context: any) => {
 
   useEffect(() => {
     if (loading == false) {
-      console.log(allTableData);
-      setAllTableData((prevNames) => [
-        ...prevNames,
-        { data: currentLayerData, name: currentLayerName },
-      ]);
+      if (currentLayerData.length != 0) {
+        setAllTableData((prevNames) => [
+          ...prevNames,
+          {
+            data: currentLayerData,
+            header: currentLayerDataHeader,
+            name: currentLayerName,
+          },
+        ]);
+      }
     }
   }, [loading]);
 
   useEffect(() => {
+    if (allTableData) {
+      if (allTableData.length != 0)
+        localStorage.setItem("tableData", JSON.stringify(allTableData));
+    }
+  }, [allTableData]);
+
+  useEffect(() => {
     // set action to be performed when component unmounts
-    console.log("Component mounted");
+    loadWorkSpace();
     return () => {
-      console.log("Component unmounted");
+      if (
+        localStorage.getItem("geoData") &&
+        localStorage.getItem("tableData") &&
+        localStorage.getItem("layerData")
+      ) {
+        setDoc(doc(db, "data", userId), {
+          geoData: JSON.parse(localStorage.getItem("geoData") ?? ""),
+          tableData: JSON.parse(localStorage.getItem("tableData") ?? ""),
+          layerData: JSON.parse(localStorage.getItem("layerData") ?? ""),
+        });
+        localStorage.clear();
+        console.log("Component unmounted");
+      }
     };
   }, []);
+  async function loadWorkSpace() {
+    const docRef = doc(db, "data", userId);
+    const docSnap = getDoc(docRef);
+    setDataLayerFlag(!dataLayerFlag);
+
+    if ((await docSnap).exists()) {
+      const data = (await docSnap).data();
+      // console.log("Document data:", (await docSnap).data());
+      setAllGeodata(data?.geoData);
+      setAllTableData(data?.tableData);
+      setDataLayers(data?.layerData);
+      setCurrentLayerName(data?.layerData[0]);
+    } else {
+      // docSnap.data() will be undefined in this case
+      console.log("No such document!");
+    }
+    setInitFlag(!initFlag);
+    localStorage.clear();
+  }
   const addCurrentLayerData = (aData: any) => {
     const feature = {
       type: "Feature",
@@ -775,7 +834,6 @@ const SatelitteMap = (context: any) => {
       email,
       phoneNumber
     );
-    console.log(query);
     PDLJSClient.person.search
       .sql({
         searchQuery: query,
@@ -868,6 +926,7 @@ const SatelitteMap = (context: any) => {
   const myMap = useMap(
     mapRef,
     dataLayerFlag,
+    initFlag,
     addCurrentLayerData,
     updateCurrentLayerData,
     deleteCurrentLayerData,
