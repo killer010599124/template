@@ -29,14 +29,15 @@ import Typography from "@mui/material/Typography";
 import listItemClasses from "@mui/material/ListItem";
 import { IndexKind } from "typescript";
 import Draggable, { DraggableData, DraggableEvent } from "react-draggable";
-import { current } from "@reduxjs/toolkit";
+
 import {
   getAuth,
   createUserWithEmailAndPassword,
   updateProfile,
   sendEmailVerification,
 } from "firebase/auth";
-
+import { CollectionReference, collection } from "firebase/firestore";
+import * as firebase from "firebase/app";
 import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -676,16 +677,35 @@ const SatelitteMap = (context: any) => {
         localStorage.getItem("tableData") &&
         localStorage.getItem("layerData")
       ) {
-        setDoc(doc(db, "data", userId), {
-          geoData: JSON.parse(localStorage.getItem("geoData") ?? ""),
-          tableData: JSON.parse(localStorage.getItem("tableData") ?? ""),
-          layerData: JSON.parse(localStorage.getItem("layerData") ?? ""),
-        });
+        // setDoc(doc(db, "data", userId), {
+        //   geoData: JSON.parse(localStorage.getItem("geoData") ?? ""),
+        //   tableData: JSON.parse(localStorage.getItem("tableData") ?? ""),
+        //   layerData: JSON.parse(localStorage.getItem("layerData") ?? ""),
+        // });
+        const collectionRef = collection(db, "data");
+        storeLargeData(
+          {
+            geoData: JSON.parse(localStorage.getItem("geoData") ?? ""),
+            tableData: JSON.parse(localStorage.getItem("tableData") ?? ""),
+            layerData: JSON.parse(localStorage.getItem("layerData") ?? ""),
+          },
+          collectionRef
+        );
+
         localStorage.clear();
         console.log("Component unmounted");
       }
     };
   }, []);
+  async function storeLargeData(data: any, collectionRef: CollectionReference) {
+    // Split the data into chunks of 1MB
+
+    const jsonString = JSON.stringify(data);
+    const byteLength = new TextEncoder().encode(jsonString).length;
+    console.log(
+      `The file size of the JSON data is ${byteLength / (1024 * 1024)} MB.`
+    );
+  }
   async function loadWorkSpace() {
     const docRef = doc(db, "data", userId);
     const docSnap = getDoc(docRef);
