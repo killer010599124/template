@@ -29,6 +29,7 @@ import Typography from "@mui/material/Typography";
 import listItemClasses from "@mui/material/ListItem";
 import { IndexKind } from "typescript";
 import Draggable, { DraggableData, DraggableEvent } from "react-draggable";
+import { saveAs } from "file-saver";
 
 import {
   getAuth,
@@ -612,6 +613,12 @@ const SatelitteMap = (context: any) => {
       localStorage.setItem("geoData", JSON.stringify(allGeodata));
       localStorage.setItem("layerData", JSON.stringify(dataLayers));
 
+      const gjson = JSON.stringify(allGeodata, null, 2);
+      const ljson = JSON.stringify(allGeodata, null, 2);
+      const blobg = new Blob([gjson], { type: "application/json" });
+      const blobl = new Blob([ljson], { type: "application/json" });
+      // saveAs(blobg, `geo${userId}.json`);
+      // saveAs(blobl, `layer${userId}.json`);
       setCurrentPage(1);
       // console.log(checkNewTableData(allTableData,currentLayerName))
       if (checkNewTableData(allTableData, currentLayerName)) {
@@ -663,38 +670,41 @@ const SatelitteMap = (context: any) => {
 
   useEffect(() => {
     if (allTableData) {
-      if (allTableData.length != 0)
+      if (allTableData.length != 0) {
         localStorage.setItem("tableData", JSON.stringify(allTableData));
+        const jsonContent = JSON.stringify(allTableData, null, 2);
+        const blob = new Blob([jsonContent], { type: "application/json" });
+        saveAs(blob, `table${userId}.json`);
+      }
     }
   }, [allTableData]);
 
   useEffect(() => {
     // set action to be performed when component unmounts
-    loadWorkSpace();
+    // loadWorkSpace();
     return () => {
-      if (
-        localStorage.getItem("geoData") &&
-        localStorage.getItem("tableData") &&
-        localStorage.getItem("layerData")
-      ) {
-        // setDoc(doc(db, "data", userId), {
-        //   geoData: JSON.parse(localStorage.getItem("geoData") ?? ""),
-        //   tableData: JSON.parse(localStorage.getItem("tableData") ?? ""),
-        //   layerData: JSON.parse(localStorage.getItem("layerData") ?? ""),
-        // });
-        const collectionRef = collection(db, "data");
-        storeLargeData(
-          {
-            geoData: JSON.parse(localStorage.getItem("geoData") ?? ""),
-            tableData: JSON.parse(localStorage.getItem("tableData") ?? ""),
-            layerData: JSON.parse(localStorage.getItem("layerData") ?? ""),
-          },
-          collectionRef
-        );
-
-        localStorage.clear();
-        console.log("Component unmounted");
-      }
+      // if (
+      //   localStorage.getItem("geoData") &&
+      //   localStorage.getItem("tableData") &&
+      //   localStorage.getItem("layerData")
+      // ) {
+      //   // setDoc(doc(db, "data", userId), {
+      //   //   geoData: JSON.parse(localStorage.getItem("geoData") ?? ""),
+      //   //   tableData: JSON.parse(localStorage.getItem("tableData") ?? ""),
+      //   //   layerData: JSON.parse(localStorage.getItem("layerData") ?? ""),
+      //   // });
+      //   const collectionRef = collection(db, "data");
+      //   storeLargeData(
+      //     {
+      //       geoData: JSON.parse(localStorage.getItem("geoData") ?? ""),
+      //       tableData: JSON.parse(localStorage.getItem("tableData") ?? ""),
+      //       layerData: JSON.parse(localStorage.getItem("layerData") ?? ""),
+      //     },
+      //     collectionRef
+      //   );
+      //   localStorage.clear();
+      //   console.log("Component unmounted");
+      // }
     };
   }, []);
   async function storeLargeData(data: any, collectionRef: CollectionReference) {
