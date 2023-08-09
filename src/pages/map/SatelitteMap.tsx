@@ -30,7 +30,15 @@ import listItemClasses from "@mui/material/ListItem";
 import { IndexKind } from "typescript";
 import Draggable, { DraggableData, DraggableEvent } from "react-draggable";
 import { saveAs } from "file-saver";
-
+import {
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  uploadBytes,
+  getDownloadURL,
+  getBytes,
+  getBlob,
+} from "firebase/storage";
 import {
   getAuth,
   createUserWithEmailAndPassword,
@@ -40,6 +48,7 @@ import {
 import { CollectionReference, collection } from "firebase/firestore";
 import * as firebase from "firebase/app";
 import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
+import { error } from "console";
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
@@ -114,13 +123,16 @@ function TabPanel_DV(props: TabPanelProps) {
     </div>
   );
 }
-
+var blobg: string | Blob;
+var blobl: string | Blob;
+var blobt: string | Blob;
 const SatelitteMap = (context: any) => {
   const mapRef = useRef<HTMLDivElement>(null);
 
   const auth = getAuth();
   const db = getFirestore();
   const userId = auth.currentUser?.uid ?? "";
+  const storage = getStorage();
 
   const reportTemplateRef = useRef<HTMLDivElement>(null);
 
@@ -610,13 +622,14 @@ const SatelitteMap = (context: any) => {
           setCurrentMarkerImage(data.data);
       });
       // setStorageLimit(20);
-      localStorage.setItem("geoData", JSON.stringify(allGeodata));
-      localStorage.setItem("layerData", JSON.stringify(dataLayers));
+      // localStorage.setItem("geoData", JSON.stringify(allGeodata));
+      // localStorage.setItem("layerData", JSON.stringify(dataLayers));
 
       const gjson = JSON.stringify(allGeodata, null, 2);
-      const ljson = JSON.stringify(allGeodata, null, 2);
-      const blobg = new Blob([gjson], { type: "application/json" });
-      const blobl = new Blob([ljson], { type: "application/json" });
+      const ljson = JSON.stringify(dataLayers, null, 2);
+      blobg = new Blob([gjson], { type: "application/json" });
+      blobl = new Blob([ljson], { type: "application/json" });
+
       // saveAs(blobg, `geo${userId}.json`);
       // saveAs(blobl, `layer${userId}.json`);
       setCurrentPage(1);
@@ -671,37 +684,51 @@ const SatelitteMap = (context: any) => {
   useEffect(() => {
     if (allTableData) {
       if (allTableData.length != 0) {
-        localStorage.setItem("tableData", JSON.stringify(allTableData));
+        // localStorage.setItem("tableData", JSON.stringify(allTableData));
         const jsonContent = JSON.stringify(allTableData, null, 2);
-        const blob = new Blob([jsonContent], { type: "application/json" });
-        saveAs(blob, `table${userId}.json`);
+        blobt = new Blob([jsonContent], { type: "application/json" });
+        // saveAs(blob, `table${userId}.json`);
       }
     }
   }, [allTableData]);
 
   useEffect(() => {
     // set action to be performed when component unmounts
-    // loadWorkSpace();
+    loadWorkSpace();
+
     return () => {
+      if (blobg && blobl && blobt) {
+        
+        console.log('BLOB');
+        const geoRef = ref(storage, `${userId}/geo.json`);
+        const layerRef = ref(storage, `${userId}/layer.json`);
+        const tableRef = ref(storage, `${userId}/table.json`);
+
+        uploadBytes(geoRef, blobg as Blob).then((snapshot) => {
+          console.log("Uploaded an array!");
+        });
+        uploadBytes(layerRef, blobl as Blob).then((snapshot) => {
+          console.log("Uploaded an array!");
+        });
+        uploadBytes(tableRef, blobt as Blob).then((snapshot) => {
+          console.log("Uploaded an array!");
+        });
+        // saveAs(blobg, `geo${userId}.json`);
+        // saveAs(blobl, `layer${userId}.json`);
+        // saveAs(blobt, `table${userId}.json`);
+      }
+
       // if (
       //   localStorage.getItem("geoData") &&
       //   localStorage.getItem("tableData") &&
       //   localStorage.getItem("layerData")
       // ) {
-      //   // setDoc(doc(db, "data", userId), {
-      //   //   geoData: JSON.parse(localStorage.getItem("geoData") ?? ""),
-      //   //   tableData: JSON.parse(localStorage.getItem("tableData") ?? ""),
-      //   //   layerData: JSON.parse(localStorage.getItem("layerData") ?? ""),
-      //   // });
-      //   const collectionRef = collection(db, "data");
-      //   storeLargeData(
-      //     {
-      //       geoData: JSON.parse(localStorage.getItem("geoData") ?? ""),
-      //       tableData: JSON.parse(localStorage.getItem("tableData") ?? ""),
-      //       layerData: JSON.parse(localStorage.getItem("layerData") ?? ""),
-      //     },
-      //     collectionRef
-      //   );
+      //   setDoc(doc(db, "data", userId), {
+      //     geoData: JSON.parse(localStorage.getItem("geoData") ?? ""),
+      //     tableData: JSON.parse(localStorage.getItem("tableData") ?? ""),
+      //     layerData: JSON.parse(localStorage.getItem("layerData") ?? ""),
+      //   });
+
       //   localStorage.clear();
       //   console.log("Component unmounted");
       // }
@@ -717,22 +744,88 @@ const SatelitteMap = (context: any) => {
     );
   }
   async function loadWorkSpace() {
-    const docRef = doc(db, "data", userId);
-    const docSnap = getDoc(docRef);
+    // const docRef = doc(db, "data", userId);
+    // const docSnap = getDoc(docRef);
     setDataLayerFlag(!dataLayerFlag);
 
-    if ((await docSnap).exists()) {
-      const data = (await docSnap).data();
-      // console.log("Document data:", (await docSnap).data());
-      setAllGeodata(data?.geoData);
-      setAllTableData(data?.tableData);
-      setDataLayers(data?.layerData);
-      setCurrentLayerName(data?.layerData[0]);
-    } else {
-      // docSnap.data() will be undefined in this case
-      console.log("No such document!");
-    }
-    setInitFlag(!initFlag);
+    blobg = '';
+    blobt = '';
+    blobl = '';
+    
+    
+
+    const geoRef = ref(storage, `${userId}/geo.json`);
+    const layerRef = ref(storage, `${userId}/layer.json`);
+    const tableRef = ref(storage, `${userId}/table.json`);
+
+    getDownloadURL(geoRef)
+      .then((url) => {
+        fetch(url)
+          .then((response) => response.json())
+          .then((jsonData) => {
+            console.log(jsonData);
+            setAllGeodata(jsonData);
+            setInitFlag(!initFlag);
+          })
+          .catch((error) => {
+            console.error("Error retrieving JSON data", error);
+          });
+      })
+      .catch((error) => {
+        console.log(error);
+        // Handle any errors
+      });
+
+    getDownloadURL(tableRef)
+      .then((url) => {
+        fetch(url)
+          .then((response) => response.json())
+          .then((jsonData) => {
+            console.log(jsonData);
+            setAllTableData(jsonData);
+          })
+          .catch((error) => {
+            console.error("Error retrieving JSON data", error);
+          });
+      })
+      .catch((error) => {
+        console.log(error);
+        // Handle any errors
+      });
+    
+      getDownloadURL(layerRef)
+      .then((url) => {
+        fetch(url)
+          .then((response) => response.json())
+          .then((jsonData) => {
+            console.log(jsonData);
+            setDataLayers(jsonData);
+            setCurrentLayerName(jsonData[0]);
+          })
+          .catch((error) => {
+            console.error("Error retrieving JSON data", error);
+          });
+      })
+      .catch((error) => {
+        console.log(error);
+        // Handle any errors
+      });
+    
+    
+    
+    // if ((await docSnap).exists()) {
+    //   const data = (await docSnap).data();
+    //   // console.log("Document data:", (await docSnap).data());
+    //   setAllGeodata(data?.geoData);
+    //   setAllTableData(data?.tableData);
+    //   setDataLayers(data?.layerData);
+    //   setCurrentLayerName(data?.layerData[0]);
+    // } else {
+    //   // docSnap.data() will be undefined in this case
+    //   console.log("No such document!");
+    // }
+
+    
     localStorage.clear();
   }
   const addCurrentLayerData = (aData: any) => {
