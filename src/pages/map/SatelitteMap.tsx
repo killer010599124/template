@@ -212,6 +212,8 @@ const SatelitteMap = (context: any) => {
   const csv2geojson = require("csv2geojson");
   const readFile = require("./readCsvFile");
   const [loading, setLoading] = useState(false);
+  const [loadingText, setLoadingText] = useState("");
+
   const [progress, setProgress] = useState(0);
   // let progress = 0;
 
@@ -490,7 +492,7 @@ const SatelitteMap = (context: any) => {
   const readCSVFile = (e: any) => {
     const file = e.target.files[0];
     setLoading(true);
-
+    setLoadingText("Loading CSV Data");
     readFile.readAsText(file, (err: any, text: any) => {
       csv2geojson.csv2geojson(
         text,
@@ -572,6 +574,7 @@ const SatelitteMap = (context: any) => {
 
   const addDataLayer = () => {
     setLoading(true);
+    setLoadingText("Loading CSV Data");
     setLayerImageFiles((prevNames) => [...prevNames, selectedLayerImageFile]);
     setMarkerImageFiles((prevNames) => [
       ...prevNames,
@@ -715,24 +718,26 @@ const SatelitteMap = (context: any) => {
     }
   }, [allTableData]);
 
-  const saveWorkspace = () => {
+  const saveWorkspace = async () => {
     if (blobg != "" && blobl != "" && blobt != "") {
-      console.log("BLOB");
+      setLoading(true);
+      setLoadingText("Saving Workspace");
       const geoRef = ref(storage, `${userId}/geo.json`);
       const layerRef = ref(storage, `${userId}/layer.json`);
       const tableRef = ref(storage, `${userId}/table.json`);
 
-      uploadBytes(geoRef, blobg as Blob).then((snapshot) => {
+      await uploadBytes(geoRef, blobg as Blob).then((snapshot) => {
         console.log("Uploaded an array!");
         console.log(snapshot);
       });
-      uploadBytes(layerRef, blobl as Blob).then((snapshot) => {
+      await uploadBytes(layerRef, blobl as Blob).then((snapshot) => {
         console.log("Uploaded an array!");
       });
-      uploadBytes(tableRef, blobt as Blob).then((snapshot) => {
+      await uploadBytes(tableRef, blobt as Blob).then((snapshot) => {
         console.log("Uploaded an array!");
       });
-
+      setLoading(false);
+      console.log("BLOB");
       blobg = "";
       blobt = "";
       blobl = "";
@@ -741,6 +746,11 @@ const SatelitteMap = (context: any) => {
   useEffect(() => {
     // set action to be performed when component unmounts
     loadWorkSpace();
+    return () => {
+      blobg = "";
+      blobt = "";
+      blobl = "";
+    };
   }, []);
 
   async function storeLargeData(data: any, collectionRef: CollectionReference) {
@@ -756,13 +766,15 @@ const SatelitteMap = (context: any) => {
     // const docRef = doc(db, "data", userId);
     // const docSnap = getDoc(docRef);
     setDataLayerFlag(!dataLayerFlag);
+    setLoading(true);
+    setLoadingText("Loading Workspace");
 
     const geoRef = ref(storage, `${userId}/geo.json`);
     const layerRef = ref(storage, `${userId}/layer.json`);
     const tableRef = ref(storage, `${userId}/table.json`);
 
     if (geoRef && layerRef && tableRef) {
-      getDownloadURL(geoRef)
+      await getDownloadURL(geoRef)
         .then((url) => {
           fetch(url)
             .then((response) => response.json())
@@ -779,7 +791,7 @@ const SatelitteMap = (context: any) => {
           // Handle any errors
         });
 
-      getDownloadURL(tableRef)
+      await getDownloadURL(tableRef)
         .then((url) => {
           fetch(url)
             .then((response) => response.json())
@@ -796,7 +808,7 @@ const SatelitteMap = (context: any) => {
           // Handle any errors
         });
 
-      getDownloadURL(layerRef)
+      await getDownloadURL(layerRef)
         .then((url) => {
           fetch(url)
             .then((response) => response.json())
@@ -813,7 +825,7 @@ const SatelitteMap = (context: any) => {
           // Handle any errors
         });
     }
-
+    setLoading(false);
     localStorage.clear();
   }
   const addCurrentLayerData = (aData: any) => {
@@ -2078,6 +2090,7 @@ const SatelitteMap = (context: any) => {
         }
       >
         <img src={assets.images.loading} style={{ marginTop: "10%" }} />
+        <h2 style = {{color : 'white', marginTop : "-10%"}}>{loadingText}</h2>
       </div>
 
       {/* -----------------------------import various csv , Data layer  */}
