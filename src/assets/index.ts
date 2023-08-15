@@ -4,6 +4,7 @@ const assets = {
     data : require("./images/data.png"),
     geoMark : require("./images/geoMark.png"),
     logout: require("./images/logout.png"),
+    save : require("./images/save.png"),
     blueMarker: require("./images/mapbox-marker-icon-20px-blue.png"),
     grayMarker: require("./images/mapbox-marker-icon-20px-gray.png"),
     greenMarker: require("./images/mapbox-marker-icon-20px-green.png"),

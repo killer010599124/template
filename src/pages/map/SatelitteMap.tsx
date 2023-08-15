@@ -13,7 +13,7 @@ import { AddressAutofill, useSearchSession } from "@mapbox/search-js-react";
 import { Box, Tabs } from "@mui/material";
 import { CSVLink, CSVDownload } from "react-csv";
 import PDLJSClient from "./PDL";
-import { PDFViewer } from "@react-pdf/renderer";
+import { PDFViewer, View } from "@react-pdf/renderer";
 import MyDocument from "./generatePDF";
 import jsPDF from "jspdf";
 import colorConfigs from "../../configs/colorConfigs";
@@ -25,6 +25,7 @@ import Divider from "@mui/material/Divider";
 import ListItemText from "@mui/material/ListItemText";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Avatar from "@mui/material/Avatar";
+import IconButton from "@mui/material";
 import Typography from "@mui/material/Typography";
 import listItemClasses from "@mui/material/ListItem";
 import { IndexKind } from "typescript";
@@ -49,6 +50,7 @@ import { CollectionReference, collection } from "firebase/firestore";
 import * as firebase from "firebase/app";
 import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 import { error } from "console";
+import { Button } from "react-bootstrap/lib/InputGroup";
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
@@ -127,7 +129,9 @@ var blobg: string | Blob;
 var blobl: string | Blob;
 var blobt: string | Blob;
 
-blobg = ""; blobl= "";blobt = "";
+blobg = "";
+blobl = "";
+blobt = "";
 const SatelitteMap = (context: any) => {
   const mapRef = useRef<HTMLDivElement>(null);
 
@@ -279,6 +283,17 @@ const SatelitteMap = (context: any) => {
   const handleDrag = (event: DraggableEvent, data: DraggableData) => {
     setPosition({ x: data.x, y: data.y });
   };
+
+  const [positionData, setPositionData] = useState({ x: 0, y: 84 });
+  const handleDragData = (event: DraggableEvent, data: DraggableData) => {
+    setPositionData({ x: data.x, y: data.y });
+  };
+
+  const [positionPB, setPositionPB] = useState({ x: 0, y: 84 });
+  const handleDragPB = (event: DraggableEvent, data: DraggableData) => {
+    setPositionPB({ x: data.x, y: data.y });
+  };
+
   const [isMinimized, setIsMinimized] = useState(false);
 
   const toggleMinimized = () => {
@@ -623,8 +638,8 @@ const SatelitteMap = (context: any) => {
         if (data.layername === currentLayerName)
           setCurrentMarkerImage(data.data);
       });
-      
-      console.log('asdfasdfasdfasdfasdf')
+
+      console.log("asdfasdfasdfasdfasdf");
 
       const gjson = JSON.stringify(allGeodata, null, 2);
       const ljson = JSON.stringify(dataLayers, null, 2);
@@ -671,14 +686,19 @@ const SatelitteMap = (context: any) => {
   useEffect(() => {
     if (loading == false) {
       if (currentLayerData.length != 0) {
-        setAllTableData((prevNames) => [
-          ...prevNames,
-          {
-            data: currentLayerData,
-            header: currentLayerDataHeader,
-            name: currentLayerName,
-          },
-        ]);
+        const isDataExists = allTableData.some(
+          (data) => data.name === currentLayerName
+        );
+        if (!isDataExists) {
+          setAllTableData((prevNames) => [
+            ...prevNames,
+            {
+              data: currentLayerData,
+              header: currentLayerDataHeader,
+              name: currentLayerName,
+            },
+          ]);
+        }
       }
     }
   }, [loading]);
@@ -695,33 +715,32 @@ const SatelitteMap = (context: any) => {
     }
   }, [allTableData]);
 
+  const saveWorkspace = () => {
+    if (blobg != "" && blobl != "" && blobt != "") {
+      console.log("BLOB");
+      const geoRef = ref(storage, `${userId}/geo.json`);
+      const layerRef = ref(storage, `${userId}/layer.json`);
+      const tableRef = ref(storage, `${userId}/table.json`);
+
+      uploadBytes(geoRef, blobg as Blob).then((snapshot) => {
+        console.log("Uploaded an array!");
+        console.log(snapshot);
+      });
+      uploadBytes(layerRef, blobl as Blob).then((snapshot) => {
+        console.log("Uploaded an array!");
+      });
+      uploadBytes(tableRef, blobt as Blob).then((snapshot) => {
+        console.log("Uploaded an array!");
+      });
+
+      blobg = "";
+      blobt = "";
+      blobl = "";
+    }
+  };
   useEffect(() => {
     // set action to be performed when component unmounts
     loadWorkSpace();
-
-    return () => {
-      if (blobg != "" && blobl != "" && blobt != "") {
-        console.log("BLOB");
-        const geoRef = ref(storage, `${userId}/geo.json`);
-        const layerRef = ref(storage, `${userId}/layer.json`);
-        const tableRef = ref(storage, `${userId}/table.json`);
-
-        uploadBytes(geoRef, blobg as Blob).then((snapshot) => {
-          console.log("Uploaded an array!");
-          console.log(snapshot);
-        });
-        uploadBytes(layerRef, blobl as Blob).then((snapshot) => {
-          console.log("Uploaded an array!");
-        });
-        uploadBytes(tableRef, blobt as Blob).then((snapshot) => {
-          console.log("Uploaded an array!");
-        });
-
-        blobg = "";
-        blobt = "";
-        blobl = "";
-      }
-    };
   }, []);
 
   async function storeLargeData(data: any, collectionRef: CollectionReference) {
@@ -743,7 +762,6 @@ const SatelitteMap = (context: any) => {
     const tableRef = ref(storage, `${userId}/table.json`);
 
     if (geoRef && layerRef && tableRef) {
-    
       getDownloadURL(geoRef)
         .then((url) => {
           fetch(url)
@@ -1038,6 +1056,25 @@ const SatelitteMap = (context: any) => {
   return (
     <>
       {/* --------------------------- Side Tool Bar --------------------------- */}
+
+      <div
+        style={{
+          position: "absolute",
+          marginTop: "45%",
+          marginLeft: "45%",
+          zIndex: 9,
+        }}
+      >
+        <button
+          className="saveBtn"
+          onClick={() => {
+            saveWorkspace();
+          }}
+        >
+          Save Workspace
+        </button>
+      </div>
+
       <div
         style={{
           position: "absolute",
@@ -1511,514 +1548,519 @@ const SatelitteMap = (context: any) => {
       </Draggable>
 
       {/* -------------------------   P&B layout --------------------- */}
-
-      <div
-        className="PDdata"
-        style={
-          pbVisible
-            ? { display: "none" }
-            : {
-                position: "absolute",
-                right: "25%",
-                marginTop: "7%",
-
-                zIndex: "1",
-                width: "50%",
-                height: "650px",
-                backgroundColor: "black",
-                display: "flex",
-                flexDirection: "row",
-                borderRadius: "10px",
-                opacity: "0.75",
-              }
-        }
+      <Draggable
+        position={positionData}
+        onDrag={handleDragData}
+        disabled={false}
       >
         <div
-          style={{
-            width: "30%",
-            height: "100%",
-            borderTopLeftRadius: "10px",
-            borderBottomLeftRadius: "10px",
-            borderRight: "0.1rem solid white",
-          }}
+          className="PDdata"
+          style={
+            pbVisible
+              ? { display: "none" }
+              : {
+                  position: "fixed",
+                  right: "25%",
+                  marginTop: "7%",
+
+                  zIndex: "1",
+                  width: "50%",
+                  height: "650px",
+                  backgroundColor: "black",
+                  display: "flex",
+                  flexDirection: "row",
+                  borderRadius: "10px",
+                  opacity: "0.75",
+                }
+          }
         >
-          <Box sx={{ width: "100%" }}>
-            <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-              <Tabs
-                value={value_tab_pb}
-                onChange={handleTabPBChange}
-                aria-label="basic tabs example"
+          <div
+            style={{
+              width: "30%",
+              height: "100%",
+              borderTopLeftRadius: "10px",
+              borderBottomLeftRadius: "10px",
+              borderRight: "0.1rem solid white",
+            }}
+          >
+            <Box sx={{ width: "100%" }}>
+              <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+                <Tabs
+                  value={value_tab_pb}
+                  onChange={handleTabPBChange}
+                  aria-label="basic tabs example"
+                >
+                  <Tab
+                    label="Person"
+                    {...a11yProps_PB(0)}
+                    style={{ color: "white", width: "50%" }}
+                    onClick={() => {
+                      setPbMode("person");
+                    }}
+                  />
+                  <Tab
+                    label="company"
+                    {...a11yProps_PB(1)}
+                    style={{ color: "white", width: "50%" }}
+                    onClick={() => {
+                      setPbMode("company");
+                    }}
+                  />
+                </Tabs>
+              </Box>
+              <TabPanel_PB value={value_tab_pb} index={0}>
+                <div className="drawTab">
+                  <div style={{ paddingBottom: "10px" }}></div>
+
+                  <div style={{ display: "flex" }}>
+                    <input
+                      type="text"
+                      placeholder="First Name"
+                      value={firstName}
+                      onChange={(e) => {
+                        setFirstName(e.target.value);
+                      }}
+                      style={{ borderColor: "white", width: "50%" }}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Last Name"
+                      value={lastName}
+                      onChange={(e) => {
+                        setLastName(e.target.value);
+                      }}
+                      style={{
+                        marginLeft: "5px",
+                        width: "50%",
+                        borderColor: "white",
+                      }}
+                    />
+                  </div>
+
+                  <div style={{ display: "flex" }}>
+                    <input
+                      type="text"
+                      placeholder="Address"
+                      value={address}
+                      onChange={(e) => {
+                        setAddress(e.target.value);
+                      }}
+                      style={{ width: "100%", borderColor: "white" }}
+                    />
+                  </div>
+                  <div style={{ display: "flex" }}>
+                    <input
+                      type="text"
+                      placeholder="Email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      style={{ width: "100%", borderColor: "white" }}
+                    />
+                  </div>
+                  <div style={{ display: "flex" }}>
+                    <input
+                      type="text"
+                      placeholder="Phone"
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value)}
+                      style={{ width: "100%", borderColor: "white" }}
+                    />
+                  </div>
+                  <div style={{ textAlign: "center", color: "white" }}>
+                    Search Result : {pSearchCount}
+                  </div>
+                  <div
+                    className="large-2"
+                    style={{
+                      width: "100%",
+                      height: "300px",
+                      border: "0.01em solid white",
+                      borderRadius: "5px",
+                      overflowY: "scroll",
+                    }}
+                  >
+                    <ul style={{ width: "100%", height: "100%" }}>
+                      {searchPeopleData.map((data, index) => {
+                        return (
+                          <li
+                            style={{ padding: "10px", borderRadius: "10px" }}
+                            onClick={() => {
+                              displayPeopleData(data);
+                            }}
+                          >
+                            {data["first_name"] +
+                              " " +
+                              data["last_name"] +
+                              " " +
+                              data["birth_date"]}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                </div>
+              </TabPanel_PB>
+              <TabPanel_PB value={value_tab_pb} index={1}>
+                <div className="drawTab">
+                  <div style={{ paddingBottom: "10px" }}></div>
+
+                  <div style={{ display: "flex" }}>
+                    <input
+                      type="text"
+                      placeholder="Name"
+                      value={cName}
+                      onChange={(e) => {
+                        setCName(e.target.value);
+                      }}
+                      style={{ width: "100%", borderColor: "white" }}
+                    />
+                  </div>
+
+                  <div style={{ display: "flex" }}>
+                    <input
+                      type="text"
+                      placeholder="Ticker"
+                      value={cticker}
+                      onChange={(e) => {
+                        setCticker(e.target.value);
+                      }}
+                      style={{ width: "100%", borderColor: "white" }}
+                    />
+                  </div>
+                  <div style={{ display: "flex" }}>
+                    <input
+                      type="text"
+                      placeholder="Website"
+                      value={cWebsite}
+                      onChange={(e) => {
+                        setCWebsite(e.target.value);
+                      }}
+                      style={{ width: "100%", borderColor: "white" }}
+                    />
+                  </div>
+                  <div style={{ textAlign: "center", color: "white" }}>
+                    Search Result : {pSearchCount}
+                  </div>
+                  <div
+                    className="large-2"
+                    style={{
+                      width: "100%",
+                      height: "300px",
+                      border: "0.01em solid white",
+                      borderRadius: "5px",
+                      overflowY: "scroll",
+                    }}
+                  >
+                    <ul style={{ width: "100%", height: "100%" }}>
+                      {searchCompanyData.map((data, index) => {
+                        return (
+                          <li
+                            style={{ padding: "10px", borderRadius: "10px" }}
+                            onClick={() => {
+                              displayCompanyData(data);
+                            }}
+                          >
+                            {data["id"]}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                </div>
+              </TabPanel_PB>
+
+              <button
+                className="geoStyleBtn"
+                style={{ marginLeft: "20px" }}
+                onClick={() => {
+                  if (pbMode === "person") getPersonData();
+                  else if (pbMode === "company")
+                    getCompanyData(cticker, cName, cWebsite);
+                }}
               >
-                <Tab
-                  label="Person"
-                  {...a11yProps_PB(0)}
-                  style={{ color: "white", width: "50%" }}
-                  onClick={() => {
-                    setPbMode("person");
-                  }}
-                />
-                <Tab
-                  label="company"
-                  {...a11yProps_PB(1)}
-                  style={{ color: "white", width: "50%" }}
-                  onClick={() => {
-                    setPbMode("company");
-                  }}
-                />
-              </Tabs>
+                Search
+              </button>
+              <button
+                className="geoStyleBtn"
+                style={{ marginLeft: "20px" }}
+                onClick={() => {
+                  handleGeneratePdf();
+                }}
+              >
+                Download
+              </button>
             </Box>
-            <TabPanel_PB value={value_tab_pb} index={0}>
-              <div className="drawTab">
-                <div style={{ paddingBottom: "10px" }}></div>
-
-                <div style={{ display: "flex" }}>
-                  <input
-                    type="text"
-                    placeholder="First Name"
-                    value={firstName}
-                    onChange={(e) => {
-                      setFirstName(e.target.value);
-                    }}
-                    style={{ borderColor: "white", width: "50%" }}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Last Name"
-                    value={lastName}
-                    onChange={(e) => {
-                      setLastName(e.target.value);
-                    }}
-                    style={{
-                      marginLeft: "5px",
-                      width: "50%",
-                      borderColor: "white",
-                    }}
-                  />
-                </div>
-
-                <div style={{ display: "flex" }}>
-                  <input
-                    type="text"
-                    placeholder="Address"
-                    value={address}
-                    onChange={(e) => {
-                      setAddress(e.target.value);
-                    }}
-                    style={{ width: "100%", borderColor: "white" }}
-                  />
-                </div>
-                <div style={{ display: "flex" }}>
-                  <input
-                    type="text"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    style={{ width: "100%", borderColor: "white" }}
-                  />
-                </div>
-                <div style={{ display: "flex" }}>
-                  <input
-                    type="text"
-                    placeholder="Phone"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    style={{ width: "100%", borderColor: "white" }}
-                  />
-                </div>
-                <div style={{ textAlign: "center", color: "white" }}>
-                  Search Result : {pSearchCount}
-                </div>
-                <div
-                  className="large-2"
-                  style={{
-                    width: "100%",
-                    height: "300px",
-                    border: "0.01em solid white",
-                    borderRadius: "5px",
-                    overflowY: "scroll",
-                  }}
-                >
-                  <ul style={{ width: "100%", height: "100%" }}>
-                    {searchPeopleData.map((data, index) => {
-                      return (
-                        <li
-                          style={{ padding: "10px", borderRadius: "10px" }}
-                          onClick={() => {
-                            displayPeopleData(data);
-                          }}
-                        >
-                          {data["first_name"] +
-                            " " +
-                            data["last_name"] +
-                            " " +
-                            data["birth_date"]}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
-              </div>
-            </TabPanel_PB>
-            <TabPanel_PB value={value_tab_pb} index={1}>
-              <div className="drawTab">
-                <div style={{ paddingBottom: "10px" }}></div>
-
-                <div style={{ display: "flex" }}>
-                  <input
-                    type="text"
-                    placeholder="Name"
-                    value={cName}
-                    onChange={(e) => {
-                      setCName(e.target.value);
-                    }}
-                    style={{ width: "100%", borderColor: "white" }}
-                  />
-                </div>
-
-                <div style={{ display: "flex" }}>
-                  <input
-                    type="text"
-                    placeholder="Ticker"
-                    value={cticker}
-                    onChange={(e) => {
-                      setCticker(e.target.value);
-                    }}
-                    style={{ width: "100%", borderColor: "white" }}
-                  />
-                </div>
-                <div style={{ display: "flex" }}>
-                  <input
-                    type="text"
-                    placeholder="Website"
-                    value={cWebsite}
-                    onChange={(e) => {
-                      setCWebsite(e.target.value);
-                    }}
-                    style={{ width: "100%", borderColor: "white" }}
-                  />
-                </div>
-                <div style={{ textAlign: "center", color: "white" }}>
-                  Search Result : {pSearchCount}
-                </div>
-                <div
-                  className="large-2"
-                  style={{
-                    width: "100%",
-                    height: "300px",
-                    border: "0.01em solid white",
-                    borderRadius: "5px",
-                    overflowY: "scroll",
-                  }}
-                >
-                  <ul style={{ width: "100%", height: "100%" }}>
-                    {searchCompanyData.map((data, index) => {
-                      return (
-                        <li
-                          style={{ padding: "10px", borderRadius: "10px" }}
-                          onClick={() => {
-                            displayCompanyData(data);
-                          }}
-                        >
-                          {data["id"]}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
-              </div>
-            </TabPanel_PB>
-
-            <button
-              className="geoStyleBtn"
-              style={{ marginLeft: "20px" }}
-              onClick={() => {
-                if (pbMode === "person") getPersonData();
-                else if (pbMode === "company")
-                  getCompanyData(cticker, cName, cWebsite);
-              }}
-            >
-              Search
-            </button>
-            <button
-              className="geoStyleBtn"
-              style={{ marginLeft: "20px" }}
-              onClick={() => {
-                handleGeneratePdf();
-              }}
-            >
-              Download
-            </button>
-          </Box>
-        </div>
-        <div
-          style={{
-            width: "70%",
-            height: "100%",
-            borderTopRightRadius: "10px",
-            borderBottomRightRadius: "10px",
-          }}
-        >
-          <div className="PBData" style={{ color: "white", height: "100%" }}>
-            {pbMode === "person" ? (
-              <div>
-                <div
-                  style={{
-                    fontSize: "24px",
-                    lineHeight: "45px",
-                    width: "100%",
-                    height: "50px",
-                    textAlign: "center",
-                    paddingTop: "10px",
-                  }}
-                >
-                  Identity Details
-                </div>
-                <div style={{ padding: "20px" }} ref={reportTemplateRef}>
+          </div>
+          <div
+            style={{
+              width: "70%",
+              height: "100%",
+              borderTopRightRadius: "10px",
+              borderBottomRightRadius: "10px",
+            }}
+          >
+            <div className="PBData" style={{ color: "white", height: "100%" }}>
+              {pbMode === "person" ? (
+                <div>
                   <div
                     style={{
-                      fontWeight: "bold",
+                      fontSize: "24px",
+                      lineHeight: "45px",
+                      width: "100%",
+                      height: "50px",
                       textAlign: "center",
-                      padding: "5px",
-                      borderBottom: "0.05em solid",
-                      borderTop: "0.05em solid",
+                      paddingTop: "10px",
                     }}
                   >
-                    PERSONAL INFORMATION
-                    <br />
+                    Identity Details
                   </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      padding: "15px",
-                    }}
-                  >
-                    <div style={{ width: "10%", marginLeft: "3%" }}>
-                      ID:
+                  <div style={{ padding: "20px" }} ref={reportTemplateRef}>
+                    <div
+                      style={{
+                        fontWeight: "bold",
+                        textAlign: "center",
+                        padding: "5px",
+                        borderBottom: "0.05em solid",
+                        borderTop: "0.05em solid",
+                      }}
+                    >
+                      PERSONAL INFORMATION
                       <br />
-                      Name:
-                      <br />
-                      Address:
-                      <br />
-                      Emails:
-                      <br />
-                      Phone:
                     </div>
-                    <div style={{ width: "85%", marginLeft: "25px" }}>
-                      <div>{pid}</div>
-                      <div>{pname}</div>
-                      <div>{paddress}</div>
-                      <div style={{ width: "100%", overflowX: "hidden" }}>
-                        {pemail}
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        padding: "15px",
+                      }}
+                    >
+                      <div style={{ width: "10%", marginLeft: "3%" }}>
+                        ID:
+                        <br />
+                        Name:
+                        <br />
+                        Address:
+                        <br />
+                        Emails:
+                        <br />
+                        Phone:
                       </div>
-                      <div style={{ width: "100%", overflowX: "hidden" }}>
-                        {pphone}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div
-                    style={{
-                      fontWeight: "bold",
-                      textAlign: "center",
-                      padding: "5px",
-                      borderBottom: "0.05em solid",
-                      borderTop: "0.05em solid",
-                    }}
-                  >
-                    SOCIAL MEDIA INFORMATION
-                    <br />
-                  </div>
-                  <div style={{ padding: "15px" }}>
-                    <div>
-                      <div style={{ marginLeft: "3%" }}>Facebook:</div>
-                      <div style={{ display: "flex", flexDirection: "row" }}>
-                        <div
-                          style={{
-                            width: "10%",
-                            marginLeft: "5%",
-                            padding: "10px",
-                            fontSize: "14px",
-                          }}
-                        >
-                          ID:
-                          <br />
-                          URL:
-                          <br />
-                          Username:
+                      <div style={{ width: "85%", marginLeft: "25px" }}>
+                        <div>{pid}</div>
+                        <div>{pname}</div>
+                        <div>{paddress}</div>
+                        <div style={{ width: "100%", overflowX: "hidden" }}>
+                          {pemail}
                         </div>
-                        <div
-                          style={{
-                            padding: "10px",
-                            marginLeft: "25px",
-                            fontSize: "14px",
-                          }}
-                        >
-                          <div>{pfacebook_id}</div>
-                          <div>{pfacebook_url}</div>
-                          <div>{pfacebook_un}</div>
+                        <div style={{ width: "100%", overflowX: "hidden" }}>
+                          {pphone}
                         </div>
                       </div>
                     </div>
 
-                    <div>
-                      <div style={{ marginLeft: "3%" }}>LinkedIn:</div>
-                      <div style={{ display: "flex", flexDirection: "row" }}>
-                        <div
-                          style={{
-                            width: "10%",
-                            marginLeft: "5%",
-                            padding: "10px",
-                            fontSize: "14px",
-                          }}
-                        >
-                          ID:
-                          <br />
-                          URL:
-                          <br />
-                          Username:
-                        </div>
-                        <div
-                          style={{
-                            padding: "10px",
-                            marginLeft: "25px",
-                            fontSize: "14px",
-                          }}
-                        >
-                          <div>{plinkdin_id}</div>
-                          <div>{plinkdin_url}</div>
-                          <div>{plinkdin_un}</div>
+                    <div
+                      style={{
+                        fontWeight: "bold",
+                        textAlign: "center",
+                        padding: "5px",
+                        borderBottom: "0.05em solid",
+                        borderTop: "0.05em solid",
+                      }}
+                    >
+                      SOCIAL MEDIA INFORMATION
+                      <br />
+                    </div>
+                    <div style={{ padding: "15px" }}>
+                      <div>
+                        <div style={{ marginLeft: "3%" }}>Facebook:</div>
+                        <div style={{ display: "flex", flexDirection: "row" }}>
+                          <div
+                            style={{
+                              width: "10%",
+                              marginLeft: "5%",
+                              padding: "10px",
+                              fontSize: "14px",
+                            }}
+                          >
+                            ID:
+                            <br />
+                            URL:
+                            <br />
+                            Username:
+                          </div>
+                          <div
+                            style={{
+                              padding: "10px",
+                              marginLeft: "25px",
+                              fontSize: "14px",
+                            }}
+                          >
+                            <div>{pfacebook_id}</div>
+                            <div>{pfacebook_url}</div>
+                            <div>{pfacebook_un}</div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div>
-                      <div style={{ marginLeft: "3%" }}>Twitter:</div>
-                      <div style={{ display: "flex", flexDirection: "row" }}>
-                        <div
-                          style={{
-                            width: "10%",
-                            marginLeft: "5%",
-                            padding: "10px",
-                            fontSize: "14px",
-                          }}
-                        >
-                          URL:
-                          <br />
-                          Username:
+
+                      <div>
+                        <div style={{ marginLeft: "3%" }}>LinkedIn:</div>
+                        <div style={{ display: "flex", flexDirection: "row" }}>
+                          <div
+                            style={{
+                              width: "10%",
+                              marginLeft: "5%",
+                              padding: "10px",
+                              fontSize: "14px",
+                            }}
+                          >
+                            ID:
+                            <br />
+                            URL:
+                            <br />
+                            Username:
+                          </div>
+                          <div
+                            style={{
+                              padding: "10px",
+                              marginLeft: "25px",
+                              fontSize: "14px",
+                            }}
+                          >
+                            <div>{plinkdin_id}</div>
+                            <div>{plinkdin_url}</div>
+                            <div>{plinkdin_un}</div>
+                          </div>
                         </div>
-                        <div
-                          style={{
-                            padding: "10px",
-                            marginLeft: "25px",
-                            fontSize: "14px",
-                          }}
-                        >
-                          <div>{ptwitter_url}</div>
-                          <div>{ptwitter_un}</div>
+                      </div>
+                      <div>
+                        <div style={{ marginLeft: "3%" }}>Twitter:</div>
+                        <div style={{ display: "flex", flexDirection: "row" }}>
+                          <div
+                            style={{
+                              width: "10%",
+                              marginLeft: "5%",
+                              padding: "10px",
+                              fontSize: "14px",
+                            }}
+                          >
+                            URL:
+                            <br />
+                            Username:
+                          </div>
+                          <div
+                            style={{
+                              padding: "10px",
+                              marginLeft: "25px",
+                              fontSize: "14px",
+                            }}
+                          >
+                            <div>{ptwitter_url}</div>
+                            <div>{ptwitter_un}</div>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ) : (
-              <div>
-                <div
-                  style={{
-                    fontSize: "24px",
-                    lineHeight: "45px",
-                    width: "100%",
-                    height: "50px",
-                    textAlign: "center",
-                    paddingTop: "10px",
-                  }}
-                >
-                  Company Details.
-                </div>
-                <div style={{ padding: "20px" }} ref={reportTemplateRef}>
+              ) : (
+                <div>
                   <div
                     style={{
-                      fontWeight: "bold",
+                      fontSize: "24px",
+                      lineHeight: "45px",
+                      width: "100%",
+                      height: "50px",
                       textAlign: "center",
-                      padding: "5px",
-                      borderBottom: "0.05em solid",
-                      borderTop: "0.05em solid",
+                      paddingTop: "10px",
                     }}
                   >
-                    BUSINESS INFORMATION
-                    <br />
+                    Company Details.
                   </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      padding: "15px",
-                    }}
-                  >
-                    <div style={{ width: "10%", marginLeft: "3%" }}>
-                      ID:
+                  <div style={{ padding: "20px" }} ref={reportTemplateRef}>
+                    <div
+                      style={{
+                        fontWeight: "bold",
+                        textAlign: "center",
+                        padding: "5px",
+                        borderBottom: "0.05em solid",
+                        borderTop: "0.05em solid",
+                      }}
+                    >
+                      BUSINESS INFORMATION
                       <br />
-                      Name:
-                      <br />
-                      Founded:
-                      <br />
-                      Industry:
-                      <br />
-                      Website:
-                      <br />
-                      Summary:
                     </div>
-                    <div style={{ marginLeft: "25px" }}>
-                      <div>{bid}</div>
-                      <div>{bname}</div>
-                      <div>{bfounded}</div>
-                      <div>{bindustry}</div>
-                      <div>{bwebsite}</div>
-                      <div>{bsummary}</div>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        padding: "15px",
+                      }}
+                    >
+                      <div style={{ width: "10%", marginLeft: "3%" }}>
+                        ID:
+                        <br />
+                        Name:
+                        <br />
+                        Founded:
+                        <br />
+                        Industry:
+                        <br />
+                        Website:
+                        <br />
+                        Summary:
+                      </div>
+                      <div style={{ marginLeft: "25px" }}>
+                        <div>{bid}</div>
+                        <div>{bname}</div>
+                        <div>{bfounded}</div>
+                        <div>{bindustry}</div>
+                        <div>{bwebsite}</div>
+                        <div>{bsummary}</div>
+                      </div>
                     </div>
-                  </div>
 
-                  <div
-                    style={{
-                      fontWeight: "bold",
-                      textAlign: "center",
-                      padding: "5px",
-                      borderBottom: "0.05em solid",
-                      borderTop: "0.05em solid",
-                    }}
-                  >
-                    SOCIAL MEDIA INFORMATION
-                    <br />
-                  </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      padding: "15px",
-                    }}
-                  >
-                    <div style={{ width: "10%", marginLeft: "3%" }}>
-                      Linkdlin:
+                    <div
+                      style={{
+                        fontWeight: "bold",
+                        textAlign: "center",
+                        padding: "5px",
+                        borderBottom: "0.05em solid",
+                        borderTop: "0.05em solid",
+                      }}
+                    >
+                      SOCIAL MEDIA INFORMATION
                       <br />
-                      Facebook:
-                      <br />
-                      Twitter:
-                      <br />
-                      Crunch:
                     </div>
-                    <div style={{ marginLeft: "25px" }}>
-                      <div>{blinkdin}</div>
-                      <div>{bfacebook}</div>
-                      <div>{btwitter}</div>
-                      <div>{bcrunchbase}</div>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        padding: "15px",
+                      }}
+                    >
+                      <div style={{ width: "10%", marginLeft: "3%" }}>
+                        Linkdlin:
+                        <br />
+                        Facebook:
+                        <br />
+                        Twitter:
+                        <br />
+                        Crunch:
+                      </div>
+                      <div style={{ marginLeft: "25px" }}>
+                        <div>{blinkdin}</div>
+                        <div>{bfacebook}</div>
+                        <div>{btwitter}</div>
+                        <div>{bcrunchbase}</div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      </Draggable>
 
       {/* ------------------------- Geo Point Table layout-------------------- */}
       <div
@@ -2039,468 +2081,484 @@ const SatelitteMap = (context: any) => {
       </div>
 
       {/* -----------------------------import various csv , Data layer  */}
-      <div
-        className=""
-        style={
-          dataVisible
-            ? { display: "none" }
-            : {
-                position: "absolute",
-                right: "25%",
-                marginTop: "7%",
-                zIndex: "2",
-                width: "50%",
-                height: "650px",
-                display: "flex",
-                // display : 'none',
-                backgroundColor: "black",
-                borderRadius: "10px",
-                opacity: "0.75",
-              }
-        }
+
+      <Draggable
+        position={positionData}
+        onDrag={handleDragData}
+        disabled={false}
       >
         <div
-          style={{
-            width: "30%",
-            height: "100%",
-            borderTopLeftRadius: "10px",
-            borderBottomLeftRadius: "10px",
-            borderRight: "0.1rem solid white",
-          }}
+          className=""
+          style={
+            dataVisible
+              ? { display: "none" }
+              : {
+                  position: "fixed",
+                  right: "25%",
+                  marginTop: "7%",
+                  zIndex: "2",
+                  width: "50%",
+                  height: "650px",
+                  display: "flex",
+                  // display : 'none',
+                  backgroundColor: "black",
+                  borderRadius: "10px",
+                  opacity: "0.75",
+                }
+          }
         >
-          <div className="PBData" style={{ color: "white", height: "100%" }}>
-            <div>
-              <div
-                style={{
-                  fontSize: "24px",
-                  lineHeight: "45px",
-                  width: "100%",
-                  height: "50px",
-                  textAlign: "center",
-                  paddingTop: "10px",
-                }}
-              >
-                Layers
-              </div>
-              <div className="drawTab">
+          <div
+            style={{
+              width: "30%",
+              height: "100%",
+              borderTopLeftRadius: "10px",
+              borderBottomLeftRadius: "10px",
+              borderRight: "0.1rem solid white",
+            }}
+          >
+            <div className="PBData" style={{ color: "white", height: "100%" }}>
+              <div>
                 <div
                   style={{
+                    fontSize: "24px",
+                    lineHeight: "45px",
                     width: "100%",
-                    height: "450px",
-                    border: "0.1rem solid white",
-                    borderRadius: "10px",
+                    height: "50px",
+                    textAlign: "center",
+                    paddingTop: "10px",
                   }}
                 >
-                  <ul style={{ width: "100%", height: "100%" }}>
-                    {dataLayers.map((data, index) => {
+                  Layers
+                </div>
+                <div className="drawTab">
+                  <div
+                    style={{
+                      width: "100%",
+                      height: "450px",
+                      border: "0.1rem solid white",
+                      borderRadius: "10px",
+                    }}
+                  >
+                    <ul style={{ width: "100%", height: "100%" }}>
+                      {dataLayers.map((data, index) => {
+                        return (
+                          <li
+                            style={{ padding: "10px", borderRadius: "10px" }}
+                            onClick={() => setMCurrentLayer(data)}
+                            className={`list-item ${
+                              mCurrentLayer == data && "active"
+                            }`}
+                          >
+                            {data}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                  <div
+                    style={{
+                      // display: "block",
+                      position: "absolute",
+                      display: "flex",
+                      flexDirection: "row",
+                      justifyContent: "space-evenly",
+                      paddingTop: "5px",
+                      zIndex: "1",
+                      width: "25%",
+                      marginBottom: "4%",
+                      bottom: "0",
+                      // overflowY: 'scroll'
+                    }}
+                  >
+                    <label
+                      className="csv"
+                      onClick={() => {
+                        addDataLayer();
+                      }}
+                    >
+                      Add Layer
+                    </label>
+                    {/* <label className='csv' onClick={() => {
+
+                }}>
+                  Remove layer
+                </label> */}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            style={{
+              width: "70%",
+              height: "100%",
+              borderTopRightRadius: "10px",
+              borderBottomRightRadius: "10px",
+            }}
+          >
+            <div className="PBData" style={{ color: "white", height: "100%" }}>
+              <div
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "24px",
+                    lineHeight: "45px",
+                    width: "100%",
+                    height: "50px",
+                    textAlign: "center",
+                    paddingTop: "10px",
+                  }}
+                >
+                  Preview Data
+                </div>
+                <table
+                  className="large-2"
+                  style={{
+                    // textAlign: "center",
+                    width: "100%",
+                    height: "25%",
+                    display: "table-cell",
+                    overflow: "scroll",
+                    marginBottom: "0px",
+                    borderBottom: "0.01em solid white",
+                    // height: "100%"
+                  }}
+                >
+                  <thead
+                    style={{ background: "gray", position: "sticky", top: "0" }}
+                  >
+                    <tr style={{}}>
+                      {csvHeader.map((data, index) => {
+                        return <td style={{ textAlign: "center" }}>{data}</td>;
+                      })}
+                    </tr>
+                  </thead>
+                  <tbody style={{}}>
+                    {csvData.map((data, index) => {
                       return (
-                        <li
-                          style={{ padding: "10px", borderRadius: "10px" }}
-                          onClick={() => setMCurrentLayer(data)}
-                          className={`list-item ${
-                            mCurrentLayer == data && "active"
-                          }`}
-                        >
-                          {data}
-                        </li>
+                        <tr style={{}}>
+                          {csvHeader.map((header, index) => {
+                            return (
+                              <td
+                                style={{ textAlign: "center", padding: "10px" }}
+                              >
+                                {data[header]}
+                              </td>
+                            );
+                          })}
+                        </tr>
                       );
                     })}
-                  </ul>
+                  </tbody>
+                </table>
+                <div
+                  style={{
+                    fontSize: "20px",
+                    lineHeight: "45px",
+                    width: "100%",
+                    height: "50px",
+                    textAlign: "center",
+                    paddingTop: "10px",
+                  }}
+                >
+                  Options
                 </div>
                 <div
                   style={{
-                    // display: "block",
-                    position: "absolute",
                     display: "flex",
                     flexDirection: "row",
-                    justifyContent: "space-evenly",
-                    paddingTop: "5px",
-                    zIndex: "1",
-                    width: "25%",
-                    marginBottom: "4%",
-                    bottom: "0",
-                    // overflowY: 'scroll'
+                    height: "60%",
+                    padding: "10px",
+                    justifyContent: "space-around",
                   }}
                 >
-                  <label
-                    className="csv"
-                    onClick={() => {
-                      addDataLayer();
-                    }}
-                  >
-                    Add Layer
-                  </label>
-                  {/* <label className='csv' onClick={() => {
-
-                  }}>
-                    Remove layer
-                  </label> */}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div
-          style={{
-            width: "70%",
-            height: "100%",
-            borderTopRightRadius: "10px",
-            borderBottomRightRadius: "10px",
-          }}
-        >
-          <div className="PBData" style={{ color: "white", height: "100%" }}>
-            <div
-              style={{
-                width: "100%",
-                height: "100%",
-                display: "flex",
-                flexDirection: "column",
-              }}
-            >
-              <div
-                style={{
-                  fontSize: "24px",
-                  lineHeight: "45px",
-                  width: "100%",
-                  height: "50px",
-                  textAlign: "center",
-                  paddingTop: "10px",
-                }}
-              >
-                Preview Data
-              </div>
-              <table
-                className="large-2"
-                style={{
-                  // textAlign: "center",
-                  width: "100%",
-                  height: "25%",
-                  display: "table-cell",
-                  overflow: "scroll",
-                  marginBottom: "0px",
-                  borderBottom: "0.01em solid white",
-                  // height: "100%"
-                }}
-              >
-                <thead
-                  style={{ background: "gray", position: "sticky", top: "0" }}
-                >
-                  <tr style={{}}>
-                    {csvHeader.map((data, index) => {
-                      return <td style={{ textAlign: "center" }}>{data}</td>;
-                    })}
-                  </tr>
-                </thead>
-                <tbody style={{}}>
-                  {csvData.map((data, index) => {
-                    return (
-                      <tr style={{}}>
-                        {csvHeader.map((header, index) => {
-                          return (
-                            <td
-                              style={{ textAlign: "center", padding: "10px" }}
-                            >
-                              {data[header]}
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-              <div
-                style={{
-                  fontSize: "20px",
-                  lineHeight: "45px",
-                  width: "100%",
-                  height: "50px",
-                  textAlign: "center",
-                  paddingTop: "10px",
-                }}
-              >
-                Options
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  height: "60%",
-                  padding: "10px",
-                  justifyContent: "space-around",
-                }}
-              >
-                <div style={{ width: "48%", border: "0.01em solid white" }}>
-                  <div
-                    style={{
-                      fontSize: "16px",
-                      lineHeight: "45px",
-                      width: "100%",
-                      height: "50px",
-                      textAlign: "center",
-                      padding: "5px",
-                      borderBottom: "0.01em solid white",
-                    }}
-                  >
-                    Create Data Field
-                  </div>
-
-                  <Box sx={{ width: "100%" }} style={{ height: "86%" }}>
-                    <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-                      <Tabs
-                        value={value_tab_layer}
-                        onChange={handleTabLayerChange}
-                        aria-label="basic tabs example"
-                      >
-                        <Tab
-                          label="From CSV"
-                          {...a11yProps_PB(0)}
-                          style={{ color: "white", width: "50%" }}
-                          onClick={() => {
-                            setInputMode("csv");
-                          }}
-                        />
-                        <Tab
-                          label="Manual"
-                          {...a11yProps_PB(1)}
-                          style={{ color: "white", width: "50%" }}
-                          onClick={() => {
-                            setInputMode("manual");
-                          }}
-                        />
-                      </Tabs>
-                    </Box>
-                    <TabPanel_PB value={value_tab_layer} index={0}>
-                      <div
-                        className="drawTab"
-                        style={{ height: "395px", padding: "10px" }}
-                      >
-                        <div
-                          style={{
-                            display: "flex",
-                            height: "56%",
-                            width: "90%",
-                            transform: "translateX(5%)",
-                            marginBottom: "10px",
-                            borderRadius: "10px",
-                            border: "0.01em solid white",
-                            flexDirection: "column",
-                            padding: "27px",
-                          }}
-                        >
-                          {csvHeader.map((data, index) => {
-                            return (
-                              <>
-                                <div
-                                  style={{
-                                    width: "100%",
-                                    display: "flex",
-                                    flexDirection: "row",
-                                    justifyContent: "space-between",
-                                  }}
-                                >
-                                  <div>{data}</div>
-                                  {/* <div style={{ display: 'flex' }}>
-                                            <button style={{ width: '100%' }}>E</button>
-                                            <button style={{ width: '100%' }}>D</button>
-                                          </div> */}
-                                </div>
-                              </>
-                            );
-                          })}
-                        </div>
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-evenly",
-                          }}
-                        >
-                          <label className="csv">
-                            <input
-                              id="Image"
-                              type="file"
-                              onChange={readCSVFile}
-                            />
-                            From CSV
-                          </label>
-                        </div>
-                      </div>
-                    </TabPanel_PB>
-                    <TabPanel_PB value={value_tab_layer} index={1}>
-                      <div
-                        className="drawTab"
-                        style={{ height: "395px", padding: "10px" }}
-                      >
-                        <div
-                          style={{
-                            display: "flex",
-                            width: "90%",
-                            transform: "translateX(5%)",
-                          }}
-                        >
-                          <input
-                            type="text"
-                            value={fieldName}
-                            onChange={(e) => {
-                              handlFieldName(e.target.value);
-                            }}
-                            placeholder="Enter a new field name"
-                            style={{ width: "100%", borderColor: "white" }}
-                          />
-                        </div>
-                        <div
-                          style={{
-                            display: "flex",
-                            height: "45%",
-                            width: "90%",
-                            transform: "translateX(5%)",
-                            marginBottom: "10px",
-                            borderRadius: "10px",
-                            border: "0.01em solid white",
-                            flexDirection: "column",
-                            padding: "27px",
-                          }}
-                        >
-                          {mNewFieldData.map((data, index) => {
-                            return (
-                              <>
-                                <div
-                                  style={{
-                                    width: "100%",
-                                    display: "flex",
-                                    flexDirection: "row",
-                                    justifyContent: "space-between",
-                                  }}
-                                >
-                                  <div>{data}</div>
-                                  <div style={{ display: "flex" }}>
-                                    <button style={{ width: "100%" }}>E</button>
-                                    <button style={{ width: "100%" }}>D</button>
-                                  </div>
-                                </div>
-                              </>
-                            );
-                          })}
-                        </div>
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-evenly",
-                          }}
-                        >
-                          <label
-                            className="csv"
-                            style={{ width: "30%" }}
-                            onClick={addFieldName}
-                          >
-                            Add
-                          </label>
-                          <label
-                            className="csv"
-                            style={{ width: "30%" }}
-                            onClick={() => {
-                              setMNewFieldData([]);
-                            }}
-                          >
-                            Clear
-                          </label>
-                          <label
-                            className="csv"
-                            style={{ width: "30%" }}
-                            onClick={() => {
-                              acceptDataField();
-                            }}
-                          >
-                            Accept
-                          </label>
-                        </div>
-                      </div>
-                    </TabPanel_PB>
-                  </Box>
-                </div>
-                <div style={{ width: "48%", border: "0.01em solid white" }}>
-                  <div
-                    style={{
-                      fontSize: "16px",
-                      lineHeight: "45px",
-                      width: "100%",
-                      height: "50px",
-                      textAlign: "center",
-                      padding: "5px",
-                      borderBottom: "0.01em solid white",
-                    }}
-                  >
-                    Properties
-                  </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      marginTop: "20px",
-                      width: "90%",
-                      transform: "translateX(5%)",
-                    }}
-                  >
-                    <input
-                      type="text"
-                      placeholder="Enter a layer name"
-                      value={layer}
-                      onChange={(e) => {
-                        setLayer(e.target.value);
+                  <div style={{ width: "48%", border: "0.01em solid white" }}>
+                    <div
+                      style={{
+                        fontSize: "16px",
+                        lineHeight: "45px",
+                        width: "100%",
+                        height: "50px",
+                        textAlign: "center",
+                        padding: "5px",
+                        borderBottom: "0.01em solid white",
                       }}
-                      style={{ width: "100%", borderColor: "white" }}
-                    />
-                  </div>
-                  <div
-                    style={{ display: "flex", justifyContent: "space-evenly" }}
-                  >
-                    <label className="csv">
-                      <input
-                        type="file"
-                        onChange={handleLayerImageFileChange}
-                      />
-                      Layer Image
-                    </label>
-                    <label className="csv">
-                      <input
-                        type="file"
-                        onChange={handleMarkerImageFileChange}
-                      />
-                      Marker Image
-                    </label>
-                  </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-evenly",
-                      height: "30%",
-                    }}
-                  >
-                    <label className="csv">
-                      {selectedLayerImageFile && (
-                        <img
-                          src={selectedLayerImageFile}
-                          alt="Selected file"
-                          style={{ height: "100%", width: "100%" }}
-                        />
-                      )}
-                    </label>
+                    >
+                      Create Data Field
+                    </div>
 
-                    <label className="csv">
-                      {selectedMarkerImageFile && (
-                        <img
-                          src={selectedMarkerImageFile}
-                          alt="Selected file"
-                          style={{ height: "100%", width: "100%" }}
+                    <Box sx={{ width: "100%" }} style={{ height: "86%" }}>
+                      <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+                        <Tabs
+                          value={value_tab_layer}
+                          onChange={handleTabLayerChange}
+                          aria-label="basic tabs example"
+                        >
+                          <Tab
+                            label="From CSV"
+                            {...a11yProps_PB(0)}
+                            style={{ color: "white", width: "50%" }}
+                            onClick={() => {
+                              setInputMode("csv");
+                            }}
+                          />
+                          <Tab
+                            label="Manual"
+                            {...a11yProps_PB(1)}
+                            style={{ color: "white", width: "50%" }}
+                            onClick={() => {
+                              setInputMode("manual");
+                            }}
+                          />
+                        </Tabs>
+                      </Box>
+                      <TabPanel_PB value={value_tab_layer} index={0}>
+                        <div
+                          className="drawTab"
+                          style={{ height: "395px", padding: "10px" }}
+                        >
+                          <div
+                            style={{
+                              display: "flex",
+                              height: "56%",
+                              width: "90%",
+                              transform: "translateX(5%)",
+                              marginBottom: "10px",
+                              borderRadius: "10px",
+                              border: "0.01em solid white",
+                              flexDirection: "column",
+                              padding: "27px",
+                            }}
+                          >
+                            {csvHeader.map((data, index) => {
+                              return (
+                                <>
+                                  <div
+                                    style={{
+                                      width: "100%",
+                                      display: "flex",
+                                      flexDirection: "row",
+                                      justifyContent: "space-between",
+                                    }}
+                                  >
+                                    <div>{data}</div>
+                                    {/* <div style={{ display: 'flex' }}>
+                                          <button style={{ width: '100%' }}>E</button>
+                                          <button style={{ width: '100%' }}>D</button>
+                                        </div> */}
+                                  </div>
+                                </>
+                              );
+                            })}
+                          </div>
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "space-evenly",
+                            }}
+                          >
+                            <label className="csv">
+                              <input
+                                id="Image"
+                                type="file"
+                                onChange={readCSVFile}
+                              />
+                              From CSV
+                            </label>
+                          </div>
+                        </div>
+                      </TabPanel_PB>
+                      <TabPanel_PB value={value_tab_layer} index={1}>
+                        <div
+                          className="drawTab"
+                          style={{ height: "395px", padding: "10px" }}
+                        >
+                          <div
+                            style={{
+                              display: "flex",
+                              width: "90%",
+                              transform: "translateX(5%)",
+                            }}
+                          >
+                            <input
+                              type="text"
+                              value={fieldName}
+                              onChange={(e) => {
+                                handlFieldName(e.target.value);
+                              }}
+                              placeholder="Enter a new field name"
+                              style={{ width: "100%", borderColor: "white" }}
+                            />
+                          </div>
+                          <div
+                            style={{
+                              display: "flex",
+                              height: "45%",
+                              width: "90%",
+                              transform: "translateX(5%)",
+                              marginBottom: "10px",
+                              borderRadius: "10px",
+                              border: "0.01em solid white",
+                              flexDirection: "column",
+                              padding: "27px",
+                            }}
+                          >
+                            {mNewFieldData.map((data, index) => {
+                              return (
+                                <>
+                                  <div
+                                    style={{
+                                      width: "100%",
+                                      display: "flex",
+                                      flexDirection: "row",
+                                      justifyContent: "space-between",
+                                    }}
+                                  >
+                                    <div>{data}</div>
+                                    <div style={{ display: "flex" }}>
+                                      <button style={{ width: "100%" }}>
+                                        E
+                                      </button>
+                                      <button style={{ width: "100%" }}>
+                                        D
+                                      </button>
+                                    </div>
+                                  </div>
+                                </>
+                              );
+                            })}
+                          </div>
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "space-evenly",
+                            }}
+                          >
+                            <label
+                              className="csv"
+                              style={{ width: "30%" }}
+                              onClick={addFieldName}
+                            >
+                              Add
+                            </label>
+                            <label
+                              className="csv"
+                              style={{ width: "30%" }}
+                              onClick={() => {
+                                setMNewFieldData([]);
+                              }}
+                            >
+                              Clear
+                            </label>
+                            <label
+                              className="csv"
+                              style={{ width: "30%" }}
+                              onClick={() => {
+                                acceptDataField();
+                              }}
+                            >
+                              Accept
+                            </label>
+                          </div>
+                        </div>
+                      </TabPanel_PB>
+                    </Box>
+                  </div>
+                  <div style={{ width: "48%", border: "0.01em solid white" }}>
+                    <div
+                      style={{
+                        fontSize: "16px",
+                        lineHeight: "45px",
+                        width: "100%",
+                        height: "50px",
+                        textAlign: "center",
+                        padding: "5px",
+                        borderBottom: "0.01em solid white",
+                      }}
+                    >
+                      Properties
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        marginTop: "20px",
+                        width: "90%",
+                        transform: "translateX(5%)",
+                      }}
+                    >
+                      <input
+                        type="text"
+                        placeholder="Enter a layer name"
+                        value={layer}
+                        onChange={(e) => {
+                          setLayer(e.target.value);
+                        }}
+                        style={{ width: "100%", borderColor: "white" }}
+                      />
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-evenly",
+                      }}
+                    >
+                      <label className="csv">
+                        <input
+                          type="file"
+                          onChange={handleLayerImageFileChange}
                         />
-                      )}
-                    </label>
+                        Layer Image
+                      </label>
+                      <label className="csv">
+                        <input
+                          type="file"
+                          onChange={handleMarkerImageFileChange}
+                        />
+                        Marker Image
+                      </label>
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-evenly",
+                        height: "30%",
+                      }}
+                    >
+                      <label className="csv">
+                        {selectedLayerImageFile && (
+                          <img
+                            src={selectedLayerImageFile}
+                            alt="Selected file"
+                            style={{ height: "100%", width: "100%" }}
+                          />
+                        )}
+                      </label>
+
+                      <label className="csv">
+                        {selectedMarkerImageFile && (
+                          <img
+                            src={selectedMarkerImageFile}
+                            alt="Selected file"
+                            style={{ height: "100%", width: "100%" }}
+                          />
+                        )}
+                      </label>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </Draggable>
+
+      {/* --------------------------------------------  */}
       <div
         ref={mapRef}
         className="map"

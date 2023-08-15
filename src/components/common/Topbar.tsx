@@ -68,6 +68,7 @@ const Topbar = () => {
       >
         {auth.currentUser?.displayName}
       </Typography>
+      
       <IconButton
         style={{
           position: "absolute",
