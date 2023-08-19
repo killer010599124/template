@@ -51,6 +51,8 @@ import * as firebase from "firebase/app";
 import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 import { error } from "console";
 import { Button } from "react-bootstrap/lib/InputGroup";
+
+import MapAlertMessage from "../../components/common/mapAlertMessage";
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
@@ -152,6 +154,13 @@ const SatelitteMap = (context: any) => {
   const [value_tab_dv, setValue_tab_dv] = React.useState(0);
   const [value_tab_layer, setValue_tab_layer] = React.useState(0);
 
+  const [alertContent, setAlertContent] = useState("");
+  const [alertColor, setAlertColor] = useState("");
+  const [alertVisible, setAlertVisible] = useState<boolean>(false);
+  function handleAlertClose() {
+    setAlertVisible(false);
+  }
+
   const [drawMode, setDrawMode] = useState("");
 
   const [toggle, setToggle] = useState(true);
@@ -223,8 +232,7 @@ const SatelitteMap = (context: any) => {
   //------------------  Data Manager --------//
   const [geodata, setGeodata] = useState<any>();
   const [allGeodata, setAllGeodata] = useState<any[]>([]);
-  const [layer, setLayer] = useState("");
-  const [currentLayerName, setCurrentLayerName] = useState("");
+
   const [currentLayerData, setCurrentLayerData] = useState<any[]>([]);
   const [currentLayerDataHeader, setCurrentLayerDataHeader] = useState<
     string[]
@@ -381,11 +389,13 @@ const SatelitteMap = (context: any) => {
   }
 
   //-------------- Manage Layers---------------//
-
+  const [layer, setLayer] = useState("");
+  const [currentLayerName, setCurrentLayerName] = useState("");
   const [dataLayers, setDataLayers] = useState<string[]>([]);
   const [mCurrentLayer, setMCurrentLayer] = useState<string>();
   const [mDataField, setMDataField] = useState<any[]>([]);
   const [mNewFieldData, setMNewFieldData] = useState<string[]>([]);
+  const [acceptField, setAcceptField] = useState(false);
 
   const [fieldName, setFieldName] = useState<string>();
 
@@ -532,6 +542,9 @@ const SatelitteMap = (context: any) => {
     interface MyObject {
       [key: string]: string;
     }
+
+    setAcceptField(true);
+
     const myObject: MyObject = {};
     mNewFieldData.forEach((str) => {
       const [key, value] = str.split(":");
@@ -573,36 +586,57 @@ const SatelitteMap = (context: any) => {
   };
 
   const addDataLayer = () => {
-    setLoading(true);
-    setLoadingText("Loading CSV Data");
-    setLayerImageFiles((prevNames) => [...prevNames, selectedLayerImageFile]);
-    setMarkerImageFiles((prevNames) => [
-      ...prevNames,
-      { data: selectedMarkerImageFile, layername: layer },
-    ]);
-    // setCurrentMarkerImage({ data:selectedMarkerImageFile, layername:layer});
+    const checkStringExistence = (array: string[], value: string): boolean => {
+      return array.includes(value);
+    };
+    const isStringExists = checkStringExistence(dataLayers, layer);
 
-    if (inputMode === "csv") {
-      setDataLayers((layers) => [...layers, layer]);
-      // const mDataField = { data: csvHeader, layername: layer }
-      // setMDataField(prevNames => [...prevNames, mDataField]);
+    if (layer === "") {
+      setAlertVisible(true);
+      setAlertColor("black");
+      setAlertContent("You should enter a layer name ");
+    } else if (isStringExists) {
+      setAlertVisible(true);
+      setAlertColor("black");
+      setAlertContent("Layer name is already exist. Enter a other name");
+    } else if (!geodata) {
+      setAlertVisible(true);
+      setAlertColor("black");
+      setAlertContent("You need to import data or create.");
+    } else {
+      setLoading(true);
+      setLoadingText("Loading CSV Data");
+      setLayerImageFiles((prevNames) => [...prevNames, selectedLayerImageFile]);
+      setMarkerImageFiles((prevNames) => [
+        ...prevNames,
+        { data: selectedMarkerImageFile, layername: layer },
+      ]);
+      // setCurrentMarkerImage({ data:selectedMarkerImageFile, layername:layer});
 
-      setDataLayerFlag(!dataLayerFlag);
-      if (geodata) {
-        const temp = { name: layer, data: geodata };
-        setAllGeodata((prevNames) => [...prevNames, temp]);
+      if (inputMode === "csv") {
+        setDataLayers((layers) => [...layers, layer]);
+        // const mDataField = { data: csvHeader, layername: layer }
+        // setMDataField(prevNames => [...prevNames, mDataField]);
 
-        // setLoading(false)
+        setDataLayerFlag(!dataLayerFlag);
+        if (geodata) {
+          const temp = { name: layer, data: geodata };
+          setAllGeodata((prevNames) => [...prevNames, temp]);
+
+          // setLoading(false)
+        }
+        setCurrentLayerName(layer);
+      } else if (inputMode === "manual") {
+        setDataLayers((layers) => [...layers, layer]);
+        setCurrentLayerName(layer);
+        setDataLayerFlag(!dataLayerFlag);
+        if (geodata) {
+          const temp = { name: layer, data: geodata };
+          setAllGeodata((prevNames) => [...prevNames, temp]);
+        }
       }
-      setCurrentLayerName(layer);
-    } else if (inputMode === "manual") {
-      setDataLayers((layers) => [...layers, layer]);
-      setCurrentLayerName(layer);
-      setDataLayerFlag(!dataLayerFlag);
-      if (geodata) {
-        const temp = { name: layer, data: geodata };
-        setAllGeodata((prevNames) => [...prevNames, temp]);
-      }
+
+      // setGeodata([]);
     }
   };
 
@@ -1069,6 +1103,12 @@ const SatelitteMap = (context: any) => {
     <>
       {/* --------------------------- Side Tool Bar --------------------------- */}
 
+      <MapAlertMessage
+        message={alertContent}
+        visible={alertVisible}
+        color={alertColor}
+        onClose={handleAlertClose}
+      />
       <div
         style={{
           position: "absolute",
@@ -2090,7 +2130,7 @@ const SatelitteMap = (context: any) => {
         }
       >
         <img src={assets.images.loading} style={{ marginTop: "10%" }} />
-        <h2 style = {{color : 'white', marginTop : "-10%"}}>{loadingText}</h2>
+        <h2 style={{ color: "white", marginTop: "-10%" }}>{loadingText}</h2>
       </div>
 
       {/* -----------------------------import various csv , Data layer  */}
