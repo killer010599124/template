@@ -46,7 +46,8 @@ export const useMap = (
   drawMode: string,
   toggle: boolean,
   selectedMarkerImageFile: any,
-  currentMarkerImage: any
+  currentMarkerImage: any,
+  layerVisible: any[]
 ) => {
   const mapInitRef = useRef<Map | null>(null);
   const popUpRef = useRef(new mapboxgl.Popup({ offset: 15 }));
@@ -54,7 +55,10 @@ export const useMap = (
 
   const [currentLayerMarker, setCurrentLayerMarker] = useState<Marker>();
   const [currentLayerGeoData, setCurrentLayerGeoData] = useState<any>();
-  const [currentData, setCurrentData] = useState<any>();
+  
+  // const [currentPoint, setcurrentPoint] = useState<any>();
+  let temp : any ;
+  let currentPoint: any;
 
   const [rect, setRect] = useState(false);
   const [circle, setCircle] = useState(false);
@@ -162,8 +166,8 @@ export const useMap = (
   const popUp = new Popup({ closeButton: false, anchor: "left" });
 
   useEffect(() => {
-    mapInitRef.current?.on("dblclick", makeMarker);
 
+    mapInitRef.current?.on("dblclick", makeMarker);
     return () => {
       mapInitRef.current?.off("dblclick", makeMarker);
     };
@@ -184,16 +188,26 @@ export const useMap = (
       type: "Feature",
       geometry: data.geometry,
       properties: data.properties,
+      id : data.id
     };
+    // console.log("feature",feature)
+    let temp = currentLayerGeoData;
+    // console.log("pre-currentLayerGeoData",temp);
+    temp.features.push(feature);
+    // console.log("update-currentLayerGeoData",temp);
 
-    currentLayerGeoData.features.push(feature);
-    // addMarkers(currentLayerGeoData, mapInitRef.current!, handleLayerMarker, updateMarkerCoordinates, returnMarkerData, currentMarkerImage, currentLayerName);
+    const circleSource = mapInitRef.current?.getSource(
+      currentLayerName
+    ) as mapboxgl.GeoJSONSource;
+    const circleData = circleSource.setData(currentLayerGeoData);
 
-    // currentLayerGeoData.features.push(feature)
+    // buildLocationList(temp);
 
-    buildLocationList(currentLayerGeoData);
-    addCurrentLayerData(data);
+    setCurrentLayerGeoData(currentLayerGeoData);
+    // addCurrentLayerData(data);
+
   };
+
 
   useEffect(() => {
     //   alert(drawMode);
@@ -256,6 +270,7 @@ export const useMap = (
 
   useEffect(() => {
     if (geodata) {
+      console.log('4')
       setCurrentLayerGeoData(geodata);
       // addMarkers(geodata, mapInitRef.current!, handleLayerMarker, updateMarkerCoordinates, returnMarkerData, selectedMarkerImageFile, currentLayerName);
       mapInitRef.current?.flyTo({
@@ -281,23 +296,42 @@ export const useMap = (
         },
         layout: {
           visibility: "visible",
-          // 'icon-image': layerName,
-
-          // 'text-font': [
-          //     'Open Sans Semibold',
-          //     'Arial Unicode MS Bold'
-          // ],
-          // 'text-offset': [0, 1.25],
-          // 'text-anchor': 'top'
         },
       });
+
+      if (layerVisible.find((obj) => obj.layerName === layerName).visible) {
+        mapInitRef.current?.setLayoutProperty(
+          layerName,
+          "visibility",
+          "visible"
+        );
+      } else
+        mapInitRef.current?.setLayoutProperty(layerName, "visibility", "none");
     }
   }, [dataLayerFlag]);
 
   useEffect(() => {
+    if (layerVisible) {
+      layerVisible.map((obj) => {
+        if (obj.visible)
+          mapInitRef.current?.setLayoutProperty(
+            obj.layerName,
+            "visibility",
+            "visible"
+          );
+        else
+          mapInitRef.current?.setLayoutProperty(
+            obj.layerName,
+            "visibility",
+            "none"
+          );
+      });
+    }
+  }, [layerVisible]);
+
+  useEffect(() => {
     if (allGeodata.length != 0) {
-      console.log("init");
-      console.log(allGeodata);
+      // console.log("1")
       setCurrentLayerGeoData(allGeodata[0].data);
       allGeodata.map((data: any, index: any) => {
         mapInitRef.current?.flyTo({
@@ -333,31 +367,43 @@ export const useMap = (
       });
     }
   }, [initFlag]);
-  useEffect(() => {
-    if (container.current) {
+  useEffect(() => {    
+    if (currentLayerName && container.current) {      
       allGeodata.map((data: any, index: any) => {
         if (data.name === currentLayerName) {
           buildLocationList(data.data);
+          // console.log(data.data)
           setCurrentLayerGeoData(data.data);
           mapInitRef.current!.flyTo({
             center: data.data.features[0].geometry.coordinates,
-            zoom: 16,
+            zoom: 20,
           });
         }
-      });
+      });      
+      
+      // mapInitRef.current?.on("mouseleave", currentLayerName, () => {
+      //   if (mapInitRef.current)
+      //     mapInitRef.current.getCanvas().style.cursor = "";
+      //   popUp.remove();
+      // });
+    }
+  }, [currentLayerName]);
 
-      mapInitRef.current?.on("mouseenter", currentLayerName, (e: any) => {
+  useEffect(()=> {
+    if(currentLayerGeoData && currentLayerName){
+      mapInitRef.current?.on("click", currentLayerName, (e: any) => {
         // Change the cursor style as a UI indicator.
+        // console.log("click-currentLayerGeoData",currentLayerGeoData)
         if (mapInitRef.current)
           mapInitRef.current.getCanvas().style.cursor = "pointer";
-
+  
         // Copy coordinates array.
         const coordinates = e.features[0].geometry.coordinates.slice();
         const values = e.features[0].properties;
         const cheader = Object.keys(values);
         let html = "";
         // const values = i.properties;
-
+  
         html += `<div style="background:black; color : white; opacity : 0.75; padding: 10px; border-radius: 10px;">`;
         const obj = cheader.reduce((object: any, header, index) => {
           html += `<div style="width:100%; display:flex">
@@ -376,29 +422,46 @@ export const useMap = (
                          <label for="name" style="width:40%; text-align:right; padding-right: 5px;" >Longtitude :</label>
                          <input type="text" value = "${coordinates[0]}" style="width:60%; border: 0.01em solid white;" class = "longtitude">
                      </div>`;
+        html += `<div style = "display:flex; justify-content:space-around;">
+                     <button class='savemarker' > save </button>
+                     <button class='deletemarker' > delete </button>
+                     <button class='cancelmarker' > cancel </button>
+                   </div>`;
         // Ensure that if the map is zoomed out such that multiple
         // copies of the feature are visible, the popup appears
         // over the copy being pointed to.
         while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
           coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
         }
-
+  
         // Populate the popup and set its coordinates
         // based on the feature found.
         popUp.setLngLat(coordinates).setHTML(html).addTo(mapInitRef.current!);
-      });
-
-      mapInitRef.current?.on("mouseleave", currentLayerName, () => {
-        if (mapInitRef.current)
-          mapInitRef.current.getCanvas().style.cursor = "";
-        popUp.remove();
+  
+        // setcurrentPoint({data:obj , id : e.id})
+        currentPoint = { data: obj, id: e.features[0].id };
+        // console.log({data:obj , id : e.features[0].id})
+  
+        setTimeout(() => {
+  
+          document
+            .getElementsByClassName("deletemarker")[0]
+            .addEventListener("click", deleteMarker);
+  
+          document
+            .getElementsByClassName("savemarker")[0]
+            .addEventListener("click", editMarker);
+          document
+            .getElementsByClassName("cancelmarker")[0]
+            .addEventListener("click", cancelMarker);
+        }, 100);
       });
     }
-  }, [currentLayerName]);
+    
+  }, [currentLayerGeoData]);
+
   useEffect(() => {
     mapInitRef.current?.on("style.load", () => {
-      console.log("map style changed");
-      console.log(currentLayerGeoData);
       if (currentLayerGeoData) {
         mapInitRef.current?.addSource(currentLayerName, {
           type: "geojson",
@@ -428,99 +491,31 @@ export const useMap = (
             // 'text-anchor': 'top'
           },
         });
+
+        if (
+          layerVisible.find((obj) => obj.layerName === currentLayerName).visible
+        ) {
+          mapInitRef.current?.setLayoutProperty(
+            currentLayerName,
+            "visibility",
+            "visible"
+          );
+        } else
+          mapInitRef.current?.setLayoutProperty(
+            currentLayerName,
+            "visibility",
+            "none"
+          );
       }
     });
   }, [currentLayerGeoData]);
-  useEffect(() => {
-    if (container.current) {
-      if (currentLayerMarker) {
-        if (mapInitRef.current?.getLayer("circles1"))
-          mapInitRef.current?.removeLayer("circles1");
-
-        setTimeout(() => {
-          const cheader = Object.keys(
-            currentLayerGeoData.features[0].properties
-          );
-
-          document
-            .getElementsByClassName("deletemarker")[0]
-            .addEventListener("click", deleteMarker);
-
-          document
-            .getElementsByClassName("savemarker")[0]
-            .addEventListener("click", editMarker);
-          document
-            .getElementsByClassName("cancelmarker")[0]
-            .addEventListener("click", cancelMarker);
-        }, 100);
-
-        // document.getElementsByClassName('deletemarker')[0].addEventListener('click', (e) => { alert('hello') })
-      }
-    }
-  }, [currentLayerMarker]);
+ 
 
   useEffect(() => {
-    if (currentMarkerData) {
-      currentLayerGeoData.features.map((data: any, index: any) => {
-        if (data.id === currentMarkerData.id) {
-          count.current = count.current + 1;
-
-          if (mapInitRef.current?.getLayer("circles1"))
-            mapInitRef.current?.removeLayer("circles1");
-
-          mapInitRef.current?.addSource(`markers ${count.current}`, {
-            type: "geojson",
-            data: {
-              type: "FeatureCollection",
-              features: [
-                {
-                  type: "Feature",
-                  geometry: {
-                    type: "Point",
-                    coordinates: data.geometry.coordinates,
-                  },
-                  properties: {
-                    modelId: 1,
-                  },
-                },
-              ],
-            },
-          });
-
-          mapInitRef.current?.addLayer({
-            id: "circles1",
-            source: `markers ${count.current}`,
-            type: "circle",
-            paint: {
-              "circle-radius": 10,
-              "circle-color": "white",
-              "circle-opacity": 1,
-              "circle-stroke-width": 2,
-            },
-            filter: ["==", "modelId", 1],
-          });
-
-          // if(mapInitRef.current?.getSource(`markers ${currentMarkerData.id}`)){
-          //     mapInitRef.current?.removeSource(`markers ${currentMarkerData.id}`);
-          //     console.log('delete source')
-          // }
-
-          mapInitRef.current?.flyTo({
-            center: data.geometry.coordinates,
-            zoom: 24,
-          });
-        }
-      });
+    if (currentPoint) {
+      // updateCurrentLayerData(currentPoint);
     }
-  }, [currentMarkerData]);
-
-  useEffect(() => {
-    if (currentData) {
-      updateCurrentLayerData(currentData);
-
-      // console.log(currentData)
-    }
-  }, [currentData]);
+  }, [currentPoint]);
 
   useEffect(() => {
     if (container.current) {
@@ -544,7 +539,8 @@ export const useMap = (
   }
 
   function returnMarkerData(data: any) {
-    setCurrentData(data);
+    // setcurrentPoint(data);
+    return null;
   }
 
   function deleteMarker() {
@@ -554,11 +550,9 @@ export const useMap = (
 
     let num: number = 0;
 
-    console.log(currentLayerGeoData);
-
     currentLayerGeoData.features.map((data: any, index: any) => {
-      console.log(data.id + ":" + currentData.id);
-      if (data.id === currentData.id) {
+      console.log(data.id + ":" + currentPoint.id);
+      if (data.id === currentPoint.id) {
         num = data.id;
       }
     });
@@ -566,8 +560,6 @@ export const useMap = (
     deleteCurrentLayerData(num);
 
     currentLayerGeoData.features.splice(num, 1);
-
-    console.log(currentLayerGeoData);
 
     addMarkers(
       currentLayerGeoData,
@@ -579,7 +571,7 @@ export const useMap = (
       currentLayerName
     );
 
-    buildLocationList(currentLayerGeoData);
+    // buildLocationList(currentLayerGeoData);
   }
   function deleteElementsByClassName(className: string) {
     const elements = document.querySelectorAll(`.${className}`);
@@ -590,7 +582,6 @@ export const useMap = (
 
   function editMarker() {
     const cheader = Object.keys(currentLayerGeoData.features[0].properties);
-
     for (let i = 0; i < cheader.length; i++) {
       (
         document.getElementsByClassName(cheader[i])[0] as HTMLInputElement
@@ -599,20 +590,15 @@ export const useMap = (
         (document.getElementsByClassName(cheader[i])[0] as HTMLInputElement)
           .value
       );
-      currentData.data[cheader[i]] = (
+      currentPoint.data[cheader[i]] = (
         document.getElementsByClassName(cheader[i])[0] as HTMLInputElement
       ).value;
     }
-    //---------------In Here save---------------//
-    // const feature =
-    // {
-    //     type: 'Feature',
-    //     geometry: data.geometry,
-    //     properties: data.properties,
-    // };
-    // setCurrentLayerGeoData
 
-    updateCurrentLayerData(currentData);
+    // updateCurrentLayerData(currentPoint);
+    
+    console.log(currentPoint);
+ 
 
     (
       document.getElementsByClassName("latitude")[0] as HTMLInputElement
@@ -638,26 +624,29 @@ export const useMap = (
       ).getAttribute("value")
     );
 
-    currentLayerGeoData.features.map((data: any, index: any) => {
-      if (data.id === currentData.id) {
-        data.geometry.coordinates = [lng, lat];
-        data.properties = currentData.data;
-        console.log(data);
-        // mapInitRef.current?.flyTo({
-        //     center: data.geometry.coordinates,
-        //     zoom: 24
-        // });
-      }
-    });
+    // currentLayerGeoData.features.map((data: any, index: any) => {
+    //   if (data.id === currentPoint.id) {
+    //     data.geometry.coordinates = [lng, lat];
+    //     data.properties = currentPoint.data;
+    //     console.log(data);
+    //     // mapInitRef.current?.flyTo({
+    //     //     center: data.geometry.coordinates,
+    //     //     zoom: 24
+    //     // });
+    //   }
+    // });
 
-    setTimeout(() => {
-      currentLayerMarker?.setLngLat([lng, lat]);
-      mapInitRef.current?.flyTo({
-        center: currentLayerMarker?.getLngLat(),
-        zoom: 24,
-      });
-    }, 30);
-    currentLayerMarker?.getPopup().remove();
+    // buildLocationList(currentLayerGeoData);
+
+    
+    // console.log("save-currentLayerGeoData", currentLayerGeoData);
+
+    const circleSource = mapInitRef.current?.getSource(
+      currentLayerName
+    ) as mapboxgl.GeoJSONSource;
+    const circleData = circleSource.setData(currentLayerGeoData);
+
+
   }
   function cancelMarker() {
     currentLayerMarker?.getPopup().remove();

@@ -31,6 +31,8 @@ import listItemClasses from "@mui/material/ListItem";
 import { IndexKind } from "typescript";
 import Draggable, { DraggableData, DraggableEvent } from "react-draggable";
 import { saveAs } from "file-saver";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+
 import {
   getStorage,
   ref,
@@ -371,7 +373,7 @@ const SatelitteMap = (context: any) => {
 
   function nextPage(): void {
     // Show the next page of data
-    console.log(currentPage);
+
     if (currentPage < getNumPages(currentLayerData)) {
       // showPage(currentLayerData, currentPage + 1);
       setCurrentPage(currentPage + 1);
@@ -392,6 +394,14 @@ const SatelitteMap = (context: any) => {
   const [layer, setLayer] = useState("");
   const [currentLayerName, setCurrentLayerName] = useState("");
   const [dataLayers, setDataLayers] = useState<string[]>([]);
+
+// interface layerVisible{
+// layerName : string,
+// visible : boolean
+// }
+
+  const [dataLayersVisible, setDataLayersVisible] = useState<any[]>([]);
+
   const [mCurrentLayer, setMCurrentLayer] = useState<string>();
   const [mDataField, setMDataField] = useState<any[]>([]);
   const [mNewFieldData, setMNewFieldData] = useState<string[]>([]);
@@ -615,6 +625,10 @@ const SatelitteMap = (context: any) => {
 
       if (inputMode === "csv") {
         setDataLayers((layers) => [...layers, layer]);
+        setDataLayersVisible((layers) => [
+          ...layers,
+          { layerName: layer, visible: true },
+        ]);
         // const mDataField = { data: csvHeader, layername: layer }
         // setMDataField(prevNames => [...prevNames, mDataField]);
 
@@ -622,12 +636,16 @@ const SatelitteMap = (context: any) => {
         if (geodata) {
           const temp = { name: layer, data: geodata };
           setAllGeodata((prevNames) => [...prevNames, temp]);
-
           // setLoading(false)
         }
         setCurrentLayerName(layer);
       } else if (inputMode === "manual") {
         setDataLayers((layers) => [...layers, layer]);
+        setDataLayersVisible((layers) => [
+          ...layers,
+          { layerName: layer, visible: true },
+        ]);
+
         setCurrentLayerName(layer);
         setDataLayerFlag(!dataLayerFlag);
         if (geodata) {
@@ -635,8 +653,6 @@ const SatelitteMap = (context: any) => {
           setAllGeodata((prevNames) => [...prevNames, temp]);
         }
       }
-
-      // setGeodata([]);
     }
   };
 
@@ -659,15 +675,7 @@ const SatelitteMap = (context: any) => {
       return false;
     }
   }
-  const setStorageLimit = (limit: number) => {
-    try {
-      localStorage.setItem("storage_limit", limit.toString());
-      const currentLimit = localStorage.getItem("storage_limit");
-      console.log(`Storage limit set to ${currentLimit} MB`);
-    } catch (e) {
-      console.error("Error setting storage limit:", e);
-    }
-  };
+
 
   useEffect(() => {
     if (currentLayerName) {
@@ -676,7 +684,6 @@ const SatelitteMap = (context: any) => {
           setCurrentMarkerImage(data.data);
       });
 
-      console.log("asdfasdfasdfasdfasdf");
 
       const gjson = JSON.stringify(allGeodata, null, 2);
       const ljson = JSON.stringify(dataLayers, null, 2);
@@ -687,7 +694,6 @@ const SatelitteMap = (context: any) => {
       // saveAs(blobg, `geo${userId}.json`);
       // saveAs(blobl, `layer${userId}.json`);
       setCurrentPage(1);
-      // console.log(checkNewTableData(allTableData,currentLayerName))
       if (checkNewTableData(allTableData, currentLayerName)) {
         allTableData.map((data: any, index: number) => {
           if (data.name === currentLayerName) {
@@ -711,7 +717,6 @@ const SatelitteMap = (context: any) => {
               }, {});
 
               setCurrentLayerData((prevNames) => [...prevNames, obj]);
-              // console.log(index*100/data.data.features.length)
             });
             setLoading(false);
           }
@@ -744,7 +749,7 @@ const SatelitteMap = (context: any) => {
     if (allTableData) {
       if (allTableData.length != 0) {
         // localStorage.setItem("tableData", JSON.stringify(allTableData));
-        console.log(allTableData);
+
         const jsonContent = JSON.stringify(allTableData, null, 2);
         blobt = new Blob([jsonContent], { type: "application/json" });
         // saveAs(blob, `table${userId}.json`);
@@ -830,7 +835,6 @@ const SatelitteMap = (context: any) => {
           fetch(url)
             .then((response) => response.json())
             .then((jsonData) => {
-              console.log(jsonData);
               setAllTableData(jsonData);
             })
             .catch((error) => {
@@ -847,6 +851,13 @@ const SatelitteMap = (context: any) => {
           fetch(url)
             .then((response) => response.json())
             .then((jsonData) => {
+
+              const updatedArray = jsonData.map((obj: any) => ({
+                layerName : obj,
+                visible: true,
+              }));
+              setDataLayersVisible(updatedArray);
+
               setDataLayers(jsonData);
               setCurrentLayerName(jsonData[0]);
             })
@@ -869,13 +880,12 @@ const SatelitteMap = (context: any) => {
       properties: aData.properties,
     };
 
-    allGeodata.map((data, index) => {
-      // console.log(currentLayerName);
-      if (data.name === currentLayerName) {
-        // data.data.features.push(feature)
-        // console.log(data);
-      }
-    });
+    // allGeodata.map((data, index) => {
+    //   if (data.name === currentLayerName) {
+    //     data.data.features.push(feature)
+
+    //   }
+    // });
 
     setCurrentLayerData((prevNames) => [...prevNames, aData.properties]);
   };
@@ -997,7 +1007,6 @@ const SatelitteMap = (context: any) => {
         size: 5,
       })
       .then((data) => {
-        console.log(data);
         setPSearchCount(data["total"]);
         setSearchPeopleData([]);
         setSearchPeopleData(data["data"]);
@@ -1044,14 +1053,12 @@ const SatelitteMap = (context: any) => {
   const getCompanyData = (ticker: string, name: string, website: string) => {
     clearCompanyData();
     const query = makeCompanyQuery(name, ticker, website);
-    console.log(query);
     PDLJSClient.company.search
       .sql({
         searchQuery: query,
         size: 5,
       })
       .then((data) => {
-        // console.log(data)
         setCSearchCount(data["total"]);
         setSearchCompanyData(data.data);
       })
@@ -1077,7 +1084,6 @@ const SatelitteMap = (context: any) => {
 
   const manageCsvData = (data: any) => {
     setCsvData((prevNames) => [...prevNames, data]);
-    console.log(progress);
   };
 
   const myMap = useMap(
@@ -1096,8 +1102,44 @@ const SatelitteMap = (context: any) => {
     drawMode,
     toggle,
     selectedMarkerImageFile,
-    currentMarkerImage
+    currentMarkerImage,
+    dataLayersVisible
   );
+
+  function removeDataLayer() {
+    console.log(mCurrentLayer);
+    if (mCurrentLayer) {
+
+      const indexToRemove = dataLayers.indexOf(mCurrentLayer);
+      const updatedArray = [
+        ...dataLayers.slice(0, indexToRemove),
+        ...dataLayers.slice(indexToRemove + 1),
+      ];
+      setDataLayers(updatedArray);
+
+      const updatedArrayVisible = [
+        ...dataLayersVisible.slice(0, indexToRemove),
+        ...dataLayersVisible.slice(indexToRemove + 1),
+      ];
+      setDataLayersVisible(updatedArrayVisible);
+
+      const updatedGeo = allGeodata.filter((obj) => obj.name !== mCurrentLayer);
+      setAllGeodata(updatedGeo);
+
+      const updatedTable = allTableData.filter(
+        (obj) => obj.name !== mCurrentLayer
+      );
+      setAllTableData(updatedTable);
+
+      const gjson = JSON.stringify(updatedGeo, null, 2);
+      const ljson = JSON.stringify(updatedArray, null, 2);
+      const tjson = JSON.stringify(updatedTable, null, 2);
+
+      blobg = new Blob([gjson], { type: "application/json" });
+      blobl = new Blob([ljson], { type: "application/json" });
+      blobt = new Blob([tjson], { type: "application/json" });
+    }
+  }
 
   return (
     <>
@@ -1467,6 +1509,35 @@ const SatelitteMap = (context: any) => {
                         style={{ marginLeft: "15px" }}
                         primary={data}
                       />
+                      {dataLayersVisible.find((obj) => obj.layerName === data).visible ? (
+                        <FaEyeSlash
+                          onClick={() => {
+                            setDataLayersVisible((prevObjects) => {
+                              const updatedObjects = prevObjects.map((obj) => {
+                                if (obj.layerName === data) {
+                                  return { ...obj, visible: !dataLayersVisible.find((obj) => obj.layerName === data).visible };
+                                }
+                                return obj;
+                              });
+                              return updatedObjects;
+                            });
+                          }}
+                        />
+                      ) : (
+                        <FaEye
+                          onClick={() => {
+                            setDataLayersVisible((prevObjects) => {
+                              const updatedObjects = prevObjects.map((obj) => {
+                                if (obj.layerName === data) {
+                                  return { ...obj, visible: !dataLayersVisible.find((obj) => obj.layerName === data).visible };
+                                }
+                                return obj;
+                              });
+                              return updatedObjects;
+                            });
+                          }}
+                        />
+                      )}
                     </ListItem>
                   );
                 })}
@@ -2229,7 +2300,15 @@ const SatelitteMap = (context: any) => {
                         addDataLayer();
                       }}
                     >
-                      Add Layer
+                      Add
+                    </label>
+                    <label
+                      className="csv"
+                      onClick={() => {
+                        removeDataLayer();
+                      }}
+                    >
+                      Remove
                     </label>
                     {/* <label className='csv' onClick={() => {
 

@@ -18,7 +18,7 @@ export const generateOneMarker = (currentGeodata: any, map: Map, handleLayerMark
                          <input type="text" value = "" style="width:60%; border: 0.01em solid white;" class = "${header}">
                      </div>
                      `
-            // html += `<div class = "${header}">${header} : ${values[header]}</div>`
+
             object[header] = '';
             return object;
         }, {});
@@ -37,79 +37,79 @@ export const generateOneMarker = (currentGeodata: any, map: Map, handleLayerMark
           </div>`;
 
 
-            const popUp = new Popup({ closeButton: false, anchor: 'left' })
-                .setHTML(html);
-            let valuelist: string[] = [];
+            // const popUp = new Popup({ closeButton: false, anchor: 'left' })
+            //     .setHTML(html);
+            // let valuelist: string[] = [];
 
-            popUp.on('open', () => {
-                for (let i = 0; i < cheader.length; i++) {
-                    valuelist[i] = (document.getElementsByClassName(cheader[i])[0] as HTMLInputElement).getAttribute('value') as string;
-                }
-                valuelist[cheader.length] = (document.getElementsByClassName('latitude')[0] as HTMLInputElement).getAttribute('value') as string;
-                valuelist[cheader.length + 1] = (document.getElementsByClassName('longtitude')[0] as HTMLInputElement).getAttribute('value') as string;
+            // popUp.on('open', () => {
+            //     for (let i = 0; i < cheader.length; i++) {
+            //         valuelist[i] = (document.getElementsByClassName(cheader[i])[0] as HTMLInputElement).getAttribute('value') as string;
+            //     }
+            //     valuelist[cheader.length] = (document.getElementsByClassName('latitude')[0] as HTMLInputElement).getAttribute('value') as string;
+            //     valuelist[cheader.length + 1] = (document.getElementsByClassName('longtitude')[0] as HTMLInputElement).getAttribute('value') as string;
 
-            });
-            popUp.on('close', () => {
+            // });
+            // popUp.on('close', () => {
 
-                setTimeout(() => {
-                    if(!document.getElementsByClassName('mapboxgl-popup')[0]){
+            //     setTimeout(() => {
+            //         if(!document.getElementsByClassName('mapboxgl-popup')[0]){
 
-                        marker.setLngLat([Number(valuelist[cheader.length+1]),Number(valuelist[cheader.length])])
-                    }
-                }, 10);     
-            });
-
-
-            const el = document.createElement('img');
-            el.setAttribute('src', currentMarkerImage);
-            el.setAttribute('style', 'width:30px; height:30px; border-radius:5px')
-            el.setAttribute('class' , `${currentLayerName}qwer`);
+            //             marker.setLngLat([Number(valuelist[cheader.length+1]),Number(valuelist[cheader.length])])
+            //         }
+            //     }, 10);     
+            // });
 
 
-            const marker = new Marker(el, { scale: 0.5 })
-                .setDraggable(false)
-                .setLngLat(lnglat)
-                .setPopup(popUp)
-                .addTo(map)
-                .on('drag', (event: any) => {
-                    // console.log(event.target._lngLat)
-                    updateMarkerCoordinates(event.target._lngLat);
-                })
+            // const el = document.createElement('img');
+            // el.setAttribute('src', currentMarkerImage);
+            // el.setAttribute('style', 'width:30px; height:30px; border-radius:5px')
+            // el.setAttribute('class' , `${currentLayerName}qwer`);
 
-            marker.getElement().addEventListener('mouseup', (e) => {
-                marker.setDraggable(false);
-                if (!document.getElementsByClassName('mapboxgl-popup')[0]) {
-                    setTimeout(() => {
-                        for (let i = 0; i < cheader.length; i++) {
-                            (document.getElementsByClassName(cheader[i])[0] as HTMLInputElement).value = valuelist[i]
-                        }
-                        (document.getElementsByClassName('latitude')[0] as HTMLInputElement).value = valuelist[cheader.length];
-                        (document.getElementsByClassName('longtitude')[0] as HTMLInputElement).value = valuelist[cheader.length + 1];       
-                    }, 10)
-                }
-            })
-            marker.getElement().addEventListener('mousedown', (e) => {
-                if (document.getElementsByClassName('mapboxgl-popup')[0]) {
-                    marker.setDraggable(true);
-                }
-            })
+
+            // const marker = new Marker(el, { scale: 0.5 })
+            //     .setDraggable(false)
+            //     .setLngLat(lnglat)
+            //     .setPopup(popUp)
+            //     .addTo(map)
+            //     .on('drag', (event: any) => {
+            //         // console.log(event.target._lngLat)
+            //         updateMarkerCoordinates(event.target._lngLat);
+            //     })
+
+            // marker.getElement().addEventListener('mouseup', (e) => {
+            //     marker.setDraggable(false);
+            //     if (!document.getElementsByClassName('mapboxgl-popup')[0]) {
+            //         setTimeout(() => {
+            //             for (let i = 0; i < cheader.length; i++) {
+            //                 (document.getElementsByClassName(cheader[i])[0] as HTMLInputElement).value = valuelist[i]
+            //             }
+            //             (document.getElementsByClassName('latitude')[0] as HTMLInputElement).value = valuelist[cheader.length];
+            //             (document.getElementsByClassName('longtitude')[0] as HTMLInputElement).value = valuelist[cheader.length + 1];       
+            //         }, 10)
+            //     }
+            // })
+            // marker.getElement().addEventListener('mousedown', (e) => {
+            //     if (document.getElementsByClassName('mapboxgl-popup')[0]) {
+            //         marker.setDraggable(true);
+            //     }
+            // })
 
             const index = currentGeodata.features.length;
 
-            marker.getElement().addEventListener('click', (e) => {
-                {
+            // marker.getElement().addEventListener('click', (e) => {
+            //     {
 
-                    handleLayerMarker(marker);
-                    returnMarkerData({data:obj , id : index});
-                    map.flyTo({
-                        center: marker.getLngLat(),
-                        zoom: 24
-                    });
+            //         handleLayerMarker(marker);
+            //         returnMarkerData({data:obj , id : index});
+            //         map.flyTo({
+            //             center: marker.getLngLat(),
+            //             zoom: 24
+            //         });
 
-                    // (document.getElementsByClassName('lattitude')[0] as HTMLInputElement).setAttribute('value', marker.getLngLat().lat.toString());
-                    // (document.getElementsByClassName('longtitude')[0] as HTMLInputElement).setAttribute('value', marker.getLngLat().lng.toString());
-                }
-            }, false);
+            //         // (document.getElementsByClassName('lattitude')[0] as HTMLInputElement).setAttribute('value', marker.getLngLat().lat.toString());
+            //         // (document.getElementsByClassName('longtitude')[0] as HTMLInputElement).setAttribute('value', marker.getLngLat().lng.toString());
+            //     }
+            // }, false);
      
         return { properties: obj, geometry: { type: 'Point', coordinates: [lnglat.lng, lnglat.lat] }, id: index }
     }
