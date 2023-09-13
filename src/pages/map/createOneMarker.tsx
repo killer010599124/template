@@ -1,7 +1,7 @@
 import { Popup, Marker, Map } from 'mapbox-gl';
 
 export const generateOneMarker = (currentGeodata: any, map: Map, handleLayerMarker: (marker: Marker) => void,
-    updateMarkerCoordinates: (coord: any) => void, returnMarkerData: (data: any) => void, currentMarkerImage: any,
+   
     lnglat: any, currentLayerName: string) => {
 
     // let marker = new Marker;

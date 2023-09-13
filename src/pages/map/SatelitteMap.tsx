@@ -758,9 +758,18 @@ const SatelitteMap = (context: any) => {
   }, [allTableData]);
 
   const saveWorkspace = async () => {
-    if (blobg != "" && blobl != "" && blobt != "") {
+    // if (blobg != "" && blobl != "" && blobt != "") {
       setLoading(true);
       setLoadingText("Saving Workspace");
+
+      const gjson = JSON.stringify(allGeodata, null, 2);
+      const ljson = JSON.stringify(dataLayers, null, 2);
+      const tjson = JSON.stringify(allTableData, null, 2);
+
+      blobg = new Blob([gjson], { type: "application/json" });
+      blobl = new Blob([ljson], { type: "application/json" });
+      blobt = new Blob([tjson], { type: "application/json" });
+
       const geoRef = ref(storage, `${userId}/geo.json`);
       const layerRef = ref(storage, `${userId}/layer.json`);
       const tableRef = ref(storage, `${userId}/table.json`);
@@ -780,7 +789,7 @@ const SatelitteMap = (context: any) => {
       blobg = "";
       blobt = "";
       blobl = "";
-    }
+    // }
   };
   useEffect(() => {
     // set action to be performed when component unmounts
@@ -792,15 +801,7 @@ const SatelitteMap = (context: any) => {
     };
   }, []);
 
-  async function storeLargeData(data: any, collectionRef: CollectionReference) {
-    // Split the data into chunks of 1MB
 
-    const jsonString = JSON.stringify(data);
-    const byteLength = new TextEncoder().encode(jsonString).length;
-    console.log(
-      `The file size of the JSON data is ${byteLength / (1024 * 1024)} MB.`
-    );
-  }
   async function loadWorkSpace() {
     // const docRef = doc(db, "data", userId);
     // const docSnap = getDoc(docRef);
@@ -879,15 +880,9 @@ const SatelitteMap = (context: any) => {
       geometry: aData.geometry,
       properties: aData.properties,
     };
-
-    // allGeodata.map((data, index) => {
-    //   if (data.name === currentLayerName) {
-    //     data.data.features.push(feature)
-
-    //   }
-    // });
-
-    setCurrentLayerData((prevNames) => [...prevNames, aData.properties]);
+    // console.log(currentLayerData);
+    // setCurrentLayerData((prevNames) => [...prevNames, aData.properties]);
+    currentLayerData.push(aData.properties);
   };
 
   const deleteCurrentLayerData = (index: number) => {
@@ -897,7 +892,7 @@ const SatelitteMap = (context: any) => {
   };
 
   const updateCurrentLayerData = (uData: any) => {
-    setCurrentMarkerData(uData);
+    // setCurrentMarkerData(uData);
 
     const newState = currentLayerData.map((obj, index) => {
       // 👇️ if id equals 2, update country property
@@ -907,6 +902,8 @@ const SatelitteMap = (context: any) => {
       // 👇️ otherwise return the object as is
       return obj;
     });
+
+    // console.log(newState);
 
     setCurrentLayerData(newState);
   };
@@ -1096,7 +1093,6 @@ const SatelitteMap = (context: any) => {
     geoStyleName,
     layer,
     currentLayerName,
-    currentMarkerData,
     geodata,
     allGeodata,
     drawMode,
@@ -1595,32 +1591,7 @@ const SatelitteMap = (context: any) => {
                       </tr>
                     </thead>
                     <tbody>
-                      {/* {currentLayerData.map((data, index) => {
-                        return (
-                          <tr
-                            style={{}}
-                            onClick={() => {
-                              setCurrentMarkerData({ data: data, id: index });
-                            }}
-                            className={`markerTable ${
-                              currentMarkerData?.data == data && "active"
-                            }`}
-                          >
-                            {currentLayerDataHeader.map((header, index) => {
-                              return (
-                                <td
-                                  style={{
-                                    textAlign: "center",
-                                    padding: "10px",
-                                  }}
-                                >
-                                  {data[header]}
-                                </td>
-                              );
-                            })}
-                          </tr>
-                        );
-                      })} */}
+                     
                       {showPage(currentLayerData, currentPage)}
                     </tbody>
                   </table>
