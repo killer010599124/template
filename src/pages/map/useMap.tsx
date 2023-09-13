@@ -628,6 +628,7 @@ export const useMap = (
 
     updateCurrentLayerData(currentPoint);
     popUp.remove()
+
   }
 
   function cancelMarker() {

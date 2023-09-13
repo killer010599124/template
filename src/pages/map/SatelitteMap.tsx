@@ -236,13 +236,13 @@ const SatelitteMap = (context: any) => {
   const [allGeodata, setAllGeodata] = useState<any[]>([]);
 
   const [currentLayerData, setCurrentLayerData] = useState<any[]>([]);
-  let tempLayerData : any;
+  let tempLayerData: any;
   tempLayerData = currentLayerData;
   const [currentLayerDataHeader, setCurrentLayerDataHeader] = useState<
     string[]
   >([]);
   const [allTableData, setAllTableData] = useState<any[]>([]);
-  let tempTableData : any;
+  let tempTableData: any;
 
   const [currentMarkerData, setCurrentMarkerData] = useState<{
     data: any;
@@ -326,20 +326,38 @@ const SatelitteMap = (context: any) => {
 
   function showPage(rows: any[], pageNum: number) {
     // Calculate the starting and ending indices of the rows to display based on the page number and the rows per page
-    const startIndex = (pageNum - 1) * rowsPerPage;
-    const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
-
-    // Retrieve the relevant rows from the data source
-    const pageRows = rows.slice(startIndex, endIndex);
-
-    // Update the current page number
-    // setCurrentPage(pageNum)
-    // currentPage = pageNum;
-
-    // Render the rows on the page
-    const render = renderRows(pageRows);
-
-    return render;
+    // const [tableData, setTableData] = useState<any>([]);
+    // useEffect(()=> {
+    //   const startIndex = (pageNum - 1) * rowsPerPage;
+    //   const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
+    // // Retrieve the relevant rows from the data source
+    //   const pageRows = rows.slice(startIndex, endIndex);
+    //   setTableData(pageRows);
+    // }, [rows]);
+    // return (tableData.map((data : any, index : number) => {
+    // <tr
+    //   style={{}}
+    //   onClick={() => {
+    //     setCurrentMarkerData({ data: data, id: index });
+    //   }}
+    //   className={`markerTable ${
+    //     currentMarkerData?.data == data && "active"
+    //   }`}
+    // >
+    //   {currentLayerDataHeader.map((header, index) => {
+    //     return (
+    //       <td
+    //         style={{
+    //           textAlign: "center",
+    //           padding: "10px",
+    //         }}
+    //       >
+    //         {data[header]}
+    //       </td>
+    //     );
+    //   })}
+    // </tr>
+    // }));
     // Update the pagination buttons
   }
 
@@ -380,6 +398,7 @@ const SatelitteMap = (context: any) => {
     if (currentPage < getNumPages(currentLayerData)) {
       // showPage(currentLayerData, currentPage + 1);
       setCurrentPage(currentPage + 1);
+      // showTable(currentLayerData);
       // currentPage += 1;
     }
   }
@@ -388,20 +407,30 @@ const SatelitteMap = (context: any) => {
     // Show the previous page of data
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
+      // showTable(currentLayerData);
       // currentPage -= 1;
       // showPage(currentLayerData, currentPage - 1);
     }
   }
+
+  useEffect(() =>{
+    showTable(currentLayerData);
+  },[currentPage])
+
+  useEffect(() =>{
+    showTable(currentLayerData);
+  },[currentLayerData])
+  
 
   //-------------- Manage Layers---------------//
   const [layer, setLayer] = useState("");
   const [currentLayerName, setCurrentLayerName] = useState("");
   const [dataLayers, setDataLayers] = useState<string[]>([]);
 
-// interface layerVisible{
-// layerName : string,
-// visible : boolean
-// }
+  // interface layerVisible{
+  // layerName : string,
+  // visible : boolean
+  // }
 
   const [dataLayersVisible, setDataLayersVisible] = useState<any[]>([]);
 
@@ -679,14 +708,12 @@ const SatelitteMap = (context: any) => {
     }
   }
 
-
   useEffect(() => {
     if (currentLayerName) {
       markerImageFiles.map((data, index) => {
         if (data.layername === currentLayerName)
           setCurrentMarkerImage(data.data);
       });
-
 
       const gjson = JSON.stringify(allGeodata, null, 2);
       const ljson = JSON.stringify(dataLayers, null, 2);
@@ -701,6 +728,7 @@ const SatelitteMap = (context: any) => {
         allTableData.map((data: any, index: number) => {
           if (data.name === currentLayerName) {
             setCurrentLayerDataHeader(data.header);
+            console.log("init current layer data");
             setCurrentLayerData(data.data);
             tempLayerData = data.data;
             setLoading(false);
@@ -720,13 +748,14 @@ const SatelitteMap = (context: any) => {
                 object[header] = values[header];
                 return object;
               }, {});
-              
+
               setCurrentLayerData((prevNames) => [...prevNames, obj]);
             });
             setLoading(false);
           }
         });
       }
+      // showTable(currentLayerData)
     }
   }, [currentLayerName]);
 
@@ -752,7 +781,6 @@ const SatelitteMap = (context: any) => {
           //   },
           // ]);
           setAllTableData(tempTableData);
-
         }
       }
     }
@@ -772,36 +800,36 @@ const SatelitteMap = (context: any) => {
 
   const saveWorkspace = async () => {
     // if (blobg != "" && blobl != "" && blobt != "") {
-      setLoading(true);
-      setLoadingText("Saving Workspace");
+    setLoading(true);
+    setLoadingText("Saving Workspace");
 
-      const gjson = JSON.stringify(allGeodata, null, 2);
-      const ljson = JSON.stringify(dataLayers, null, 2);
-      const tjson = JSON.stringify(allTableData, null, 2);
+    const gjson = JSON.stringify(allGeodata, null, 2);
+    const ljson = JSON.stringify(dataLayers, null, 2);
+    const tjson = JSON.stringify(allTableData, null, 2);
 
-      blobg = new Blob([gjson], { type: "application/json" });
-      blobl = new Blob([ljson], { type: "application/json" });
-      blobt = new Blob([tjson], { type: "application/json" });
+    blobg = new Blob([gjson], { type: "application/json" });
+    blobl = new Blob([ljson], { type: "application/json" });
+    blobt = new Blob([tjson], { type: "application/json" });
 
-      const geoRef = ref(storage, `${userId}/geo.json`);
-      const layerRef = ref(storage, `${userId}/layer.json`);
-      const tableRef = ref(storage, `${userId}/table.json`);
+    const geoRef = ref(storage, `${userId}/geo.json`);
+    const layerRef = ref(storage, `${userId}/layer.json`);
+    const tableRef = ref(storage, `${userId}/table.json`);
 
-      await uploadBytes(geoRef, blobg as Blob).then((snapshot) => {
-        console.log("Uploaded an array!");
-        console.log(snapshot);
-      });
-      await uploadBytes(layerRef, blobl as Blob).then((snapshot) => {
-        console.log("Uploaded an array!");
-      });
-      await uploadBytes(tableRef, blobt as Blob).then((snapshot) => {
-        console.log("Uploaded an array!");
-      });
-      setLoading(false);
-      console.log("BLOB");
-      blobg = "";
-      blobt = "";
-      blobl = "";
+    await uploadBytes(geoRef, blobg as Blob).then((snapshot) => {
+      console.log("Uploaded an array!");
+      console.log(snapshot);
+    });
+    await uploadBytes(layerRef, blobl as Blob).then((snapshot) => {
+      console.log("Uploaded an array!");
+    });
+    await uploadBytes(tableRef, blobt as Blob).then((snapshot) => {
+      console.log("Uploaded an array!");
+    });
+    setLoading(false);
+    console.log("BLOB");
+    blobg = "";
+    blobt = "";
+    blobl = "";
     // }
   };
   useEffect(() => {
@@ -813,7 +841,6 @@ const SatelitteMap = (context: any) => {
       blobl = "";
     };
   }, []);
-
 
   async function loadWorkSpace() {
     // const docRef = doc(db, "data", userId);
@@ -865,9 +892,8 @@ const SatelitteMap = (context: any) => {
           fetch(url)
             .then((response) => response.json())
             .then((jsonData) => {
-
               const updatedArray = jsonData.map((obj: any) => ({
-                layerName : obj,
+                layerName: obj,
                 visible: true,
               }));
               setDataLayersVisible(updatedArray);
@@ -887,47 +913,53 @@ const SatelitteMap = (context: any) => {
     setLoading(false);
     localStorage.clear();
   }
+
   const addCurrentLayerData = (aData: any) => {
     const feature = {
       type: "Feature",
       geometry: aData.geometry,
       properties: aData.properties,
     };
-    // let temp = currentLayerData;
-    // console.log("0-",temp)
-    tempLayerData.push(aData.properties);
-
-    setCurrentLayerData(tempLayerData);
-    
-    
+    let temp = currentLayerData;
+    console.log("0-", temp);
+    temp.push(aData.properties);
+    setCurrentLayerData(temp);
   };
+
+  const [currentPageData, setCurrentPageData] = useState<any>([]);
+
+  function showTable(temp: any) {
+    const startIndex = (currentPage - 1) * rowsPerPage;
+    const endIndex = Math.min(startIndex + rowsPerPage, temp.length);
+
+    // Retrieve the relevant rows from the data source
+    const pageRows = temp.slice(startIndex, endIndex);
+    setCurrentPageData(pageRows);
+  }
 
   const updateCurrentLayerData = (uData: any) => {
     // setCurrentMarkerData(uData);
 
-    // let temp = currentLayerData;
-    // console.log("pre",currentLayerData);
-    const newState = tempLayerData.map((obj:any, index:number) => {
-      // 👇️ if id equals 2, update country property
-      if (index === uData.id) {
-        return uData.data;
-      }
-      // 👇️ otherwise return the object as is
-      return obj;
-    });
+    let temp = currentLayerData;
+    // const newState = temp.map((obj:any, index:number) => {
+    //   if (index === uData.id) {
+    //     return uData.data;
+    //   }
+    //   return obj;
+    // });
 
-    tempLayerData = newState;
+    temp[uData.id] = uData.data;
+    // tempLayerData = newState;
+    console.log("1-", temp);
+    setCurrentLayerData(temp);
 
+    showTable(temp);
 
-    setCurrentLayerData(tempLayerData);
-
-
-
-    const updateTableData = tempTableData.map((obj : any, index : number) => {
+    const updateTableData = allTableData.map((obj : any, index : number) => {
       // 👇️ if id equals 2, update country property
       if (obj.name === currentLayerName) {
         return {
-          data: newState,
+          data: temp,
           header: currentLayerDataHeader,
           name: currentLayerName,
         };
@@ -936,24 +968,22 @@ const SatelitteMap = (context: any) => {
       return obj;
     });
 
-
     setAllTableData(updateTableData);
-
   };
 
-  
   const deleteCurrentLayerData = (index: number) => {
-    const temp = [...currentLayerData];
+    let temp = currentLayerData;
     temp.splice(index, 1);
     setCurrentLayerData(temp);
+
+    showTable(temp);
   };
 
-
-  useEffect(() => { 
-    if(currentLayerData){
-      console.log(currentLayerData);
+  useEffect(() => {
+    if (currentLayerData) {
+      tempLayerData = currentLayerData;
     }
-  },[currentLayerData])
+  }, [currentLayerData]);
 
   function makePersonQuery(
     first_name: string,
@@ -1152,7 +1182,6 @@ const SatelitteMap = (context: any) => {
   function removeDataLayer() {
     console.log(mCurrentLayer);
     if (mCurrentLayer) {
-
       const indexToRemove = dataLayers.indexOf(mCurrentLayer);
       const updatedArray = [
         ...dataLayers.slice(0, indexToRemove),
@@ -1552,13 +1581,19 @@ const SatelitteMap = (context: any) => {
                         style={{ marginLeft: "15px" }}
                         primary={data}
                       />
-                      {dataLayersVisible.find((obj) => obj.layerName === data).visible ? (
+                      {dataLayersVisible.find((obj) => obj.layerName === data)
+                        .visible ? (
                         <FaEyeSlash
                           onClick={() => {
                             setDataLayersVisible((prevObjects) => {
                               const updatedObjects = prevObjects.map((obj) => {
                                 if (obj.layerName === data) {
-                                  return { ...obj, visible: !dataLayersVisible.find((obj) => obj.layerName === data).visible };
+                                  return {
+                                    ...obj,
+                                    visible: !dataLayersVisible.find(
+                                      (obj) => obj.layerName === data
+                                    ).visible,
+                                  };
                                 }
                                 return obj;
                               });
@@ -1572,7 +1607,12 @@ const SatelitteMap = (context: any) => {
                             setDataLayersVisible((prevObjects) => {
                               const updatedObjects = prevObjects.map((obj) => {
                                 if (obj.layerName === data) {
-                                  return { ...obj, visible: !dataLayersVisible.find((obj) => obj.layerName === data).visible };
+                                  return {
+                                    ...obj,
+                                    visible: !dataLayersVisible.find(
+                                      (obj) => obj.layerName === data
+                                    ).visible,
+                                  };
                                 }
                                 return obj;
                               });
@@ -1638,8 +1678,30 @@ const SatelitteMap = (context: any) => {
                       </tr>
                     </thead>
                     <tbody>
-                     
-                      {showPage(currentLayerData, currentPage)}
+                      {currentPageData.map((data: any, index: number) => (
+                        <tr
+                          style={{}}
+                          onClick={() => {
+                            setCurrentMarkerData({ data: data, id: index });
+                          }}
+                          className={`markerTable ${
+                            currentMarkerData?.data == data && "active"
+                          }`}
+                        >
+                          {currentLayerDataHeader.map((header, index) => {
+                            return (
+                              <td
+                                style={{
+                                  textAlign: "center",
+                                  padding: "10px",
+                                }}
+                              >
+                                {data[header]}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      ))}
                     </tbody>
                   </table>
                   <div>
