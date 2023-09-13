@@ -545,7 +545,7 @@ export const useMap = (
       }
     });
 
-    // deleteCurrentLayerData(num);
+    
 
     currentLayerGeoData.features.splice(num, 1);
 
@@ -554,10 +554,11 @@ export const useMap = (
     ) as mapboxgl.GeoJSONSource;
     const circleData = circleSource.setData(currentLayerGeoData);
 
-    console.log(currentLayerGeoData);
+    deleteCurrentLayerData(num);
     popUp.remove();
 
     buildLocationList(currentLayerGeoData);
+
   }
 
   // function deleteElementsByClassName(className: string) {
@@ -613,25 +614,22 @@ export const useMap = (
         
         mapInitRef.current?.flyTo({
             center: data.geometry.coordinates,
-            zoom: 24
+            zoom: 20
         });
       }
     });
 
     // buildLocationList(currentLayerGeoData);
 
-    console.log(currentLayerGeoData);
     const circleSource = mapInitRef.current?.getSource(
       currentLayerName
     ) as mapboxgl.GeoJSONSource;
     const circleData = circleSource.setData(currentLayerGeoData);
 
     updateCurrentLayerData(currentPoint);
-
     popUp.remove()
-
-
   }
+
   function cancelMarker() {
     popUp.remove();
   }

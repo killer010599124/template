@@ -236,10 +236,13 @@ const SatelitteMap = (context: any) => {
   const [allGeodata, setAllGeodata] = useState<any[]>([]);
 
   const [currentLayerData, setCurrentLayerData] = useState<any[]>([]);
+  let tempLayerData : any;
+  tempLayerData = currentLayerData;
   const [currentLayerDataHeader, setCurrentLayerDataHeader] = useState<
     string[]
   >([]);
   const [allTableData, setAllTableData] = useState<any[]>([]);
+  let tempTableData : any;
 
   const [currentMarkerData, setCurrentMarkerData] = useState<{
     data: any;
@@ -699,6 +702,7 @@ const SatelitteMap = (context: any) => {
           if (data.name === currentLayerName) {
             setCurrentLayerDataHeader(data.header);
             setCurrentLayerData(data.data);
+            tempLayerData = data.data;
             setLoading(false);
           }
         });
@@ -708,6 +712,7 @@ const SatelitteMap = (context: any) => {
             const cheader = Object.keys(data.data.features[0].properties);
             setCurrentLayerDataHeader(cheader);
             setCurrentLayerData([]);
+            tempLayerData = [];
             // setCurrentLayerData(geoJsonFeatureToTableRows(data.data.features));
             const array = data.data.features.map((i: any, index: number) => {
               const values = i.properties;
@@ -715,7 +720,7 @@ const SatelitteMap = (context: any) => {
                 object[header] = values[header];
                 return object;
               }, {});
-
+              
               setCurrentLayerData((prevNames) => [...prevNames, obj]);
             });
             setLoading(false);
@@ -732,14 +737,22 @@ const SatelitteMap = (context: any) => {
           (data) => data.name === currentLayerName
         );
         if (!isDataExists) {
-          setAllTableData((prevNames) => [
-            ...prevNames,
-            {
-              data: currentLayerData,
-              header: currentLayerDataHeader,
-              name: currentLayerName,
-            },
-          ]);
+          tempTableData = allTableData;
+          tempTableData.push({
+            data: currentLayerData,
+            header: currentLayerDataHeader,
+            name: currentLayerName,
+          });
+          // tempTableData((prevNames : any) => [
+          //   ...prevNames,
+          //   {
+          //     data: currentLayerData,
+          //     header: currentLayerDataHeader,
+          //     name: currentLayerName,
+          //   },
+          // ]);
+          setAllTableData(tempTableData);
+
         }
       }
     }
@@ -880,21 +893,21 @@ const SatelitteMap = (context: any) => {
       geometry: aData.geometry,
       properties: aData.properties,
     };
-    // console.log(currentLayerData);
-    // setCurrentLayerData((prevNames) => [...prevNames, aData.properties]);
-    currentLayerData.push(aData.properties);
-  };
+    // let temp = currentLayerData;
+    // console.log("0-",temp)
+    tempLayerData.push(aData.properties);
 
-  const deleteCurrentLayerData = (index: number) => {
-    const temp = [...currentLayerData];
-    temp.splice(index, 1);
-    setCurrentLayerData(temp);
+    setCurrentLayerData(tempLayerData);
+    
+    
   };
 
   const updateCurrentLayerData = (uData: any) => {
     // setCurrentMarkerData(uData);
 
-    const newState = currentLayerData.map((obj, index) => {
+    // let temp = currentLayerData;
+    // console.log("pre",currentLayerData);
+    const newState = tempLayerData.map((obj:any, index:number) => {
       // 👇️ if id equals 2, update country property
       if (index === uData.id) {
         return uData.data;
@@ -903,10 +916,44 @@ const SatelitteMap = (context: any) => {
       return obj;
     });
 
-    // console.log(newState);
+    tempLayerData = newState;
 
-    setCurrentLayerData(newState);
+
+    setCurrentLayerData(tempLayerData);
+
+
+
+    const updateTableData = tempTableData.map((obj : any, index : number) => {
+      // 👇️ if id equals 2, update country property
+      if (obj.name === currentLayerName) {
+        return {
+          data: newState,
+          header: currentLayerDataHeader,
+          name: currentLayerName,
+        };
+      }
+      // 👇️ otherwise return the object as is
+      return obj;
+    });
+
+
+    setAllTableData(updateTableData);
+
   };
+
+  
+  const deleteCurrentLayerData = (index: number) => {
+    const temp = [...currentLayerData];
+    temp.splice(index, 1);
+    setCurrentLayerData(temp);
+  };
+
+
+  useEffect(() => { 
+    if(currentLayerData){
+      console.log(currentLayerData);
+    }
+  },[currentLayerData])
 
   function makePersonQuery(
     first_name: string,
