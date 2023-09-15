@@ -924,6 +924,21 @@ const SatelitteMap = (context: any) => {
     console.log("0-", temp);
     temp.push(aData.properties);
     setCurrentLayerData(temp);
+
+    const updateTableData = allTableData.map((obj : any, index : number) => {
+      // 👇️ if id equals 2, update country property
+      if (obj.name === currentLayerName) {
+        return {
+          data: temp,
+          header: currentLayerDataHeader,
+          name: currentLayerName,
+        };
+      }
+      // 👇️ otherwise return the object as is
+      return obj;
+    });
+
+    setAllTableData(updateTableData);
   };
 
   const [currentPageData, setCurrentPageData] = useState<any>([]);
@@ -977,6 +992,21 @@ const SatelitteMap = (context: any) => {
     setCurrentLayerData(temp);
 
     showTable(temp);
+
+    const updateTableData = allTableData.map((obj : any, index : number) => {
+      // 👇️ if id equals 2, update country property
+      if (obj.name === currentLayerName) {
+        return {
+          data: temp,
+          header: currentLayerDataHeader,
+          name: currentLayerName,
+        };
+      }
+      // 👇️ otherwise return the object as is
+      return obj;
+    });
+
+    setAllTableData(updateTableData);
   };
 
   useEffect(() => {

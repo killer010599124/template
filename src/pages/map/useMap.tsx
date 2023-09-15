@@ -172,6 +172,8 @@ export const useMap = (
     };
   }, [mapInitRef.current, currentLayerGeoData]);
 
+  
+
   const makeMarker = async (lngLat: any) => {
     const data: any = generateOneMarker(
       currentLayerGeoData,
@@ -376,8 +378,8 @@ export const useMap = (
           });
         }
       });      
-      
-
+   
+     
       // mapInitRef.current?.on("mouseleave", currentLayerName, () => {
       //   if (mapInitRef.current)
       //     mapInitRef.current.getCanvas().style.cursor = "";
@@ -440,17 +442,29 @@ export const useMap = (
         // console.log({data:obj , id : e.features[0].id})
   
         setTimeout(() => {
+          console.log("add event")
+          console.log(document
+            .getElementsByClassName("savemarker"));
+
+          var deleteButton = document.querySelectorAll(".deletemarker");
+          deleteButton[deleteButton.length - 1].addEventListener("click", deleteMarker);
   
-          document
-            .getElementsByClassName("deletemarker")[0]
-            .addEventListener("click", deleteMarker);
-  
-          document
-            .getElementsByClassName("savemarker")[0]
-            .addEventListener("click", editMarker);
-          document
-            .getElementsByClassName("cancelmarker")[0]
-            .addEventListener("click", cancelMarker);
+          // document
+          //   .getElementsByClassName("savemarker")[0]
+          //   .addEventListener("click", ()=> {
+          //     console.log("savemarker")
+          //     editMarker();
+          //   });
+          // document
+          //   .getElementsByClassName("cancelmarker")[0]
+          //   .addEventListener("click", cancelMarker);
+
+          var editButton = document.querySelectorAll(".savemarker");
+          editButton[editButton.length-1].addEventListener("click", editMarker);
+
+          var cancelButton = document.querySelectorAll(".cancelmarker");
+          cancelButton[cancelButton.length-1].addEventListener("click", cancelMarker);
+
         }, 100);
       });
     }
@@ -627,8 +641,7 @@ export const useMap = (
     const circleData = circleSource.setData(currentLayerGeoData);
 
     updateCurrentLayerData(currentPoint);
-    popUp.remove()
-
+    popUp.remove();
   }
 
   function cancelMarker() {
