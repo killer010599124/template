@@ -728,7 +728,6 @@ const SatelitteMap = (context: any) => {
         allTableData.map((data: any, index: number) => {
           if (data.name === currentLayerName) {
             setCurrentLayerDataHeader(data.header);
-            console.log("init current layer data");
             setCurrentLayerData(data.data);
             tempLayerData = data.data;
             setLoading(false);

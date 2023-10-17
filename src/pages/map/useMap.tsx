@@ -276,16 +276,16 @@ export const useMap = (
         zoom: 20,
       });
 
-      mapInitRef.current?.addSource(layerName, {
+      mapInitRef.current?.addSource(currentLayerName, {
         type: "geojson",
         data: geodata,
       });
       // Add a symbol layer
 
       mapInitRef.current?.addLayer({
-        id: layerName,
+        id: currentLayerName,
         type: "circle",
-        source: layerName,
+        source: currentLayerName,
         paint: {
           "circle-radius": 5,
           "circle-stroke-width": 2,
@@ -297,14 +297,14 @@ export const useMap = (
         },
       });
 
-      if (layerVisible.find((obj) => obj.layerName === layerName).visible) {
+      if (layerVisible.find((obj) => obj.layerName === currentLayerName).visible) {
         mapInitRef.current?.setLayoutProperty(
           layerName,
           "visibility",
           "visible"
         );
       } else
-        mapInitRef.current?.setLayoutProperty(layerName, "visibility", "none");
+        mapInitRef.current?.setLayoutProperty(currentLayerName, "visibility", "none");
     }
   }, [dataLayerFlag]);
 
@@ -378,13 +378,8 @@ export const useMap = (
           });
         }
       });      
-   
-     
-      // mapInitRef.current?.on("mouseleave", currentLayerName, () => {
-      //   if (mapInitRef.current)
-      //     mapInitRef.current.getCanvas().style.cursor = "";
-      //   popUp.remove();
-      // });
+      
+
     }
   }, [currentLayerName]);
 
@@ -464,16 +459,15 @@ export const useMap = (
 
           var cancelButton = document.querySelectorAll(".cancelmarker");
           cancelButton[cancelButton.length-1].addEventListener("click", cancelMarker);
-
         }, 100);
       });
     }
-    
   }, [currentLayerGeoData]);
 
   useEffect(() => {
     mapInitRef.current?.on("style.load", () => {
       if (currentLayerGeoData) {
+       
         mapInitRef.current?.addSource(currentLayerName, {
           type: "geojson",
           data: currentLayerGeoData,
@@ -503,20 +497,7 @@ export const useMap = (
           },
         });
 
-        if (
-          layerVisible.find((obj) => obj.layerName === currentLayerName).visible
-        ) {
-          mapInitRef.current?.setLayoutProperty(
-            currentLayerName,
-            "visibility",
-            "visible"
-          );
-        } else
-          mapInitRef.current?.setLayoutProperty(
-            currentLayerName,
-            "visibility",
-            "none"
-          );
+
       }
     });
   }, [currentLayerGeoData]);
@@ -530,7 +511,7 @@ export const useMap = (
 
   useEffect(() => {
     if (container.current) {
-      console.log(layerName);
+      console.log(currentLayerName)
       mapInitRef.current?.setStyle(geoStyleName);
     }
   }, [geoStyleName]);
